@@ -70,10 +70,10 @@
 
     Animation.index = 0;
 
-    function Animation(el, css, options) {
+    function Animation(el, frames, options) {
       var _base, _base1;
       this.el = el;
-      this.css = css != null ? css : {};
+      this.frames = frames != null ? frames : {};
       this.options = options != null ? options : {};
       this._keyframes = __bind(this._keyframes, this);
 
@@ -98,19 +98,22 @@
     };
 
     Animation.prototype._keyframes = function(name) {
-      var args, css, k, step, t, transform, v, value, _ref;
+      var args, css, dValue, frame0, frame1, k, oldValue, step, t, transform, v, value;
       this.options.tween.init();
       step = 0.01;
+      frame0 = this.frames[0];
+      frame1 = this.frames[100];
       css = "@-webkit-keyframes " + name + " {\n";
       while (args = this.options.tween.next(step)) {
         t = args[0], v = args[1];
         transform = '';
-        _ref = this.css;
-        for (k in _ref) {
-          value = _ref[k];
+        for (k in frame1) {
+          value = frame1[k];
           if (k === 'translateX') {
             value = parseInt(value);
-            transform += "translateX(" + (value * v) + "px) ";
+            oldValue = frame0.translateX || 0;
+            dValue = value - oldValue;
+            transform += "translateX(" + (oldValue + (dValue * v)) + "px) ";
           }
         }
         css += "" + (t * 100) + "% { ";
@@ -327,11 +330,17 @@
     animate = function() {
       var anim;
       anim = new Animation(document.querySelector('div.circle'), {
-        translateX: animateToRight ? 350 : 0
+        0: {
+          translateX: animateToRight ? 0 : 350
+        },
+        100: {
+          translateX: animateToRight ? 350 : 0
+        }
       }, {
         tween: tween(),
         duration: _this.duration.value()
       });
+      animateToRight = !animateToRight;
       return anim.start();
     };
     update = function() {

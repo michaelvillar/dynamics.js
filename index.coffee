@@ -46,7 +46,7 @@ class TweenSpring
 class Animation
   @index: 0
 
-  constructor: (@el, @css = {}, @options = {}) ->
+  constructor: (@el, @frames = {}, @options = {}) ->
     @options.tween ||= TweenLinear
     @options.duration ||= 1000
 
@@ -68,15 +68,25 @@ class Animation
     @options.tween.init()
     step = 0.01
 
+    # percents = []
+    # for percent in @frames
+    #   percents.push percent / 100
+    # percents = percents.sort()
+
+    frame0 = @frames[0]
+    frame1 = @frames[100]
+
     css = "@-webkit-keyframes #{name} {\n"
     while args = @options.tween.next(step)
       [t, v] = args
 
       transform = ''
-      for k, value of @css
+      for k, value of frame1
         if k == 'translateX'
           value = parseInt(value)
-          transform += "translateX(#{value * v}px) "
+          oldValue = frame0.translateX || 0
+          dValue = value - oldValue
+          transform += "translateX(#{oldValue + (dValue * v)}px) "
 
       css += "#{(t * 100)}% { "
       css += "-webkit-transform: #{transform};" if transform
@@ -247,12 +257,17 @@ document.addEventListener "DOMContentLoaded", ->
   animateToRight = true
   animate = =>
     anim = new Animation(document.querySelector('div.circle'), {
-      translateX: if animateToRight then 350 else 0
+      0: {
+        translateX: if animateToRight then 0 else 350
+      },
+      100: {
+        translateX: if animateToRight then 350 else 0
+      }
     }, {
       tween: tween(),
       duration: @duration.value()
     })
-    # animateToRight = !animateToRight
+    animateToRight = !animateToRight
     anim.start()
 
   update = =>
