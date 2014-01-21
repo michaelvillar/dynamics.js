@@ -322,32 +322,43 @@
   })();
 
   document.addEventListener("DOMContentLoaded", function() {
-    var animate, animateToRight, animationTimeout, graph, tween, update,
+    var animate, animateToRight, animationTimeout, arg, graph, k, query, tween, update, url, v, values, _i, _len, _ref, _ref1,
       _this = this;
     graph = new Graph(document.querySelector('canvas'));
+    url = (document.location.toString() || '').split('#');
+    values = {};
+    if (url.length > 1) {
+      query = url[1];
+      _ref = query.split(',');
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        arg = _ref[_i];
+        _ref1 = arg.split('='), k = _ref1[0], v = _ref1[1];
+        values[k] = v;
+      }
+    }
     this.frequency = new UISlider(document.querySelector('.slider.frequency'), document.querySelector('.value.frequency'), {
       end: 100,
-      value: 17
+      value: values.frequency || 17
     });
     this.friction = new UISlider(document.querySelector('.slider.friction'), document.querySelector('.value.friction'), {
       start: 1,
       end: 3000,
-      value: 400
+      value: values.friction || 400
     });
     this.anticipationStrength = new UISlider(document.querySelector('.slider.anticipationStrength'), document.querySelector('.value.anticipationStrength'), {
       start: 0,
       end: 1000,
-      value: 115
+      value: values.anticipationStrength || 115
     });
     this.anticipationSize = new UISlider(document.querySelector('.slider.anticipationSize'), document.querySelector('.value.anticipationSize'), {
       start: 0,
       end: 100,
-      value: 10
+      value: values.anticipationSize || 10
     });
     this.duration = new UISlider(document.querySelector('.slider.duration'), document.querySelector('.value.duration'), {
       start: 100,
       end: 4000,
-      value: 1000
+      value: values.duration || 1000
     });
     animationTimeout = null;
     tween = function() {
@@ -371,6 +382,24 @@
       return anim.start();
     };
     update = function() {
+      var args, argsString, currentURL;
+      args = {
+        frequency: _this.frequency.value(),
+        friction: _this.friction.value(),
+        anticipationStrength: _this.anticipationStrength.value(),
+        anticipationSize: _this.anticipationSize.value(),
+        duration: _this.duration.value()
+      };
+      argsString = '';
+      for (k in args) {
+        v = args[k];
+        if (argsString !== '') {
+          argsString += ",";
+        }
+        argsString += "" + k + "=" + v;
+      }
+      currentURL = (document.location.toString() || '').split('#')[0];
+      document.location = currentURL + "#" + argsString;
       graph.tween = tween();
       graph.draw();
       if (animationTimeout) {

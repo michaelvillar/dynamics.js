@@ -242,29 +242,37 @@ class UISlider
 document.addEventListener "DOMContentLoaded", ->
   graph = new Graph(document.querySelector('canvas'))
 
+  url = (document.location.toString() || '').split('#')
+  values = {}
+  if url.length > 1
+    query = url[1]
+    for arg in query.split(',')
+      [k, v] = arg.split('=')
+      values[k] = v
+
   @frequency = new UISlider(document.querySelector('.slider.frequency'), document.querySelector('.value.frequency'), {
     end: 100,
-    value: 17
+    value: values.frequency || 17
   })
   @friction = new UISlider(document.querySelector('.slider.friction'), document.querySelector('.value.friction'), {
     start: 1,
     end: 3000,
-    value: 400
+    value: values.friction || 400
   })
   @anticipationStrength = new UISlider(document.querySelector('.slider.anticipationStrength'), document.querySelector('.value.anticipationStrength'), {
     start: 0,
     end: 1000,
-    value: 115
+    value: values.anticipationStrength || 115
   })
   @anticipationSize = new UISlider(document.querySelector('.slider.anticipationSize'), document.querySelector('.value.anticipationSize'), {
     start: 0,
     end: 100,
-    value: 10
+    value: values.anticipationSize || 10
   })
   @duration = new UISlider(document.querySelector('.slider.duration'), document.querySelector('.value.duration'), {
     start: 100,
     end: 4000,
-    value: 1000
+    value: values.duration || 1000
   })
 
   animationTimeout = null
@@ -289,6 +297,21 @@ document.addEventListener "DOMContentLoaded", ->
     anim.start()
 
   update = =>
+    args = {
+      frequency: @frequency.value(),
+      friction: @friction.value(),
+      anticipationStrength: @anticipationStrength.value(),
+      anticipationSize: @anticipationSize.value(),
+      duration: @duration.value()
+    }
+    argsString = ''
+    for k, v of args
+      argsString += "," unless argsString == ''
+      argsString += "#{k}=#{v}"
+
+    currentURL = (document.location.toString() || '').split('#')[0]
+    document.location = currentURL + "#" + argsString
+
     graph.tween = tween()
     graph.draw()
 
