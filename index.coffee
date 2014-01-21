@@ -9,7 +9,7 @@ TweenLinear =
     [t, v]
 
 class TweenSpring
-  constructor: (@frequency, @friction) ->
+  constructor: (@frequency, @friction, @anticipation) ->
 
   init: =>
     @t = 0
@@ -21,18 +21,27 @@ class TweenSpring
     t = @t
     @t += step
 
-    c1 = 0
-    c2 = 1
-
     A = (t) =>
       Math.pow(@friction / 10,-t) * (1 - t)
 
-
     v = A(t) * Math.cos(@frequency * t)
     v = 1 - v
-    # v -= (1 - initial) * (1 - t)
 
-    [t, v]
+
+    tAt0 = 1 / (@frequency / 3.14)
+    # -3 = -tAt0 * friction / 100
+    # -300 = -tAt0 * friction
+    friction = 300 / tAt0
+
+    startA = (t) =>
+      Math.pow(10,-t * friction / 100)
+
+    v2 = v
+    # v3 = (startA(t) * Math.sin(@startFrequency * t))
+    v3 = - @anticipation * t * startA(t)
+    v = v + v3
+
+    [t, v, v2, v3]
 
 class Animation
   @index: 0
@@ -94,37 +103,70 @@ class Graph
     r = window.devicePixelRatio
     w = @canvas.width
     h = @canvas.height
+
     step = 0.001
 
     @ctx.clearRect(0,0,w,h)
 
-    @ctx.beginPath()
     @ctx.setStrokeColor('gray')
     @ctx.setLineWidth(1)
-    @ctx.moveTo(0, 0.5 * h)
-    @ctx.lineTo(w, 0.5 * h)
+    @ctx.beginPath()
+    @ctx.moveTo(0, 0.67 * h)
+    @ctx.lineTo(w, 0.67 * h)
     @ctx.stroke()
-
-    @ctx.setStrokeColor('red')
 
     @ctx.beginPath()
+    @ctx.moveTo(0, 0.34 * h)
+    @ctx.lineTo(w, 0.34 * h)
+    @ctx.stroke()
+
     @tween.init()
+    points = []
+    points2 = []
+    points3 = []
     while args = @tween.next(step)
-      [t, v] = args
-      if t == 0
-        @ctx.moveTo(t * w,h - (v * 0.5 * h))
-      else
-        @ctx.lineTo(t * w,h - (v * 0.5 * h))
+      [t, v, v2, v3] = args
+      points.push [t, v]
+      points2.push [t, v2]
+      points3.push [t, v3]
       if t >= 1
         break
+
+    @ctx.beginPath()
+    @ctx.setStrokeColor('red')
+    @_drawCurve(points)
     @ctx.setLineWidth(2 * r)
     @ctx.stroke()
+
+    @ctx.beginPath()
+    @ctx.setStrokeColor('rgba(0, 0, 255, .3)')
+    @_drawCurve(points2)
+    @ctx.setLineWidth(1 * r)
+    @ctx.stroke()
+
+    @ctx.beginPath()
+    @ctx.setStrokeColor('rgba(0, 255, 0, .3)')
+    @_drawCurve(points3)
+    @ctx.setLineWidth(1 * r)
+    @ctx.stroke()
+
+  _drawCurve: (points) =>
+    r = window.devicePixelRatio
+    w = @canvas.width
+    h = @canvas.height
+
+    for point in points
+      [t, v] = point
+      if t == 0
+        @ctx.moveTo(t * w,h - ((0.33 + (v * 0.33)) * h))
+      else
+        @ctx.lineTo(t * w,h - ((0.33 + (v * 0.33)) * h))
 
 class UISlider
   constructor: (@el, @valueEl, @options = {}) ->
     @options.start ||= 0
     @options.end ||= 1000
-    @options.value ||= 10
+    @options.value = 10 if @options.value == undefined
 
     @width = 200 - 10
 
@@ -186,6 +228,11 @@ document.addEventListener "DOMContentLoaded", ->
     end: 3000,
     value: 400
   })
+  @anticipation = new UISlider(document.querySelector('.slider.anticipation'), document.querySelector('.value.anticipation'), {
+    start: 0,
+    end: 100,
+    value: 0
+  })
   @duration = new UISlider(document.querySelector('.slider.duration'), document.querySelector('.value.duration'), {
     start: 100,
     end: 10000,
@@ -194,17 +241,22 @@ document.addEventListener "DOMContentLoaded", ->
 
   animationTimeout = null
 
+  tween = =>
+    new TweenSpring(@frequency.value(), @friction.value(), @anticipation.value())
+
+  animateToRight = true
   animate = =>
     anim = new Animation(document.querySelector('div.circle'), {
-      translateX: 350
+      translateX: if animateToRight then 350 else 0
     }, {
-      tween: new TweenSpring(@frequency.value(), @friction.value()),
+      tween: tween(),
       duration: @duration.value()
     })
+    # animateToRight = !animateToRight
     anim.start()
 
   update = =>
-    graph.tween = new TweenSpring(@frequency.value(), @friction.value())
+    graph.tween = tween()
     graph.draw()
 
     clearTimeout animationTimeout if animationTimeout
@@ -213,6 +265,7 @@ document.addEventListener "DOMContentLoaded", ->
   update()
   @frequency.onUpdate = update
   @friction.onUpdate = update
+  @anticipation.onUpdate = update
   @duration.onUpdate = update
 
   document.querySelector('div.circle').addEventListener 'click', animate

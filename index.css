@@ -39,6 +39,14 @@ div.options {
   left: 440px;
 }
 
+div.options h2 {
+  color: #fff;
+  font-weight: bold;
+  text-align: center;
+  font-size: 15px;
+  padding: 10px 0;
+}
+
 div.options label {
   float: left;
   color: #fff;

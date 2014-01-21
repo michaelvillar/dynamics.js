@@ -22,9 +22,10 @@
 
   TweenSpring = (function() {
 
-    function TweenSpring(frequency, friction) {
+    function TweenSpring(frequency, friction, anticipation) {
       this.frequency = frequency;
       this.friction = friction;
+      this.anticipation = anticipation;
       this.next = __bind(this.next, this);
 
       this.init = __bind(this.init, this);
@@ -38,21 +39,27 @@
     };
 
     TweenSpring.prototype.next = function(step) {
-      var A, c1, c2, t, v,
+      var A, friction, startA, t, tAt0, v, v2, v3,
         _this = this;
       if (this.t > 1) {
         this.t = 1;
       }
       t = this.t;
       this.t += step;
-      c1 = 0;
-      c2 = 1;
       A = function(t) {
         return Math.pow(_this.friction / 10, -t) * (1 - t);
       };
       v = A(t) * Math.cos(this.frequency * t);
       v = 1 - v;
-      return [t, v];
+      tAt0 = 1 / (this.frequency / 3.14);
+      friction = 300 / tAt0;
+      startA = function(t) {
+        return Math.pow(10, -t * friction / 100);
+      };
+      v2 = v;
+      v3 = -this.anticipation * t * startA(t);
+      v = v + v3;
+      return [t, v, v2, v3];
     };
 
     return TweenSpring;
@@ -126,6 +133,8 @@
   Graph = (function() {
 
     function Graph(canvas) {
+      this._drawCurve = __bind(this._drawCurve, this);
+
       this.draw = __bind(this.draw, this);
       this.canvas = canvas;
       this.ctx = canvas.getContext('2d');
@@ -139,34 +148,68 @@
     }
 
     Graph.prototype.draw = function() {
-      var args, h, r, step, t, v, w;
+      var args, h, points, points2, points3, r, step, t, v, v2, v3, w;
       r = window.devicePixelRatio;
       w = this.canvas.width;
       h = this.canvas.height;
       step = 0.001;
       this.ctx.clearRect(0, 0, w, h);
-      this.ctx.beginPath();
       this.ctx.setStrokeColor('gray');
       this.ctx.setLineWidth(1);
-      this.ctx.moveTo(0, 0.5 * h);
-      this.ctx.lineTo(w, 0.5 * h);
-      this.ctx.stroke();
-      this.ctx.setStrokeColor('red');
       this.ctx.beginPath();
+      this.ctx.moveTo(0, 0.67 * h);
+      this.ctx.lineTo(w, 0.67 * h);
+      this.ctx.stroke();
+      this.ctx.beginPath();
+      this.ctx.moveTo(0, 0.34 * h);
+      this.ctx.lineTo(w, 0.34 * h);
+      this.ctx.stroke();
       this.tween.init();
+      points = [];
+      points2 = [];
+      points3 = [];
       while (args = this.tween.next(step)) {
-        t = args[0], v = args[1];
-        if (t === 0) {
-          this.ctx.moveTo(t * w, h - (v * 0.5 * h));
-        } else {
-          this.ctx.lineTo(t * w, h - (v * 0.5 * h));
-        }
+        t = args[0], v = args[1], v2 = args[2], v3 = args[3];
+        points.push([t, v]);
+        points2.push([t, v2]);
+        points3.push([t, v3]);
         if (t >= 1) {
           break;
         }
       }
+      this.ctx.beginPath();
+      this.ctx.setStrokeColor('red');
+      this._drawCurve(points);
       this.ctx.setLineWidth(2 * r);
+      this.ctx.stroke();
+      this.ctx.beginPath();
+      this.ctx.setStrokeColor('rgba(0, 0, 255, .3)');
+      this._drawCurve(points2);
+      this.ctx.setLineWidth(1 * r);
+      this.ctx.stroke();
+      this.ctx.beginPath();
+      this.ctx.setStrokeColor('rgba(0, 255, 0, .3)');
+      this._drawCurve(points3);
+      this.ctx.setLineWidth(1 * r);
       return this.ctx.stroke();
+    };
+
+    Graph.prototype._drawCurve = function(points) {
+      var h, point, r, t, v, w, _i, _len, _results;
+      r = window.devicePixelRatio;
+      w = this.canvas.width;
+      h = this.canvas.height;
+      _results = [];
+      for (_i = 0, _len = points.length; _i < _len; _i++) {
+        point = points[_i];
+        t = point[0], v = point[1];
+        if (t === 0) {
+          _results.push(this.ctx.moveTo(t * w, h - ((0.33 + (v * 0.33)) * h)));
+        } else {
+          _results.push(this.ctx.lineTo(t * w, h - ((0.33 + (v * 0.33)) * h)));
+        }
+      }
+      return _results;
     };
 
     return Graph;
@@ -176,7 +219,7 @@
   UISlider = (function() {
 
     function UISlider(el, valueEl, options) {
-      var _base, _base1, _base2;
+      var _base, _base1;
       this.el = el;
       this.valueEl = valueEl;
       this.options = options != null ? options : {};
@@ -192,7 +235,9 @@
 
       (_base = this.options).start || (_base.start = 0);
       (_base1 = this.options).end || (_base1.end = 1000);
-      (_base2 = this.options).value || (_base2.value = 10);
+      if (this.options.value === void 0) {
+        this.options.value = 10;
+      }
       this.width = 200 - 10;
       this.bar = document.createElement('div');
       this.bar.classList.add('bar');
@@ -252,7 +297,7 @@
   })();
 
   document.addEventListener("DOMContentLoaded", function() {
-    var animate, animationTimeout, graph, update,
+    var animate, animateToRight, animationTimeout, graph, tween, update,
       _this = this;
     graph = new Graph(document.querySelector('canvas'));
     this.frequency = new UISlider(document.querySelector('.slider.frequency'), document.querySelector('.value.frequency'), {
@@ -264,24 +309,33 @@
       end: 3000,
       value: 400
     });
+    this.anticipation = new UISlider(document.querySelector('.slider.anticipation'), document.querySelector('.value.anticipation'), {
+      start: 0,
+      end: 100,
+      value: 0
+    });
     this.duration = new UISlider(document.querySelector('.slider.duration'), document.querySelector('.value.duration'), {
       start: 100,
       end: 10000,
       value: 1000
     });
     animationTimeout = null;
+    tween = function() {
+      return new TweenSpring(_this.frequency.value(), _this.friction.value(), _this.anticipation.value());
+    };
+    animateToRight = true;
     animate = function() {
       var anim;
       anim = new Animation(document.querySelector('div.circle'), {
-        translateX: 350
+        translateX: animateToRight ? 350 : 0
       }, {
-        tween: new TweenSpring(_this.frequency.value(), _this.friction.value()),
+        tween: tween(),
         duration: _this.duration.value()
       });
       return anim.start();
     };
     update = function() {
-      graph.tween = new TweenSpring(_this.frequency.value(), _this.friction.value());
+      graph.tween = tween();
       graph.draw();
       if (animationTimeout) {
         clearTimeout(animationTimeout);
@@ -291,6 +345,7 @@
     update();
     this.frequency.onUpdate = update;
     this.friction.onUpdate = update;
+    this.anticipation.onUpdate = update;
     this.duration.onUpdate = update;
     return document.querySelector('div.circle').addEventListener('click', animate);
   }, false);
