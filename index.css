@@ -7,6 +7,14 @@
 
 body {
   background: gray;
+  min-width: 660px;
+}
+
+section {
+  position: absolute;
+  width: 660px;
+  left: 50%;
+  margin-left: -330px;
 }
 
 canvas {
