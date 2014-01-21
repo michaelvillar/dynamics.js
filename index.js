@@ -5,10 +5,9 @@
 
   TweenSpring = (function() {
 
-    function TweenSpring(frequency, friction, elasticity, anticipationStrength, anticipationSize) {
+    function TweenSpring(frequency, friction, anticipationStrength, anticipationSize) {
       this.frequency = frequency;
       this.friction = friction;
-      this.elasticity = elasticity;
       this.anticipationStrength = anticipationStrength;
       this.anticipationSize = anticipationSize;
       this.next = __bind(this.next, this);
@@ -24,7 +23,7 @@
     };
 
     TweenSpring.prototype.next = function(step) {
-      var A, At, a, angle, b, decal, elasticity, frequency, friction, frictionT, s, t, v, y0, yS,
+      var A, At, a, angle, b, decal, frequency, friction, frictionT, s, t, v, y0, yS,
         _this = this;
       if (this.t > 1) {
         this.t = 1;
@@ -32,8 +31,7 @@
       t = this.t;
       this.t += step;
       frequency = Math.max(1, this.frequency);
-      elasticity = this.elasticity / 100;
-      friction = Math.pow(this.friction, 1 / elasticity);
+      friction = Math.pow(20, this.friction / 100);
       s = this.anticipationSize / 100;
       decal = Math.max(0, s);
       frictionT = (t / (1 - s)) - (s / (1 - s));
@@ -329,12 +327,7 @@
     this.friction = new UISlider(document.querySelector('.slider.friction'), document.querySelector('.value.friction'), {
       start: 1,
       end: 1000,
-      value: values.friction || 400
-    });
-    this.elasticity = new UISlider(document.querySelector('.slider.elasticity'), document.querySelector('.value.elasticity'), {
-      start: 1,
-      end: 1000,
-      value: values.elasticity || 100
+      value: values.friction || 100
     });
     this.anticipationStrength = new UISlider(document.querySelector('.slider.anticipationStrength'), document.querySelector('.value.anticipationStrength'), {
       start: 0,
@@ -353,7 +346,7 @@
     });
     animationTimeout = null;
     tween = function() {
-      return new TweenSpring(_this.frequency.value(), _this.friction.value(), _this.elasticity.value(), _this.anticipationStrength.value(), _this.anticipationSize.value());
+      return new TweenSpring(_this.frequency.value(), _this.friction.value(), _this.anticipationStrength.value(), _this.anticipationSize.value());
     };
     animateToRight = true;
     animate = function() {
@@ -377,7 +370,6 @@
       args = {
         frequency: _this.frequency.value(),
         friction: _this.friction.value(),
-        elasticity: _this.elasticity.value(),
         anticipationStrength: _this.anticipationStrength.value(),
         anticipationSize: _this.anticipationSize.value(),
         duration: _this.duration.value()
@@ -402,7 +394,6 @@
     update();
     this.frequency.onUpdate = update;
     this.friction.onUpdate = update;
-    this.elasticity.onUpdate = update;
     this.anticipationStrength.onUpdate = update;
     this.anticipationSize.onUpdate = update;
     this.duration.onUpdate = update;
