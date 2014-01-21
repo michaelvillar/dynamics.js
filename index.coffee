@@ -1,13 +1,3 @@
-TweenLinear =
-  init: =>
-    @t = 0
-  next: (step) =>
-    @t = 1 if @t > 1
-    t = @t
-    v = @t
-    @t += step
-    [t, v]
-
 class TweenSpring
   constructor: (@frequency, @friction, @anticipationStrength, @anticipationSize) ->
 
