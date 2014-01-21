@@ -9,7 +9,7 @@ TweenLinear =
     [t, v]
 
 class TweenSpring
-  constructor: (@frequency, @friction, @anticipation) ->
+  constructor: (@frequency, @friction, @anticipationStrength, @anticipationSize) ->
 
   init: =>
     @t = 0
@@ -21,27 +21,37 @@ class TweenSpring
     t = @t
     @t += step
 
+    s = @anticipationSize / 100
+    decal = Math.max(0, s)
+
+    frictionT = (t / (1 - s)) - (s / (1 - s))
+
     A = (t) =>
-      Math.pow(@friction / 10,-t) * (1 - t)
+      M = 0.8
 
-    v = A(t) * Math.cos(@frequency * t)
-    v = 1 - v
+      x0 = (s / (1 - s))
+      x1 = 0
 
+      b = (x0 - (M * x1)) / (x0 - x1)
+      a = (M - b) / x0
 
-    tAt0 = 1 / (@frequency / 3.14)
-    # -3 = -tAt0 * friction / 100
-    # -300 = -tAt0 * friction
-    friction = 300 / tAt0
+      (a * t * @anticipationStrength / 100) + b
 
-    startA = (t) =>
-      Math.pow(10,-t * friction / 100)
+    if t < s
+      yS = (s / (1 - s)) - (s / (1 - s))
+      y0 = (0 / (1 - s)) - (s / (1 - s))
+      b = Math.acos(1 / A(yS))
+      a = (Math.acos(1 / A(y0)) - b) / ((@frequency || 1) * (-s))
+    else
+      A = (t) =>
+        Math.pow(@friction / 10,-t) * (1 - t)
+      b = 0
+      a = 1
+    At = A(frictionT)
 
-    v2 = v
-    # v3 = (startA(t) * Math.sin(@startFrequency * t))
-    v3 = - @anticipation * t * startA(t)
-    v = v + v3
-
-    [t, v, v2, v3]
+    angle = @frequency * (t - s) * a + b
+    v = 1 - (At * Math.cos(angle))
+    [t, v, At, frictionT]
 
 class Animation
   @index: 0
@@ -238,21 +248,26 @@ document.addEventListener "DOMContentLoaded", ->
     end: 3000,
     value: 400
   })
-  @anticipation = new UISlider(document.querySelector('.slider.anticipation'), document.querySelector('.value.anticipation'), {
+  @anticipationStrength = new UISlider(document.querySelector('.slider.anticipationStrength'), document.querySelector('.value.anticipationStrength'), {
+    start: 0,
+    end: 1000,
+    value: 115
+  })
+  @anticipationSize = new UISlider(document.querySelector('.slider.anticipationSize'), document.querySelector('.value.anticipationSize'), {
     start: 0,
     end: 100,
-    value: 0
+    value: 10
   })
   @duration = new UISlider(document.querySelector('.slider.duration'), document.querySelector('.value.duration'), {
     start: 100,
-    end: 10000,
+    end: 4000,
     value: 1000
   })
 
   animationTimeout = null
 
   tween = =>
-    new TweenSpring(@frequency.value(), @friction.value(), @anticipation.value())
+    new TweenSpring(@frequency.value(), @friction.value(), @anticipationStrength.value(), @anticipationSize.value())
 
   animateToRight = true
   animate = =>
@@ -280,7 +295,8 @@ document.addEventListener "DOMContentLoaded", ->
   update()
   @frequency.onUpdate = update
   @friction.onUpdate = update
-  @anticipation.onUpdate = update
+  @anticipationStrength.onUpdate = update
+  @anticipationSize.onUpdate = update
   @duration.onUpdate = update
 
   document.querySelector('div.circle').addEventListener 'click', animate
