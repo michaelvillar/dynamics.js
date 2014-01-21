@@ -1,5 +1,5 @@
 class TweenSpring
-  constructor: (@frequency, @friction, @anticipationStrength, @anticipationSize) ->
+  constructor: (@frequency, @friction, @elasticity, @anticipationStrength, @anticipationSize) ->
 
   init: =>
     @t = 0
@@ -12,6 +12,8 @@ class TweenSpring
     @t += step
 
     frequency = Math.max(1, @frequency)
+    elasticity = @elasticity / 100
+    friction = Math.pow(@friction, 1 / elasticity)
     s = @anticipationSize / 100
     decal = Math.max(0, s)
 
@@ -37,7 +39,7 @@ class TweenSpring
     else
       # Normal curve
       A = (t) =>
-        Math.pow(@friction / 10,-t) * (1 - t)
+        Math.pow(friction / 10,-t) * (1 - t)
 
       b = 0
       a = 1
@@ -246,8 +248,13 @@ document.addEventListener "DOMContentLoaded", ->
   })
   @friction = new UISlider(document.querySelector('.slider.friction'), document.querySelector('.value.friction'), {
     start: 1,
-    end: 3000,
+    end: 1000,
     value: values.friction || 400
+  })
+  @elasticity = new UISlider(document.querySelector('.slider.elasticity'), document.querySelector('.value.elasticity'), {
+    start: 1,
+    end: 1000,
+    value: values.elasticity || 100
   })
   @anticipationStrength = new UISlider(document.querySelector('.slider.anticipationStrength'), document.querySelector('.value.anticipationStrength'), {
     start: 0,
@@ -268,7 +275,7 @@ document.addEventListener "DOMContentLoaded", ->
   animationTimeout = null
 
   tween = =>
-    new TweenSpring(@frequency.value(), @friction.value(), @anticipationStrength.value(), @anticipationSize.value())
+    new TweenSpring(@frequency.value(), @friction.value(), @elasticity.value(), @anticipationStrength.value(), @anticipationSize.value())
 
   animateToRight = true
   animate = =>
@@ -290,6 +297,7 @@ document.addEventListener "DOMContentLoaded", ->
     args = {
       frequency: @frequency.value(),
       friction: @friction.value(),
+      elasticity: @elasticity.value(),
       anticipationStrength: @anticipationStrength.value(),
       anticipationSize: @anticipationSize.value(),
       duration: @duration.value()
@@ -311,6 +319,7 @@ document.addEventListener "DOMContentLoaded", ->
   update()
   @frequency.onUpdate = update
   @friction.onUpdate = update
+  @elasticity.onUpdate = update
   @anticipationStrength.onUpdate = update
   @anticipationSize.onUpdate = update
   @duration.onUpdate = update
