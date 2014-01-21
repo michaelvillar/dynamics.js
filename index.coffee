@@ -21,37 +21,42 @@ class TweenSpring
     t = @t
     @t += step
 
+    frequency = Math.max(1, @frequency)
     s = @anticipationSize / 100
     decal = Math.max(0, s)
 
     frictionT = (t / (1 - s)) - (s / (1 - s))
 
-    A = (t) =>
-      M = 0.8
-
-      x0 = (s / (1 - s))
-      x1 = 0
-
-      b = (x0 - (M * x1)) / (x0 - x1)
-      a = (M - b) / x0
-
-      (a * t * @anticipationStrength / 100) + b
-
     if t < s
+      # In case of anticipation
+      A = (t) =>
+        M = 0.8
+
+        x0 = (s / (1 - s))
+        x1 = 0
+
+        b = (x0 - (M * x1)) / (x0 - x1)
+        a = (M - b) / x0
+
+        (a * t * @anticipationStrength / 100) + b
+
       yS = (s / (1 - s)) - (s / (1 - s))
       y0 = (0 / (1 - s)) - (s / (1 - s))
       b = Math.acos(1 / A(yS))
-      a = (Math.acos(1 / A(y0)) - b) / ((@frequency || 1) * (-s))
+      a = (Math.acos(1 / A(y0)) - b) / (frequency * (-s))
     else
+      # Normal curve
       A = (t) =>
         Math.pow(@friction / 10,-t) * (1 - t)
+
       b = 0
       a = 1
+
     At = A(frictionT)
 
-    angle = @frequency * (t - s) * a + b
+    angle = frequency * (t - s) * a + b
     v = 1 - (At * Math.cos(angle))
-    [t, v, At, frictionT]
+    [t, v, At, frictionT, angle]
 
 class Animation
   @index: 0
@@ -141,34 +146,32 @@ class Graph
     @ctx.stroke()
 
     @tween.init()
-    points = []
-    points2 = []
-    points3 = []
+    graphes = []
     while args = @tween.next(step)
-      [t, v, v2, v3] = args
-      points.push [t, v]
-      points2.push [t, v2]
-      points3.push [t, v3]
-      if t >= 1
+      for i in [1..args.length]
+        graphes[i - 1] ||= []
+        points = graphes[i - 1]
+        points.push [args[0], args[i]]
+      if args[0] >= 1
         break
 
-    @ctx.beginPath()
-    @ctx.setStrokeColor('red')
-    @_drawCurve(points)
-    @ctx.setLineWidth(2 * r)
-    @ctx.stroke()
+    colors = [ 'red', 'rgba(0, 0, 255, .3)', 'rgba(0, 255, 0, .3)', 'rgba(0, 255, 255, .3)', 'rgba(255, 255, 0, .3)']
+    defaultColor = 'rgba(0, 0, 0, .3)'
 
-    @ctx.beginPath()
-    @ctx.setStrokeColor('rgba(0, 0, 255, .3)')
-    @_drawCurve(points2)
-    @ctx.setLineWidth(1 * r)
-    @ctx.stroke()
+    colorI = 0
+    for points in graphes
+      color = defaultColor
+      color = colors[colorI] if colorI < colors.length
+      @ctx.beginPath()
+      @ctx.setStrokeColor(color)
+      @_drawCurve(points)
+      if colorI == 0
+        @ctx.setLineWidth(2 * r)
+      else
+        @ctx.setLineWidth(1 * r)
+      @ctx.stroke()
+      colorI += 1
 
-    @ctx.beginPath()
-    @ctx.setStrokeColor('rgba(0, 255, 0, .3)')
-    @_drawCurve(points3)
-    @ctx.setLineWidth(1 * r)
-    @ctx.stroke()
 
   _drawCurve: (points) =>
     r = window.devicePixelRatio

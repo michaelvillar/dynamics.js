@@ -40,30 +40,31 @@
     };
 
     TweenSpring.prototype.next = function(step) {
-      var A, At, a, angle, b, decal, frictionT, s, t, v, y0, yS,
+      var A, At, a, angle, b, decal, frequency, frictionT, s, t, v, y0, yS,
         _this = this;
       if (this.t > 1) {
         this.t = 1;
       }
       t = this.t;
       this.t += step;
+      frequency = Math.max(1, this.frequency);
       s = this.anticipationSize / 100;
       decal = Math.max(0, s);
       frictionT = (t / (1 - s)) - (s / (1 - s));
-      A = function(t) {
-        var M, a, b, x0, x1;
-        M = 0.8;
-        x0 = s / (1 - s);
-        x1 = 0;
-        b = (x0 - (M * x1)) / (x0 - x1);
-        a = (M - b) / x0;
-        return (a * t * _this.anticipationStrength / 100) + b;
-      };
       if (t < s) {
+        A = function(t) {
+          var M, a, b, x0, x1;
+          M = 0.8;
+          x0 = s / (1 - s);
+          x1 = 0;
+          b = (x0 - (M * x1)) / (x0 - x1);
+          a = (M - b) / x0;
+          return (a * t * _this.anticipationStrength / 100) + b;
+        };
         yS = (s / (1 - s)) - (s / (1 - s));
         y0 = (0 / (1 - s)) - (s / (1 - s));
         b = Math.acos(1 / A(yS));
-        a = (Math.acos(1 / A(y0)) - b) / ((this.frequency || 1) * (-s));
+        a = (Math.acos(1 / A(y0)) - b) / (frequency * (-s));
       } else {
         A = function(t) {
           return Math.pow(_this.friction / 10, -t) * (1 - t);
@@ -72,9 +73,9 @@
         a = 1;
       }
       At = A(frictionT);
-      angle = this.frequency * (t - s) * a + b;
+      angle = frequency * (t - s) * a + b;
       v = 1 - (At * Math.cos(angle));
-      return [t, v, At, frictionT];
+      return [t, v, At, frictionT, angle];
     };
 
     return TweenSpring;
@@ -166,7 +167,7 @@
     }
 
     Graph.prototype.draw = function() {
-      var args, h, points, points2, points3, r, step, t, v, v2, v3, w;
+      var args, color, colorI, colors, defaultColor, graphes, h, i, points, r, step, w, _i, _j, _len, _name, _ref, _results;
       r = window.devicePixelRatio;
       w = this.canvas.width;
       h = this.canvas.height;
@@ -183,33 +184,39 @@
       this.ctx.lineTo(w, 0.34 * h);
       this.ctx.stroke();
       this.tween.init();
-      points = [];
-      points2 = [];
-      points3 = [];
+      graphes = [];
       while (args = this.tween.next(step)) {
-        t = args[0], v = args[1], v2 = args[2], v3 = args[3];
-        points.push([t, v]);
-        points2.push([t, v2]);
-        points3.push([t, v3]);
-        if (t >= 1) {
+        for (i = _i = 1, _ref = args.length; 1 <= _ref ? _i <= _ref : _i >= _ref; i = 1 <= _ref ? ++_i : --_i) {
+          graphes[_name = i - 1] || (graphes[_name] = []);
+          points = graphes[i - 1];
+          points.push([args[0], args[i]]);
+        }
+        if (args[0] >= 1) {
           break;
         }
       }
-      this.ctx.beginPath();
-      this.ctx.setStrokeColor('red');
-      this._drawCurve(points);
-      this.ctx.setLineWidth(2 * r);
-      this.ctx.stroke();
-      this.ctx.beginPath();
-      this.ctx.setStrokeColor('rgba(0, 0, 255, .3)');
-      this._drawCurve(points2);
-      this.ctx.setLineWidth(1 * r);
-      this.ctx.stroke();
-      this.ctx.beginPath();
-      this.ctx.setStrokeColor('rgba(0, 255, 0, .3)');
-      this._drawCurve(points3);
-      this.ctx.setLineWidth(1 * r);
-      return this.ctx.stroke();
+      colors = ['red', 'rgba(0, 0, 255, .3)', 'rgba(0, 255, 0, .3)', 'rgba(0, 255, 255, .3)', 'rgba(255, 255, 0, .3)'];
+      defaultColor = 'rgba(0, 0, 0, .3)';
+      colorI = 0;
+      _results = [];
+      for (_j = 0, _len = graphes.length; _j < _len; _j++) {
+        points = graphes[_j];
+        color = defaultColor;
+        if (colorI < colors.length) {
+          color = colors[colorI];
+        }
+        this.ctx.beginPath();
+        this.ctx.setStrokeColor(color);
+        this._drawCurve(points);
+        if (colorI === 0) {
+          this.ctx.setLineWidth(2 * r);
+        } else {
+          this.ctx.setLineWidth(1 * r);
+        }
+        this.ctx.stroke();
+        _results.push(colorI += 1);
+      }
+      return _results;
     };
 
     Graph.prototype._drawCurve = function(points) {
