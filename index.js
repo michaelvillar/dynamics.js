@@ -23,7 +23,7 @@
       },
       anticipationSize: {
         min: 0,
-        max: 100,
+        max: 99,
         "default": 10
       }
     };
@@ -342,8 +342,8 @@
 
       this.value = __bind(this.value, this);
 
-      (_base = this.options).start || (_base.start = 0);
-      (_base1 = this.options).end || (_base1.end = 1000);
+      (_base = this.options).min || (_base.min = 0);
+      (_base1 = this.options).max || (_base1.max = 1000);
       if (this.options.value === void 0) {
         this.options.value = 10;
       }
@@ -364,7 +364,7 @@
     };
 
     UISlider.prototype._updateLeftFromValue = function() {
-      return this.control.style.left = (this.options.value - this.options.start) / (this.options.end - this.options.start) * this.width + "px";
+      return this.control.style.left = (this.options.value - this.options.min) / (this.options.max - this.options.min) * this.width + "px";
     };
 
     UISlider.prototype._controlMouseDown = function(e) {
@@ -387,7 +387,7 @@
       } else if (newLeft < 0) {
         newLeft = 0;
       }
-      this.options.value = Math.round(newLeft / this.width * (this.options.end - this.options.start) + this.options.start);
+      this.options.value = Math.round(newLeft / this.width * (this.options.max - this.options.min) + this.options.min);
       this.valueEl.innerHTML = this.options.value;
       if (typeof this.onUpdate === "function") {
         this.onUpdate();

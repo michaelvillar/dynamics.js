@@ -3,7 +3,7 @@ class TweenSpring
     frequency: { min: 0, max: 100, default: 15 }
     friction: { min: 1, max: 1000, default: 100 }
     anticipationStrength: { min: 0, max: 1000, default: 115 }
-    anticipationSize: { min: 0, max: 100, default: 10 }
+    anticipationSize: { min: 0, max: 99, default: 10 }
 
   constructor: (@options = {}) ->
 
@@ -234,8 +234,8 @@ class Graph
 
 class UISlider
   constructor: (@el, @valueEl, @options = {}) ->
-    @options.start ||= 0
-    @options.end ||= 1000
+    @options.min ||= 0
+    @options.max ||= 1000
     @options.value = 10 if @options.value == undefined
 
     @width = 200 - 10
@@ -256,7 +256,7 @@ class UISlider
     @options.value
 
   _updateLeftFromValue: =>
-    @control.style.left = (@options.value - @options.start) / (@options.end - @options.start) * @width + "px"
+    @control.style.left = (@options.value - @options.min) / (@options.max - @options.min) * @width + "px"
 
   _controlMouseDown: (e) =>
     @dragging = true
@@ -274,7 +274,7 @@ class UISlider
     else if newLeft < 0
       newLeft = 0
 
-    @options.value = Math.round(newLeft / @width * (@options.end - @options.start) + @options.start)
+    @options.value = Math.round(newLeft / @width * (@options.max - @options.min) + @options.min)
     @valueEl.innerHTML = @options.value
 
     @onUpdate?()
