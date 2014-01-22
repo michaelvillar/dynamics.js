@@ -1,4 +1,25 @@
-class TweenSpring
+class Tween
+  @properties: {}
+
+  constructor: (@options = {}) ->
+
+  init: =>
+    @t = 0
+
+  next: (step) =>
+    @t = 1 if @t > 1
+    @currentT = @t
+    @t += step
+
+class TweenGravity extends Tween
+  @tweenName: "Gravity"
+
+  next: (step) =>
+    super step
+    t = @currentT
+    [t, t]
+
+class TweenSpring extends Tween
   @tweenName: "Spring"
   @properties:
     frequency: { min: 0, max: 100, default: 15 }
@@ -6,17 +27,9 @@ class TweenSpring
     anticipationStrength: { min: 0, max: 1000, default: 115 }
     anticipationSize: { min: 0, max: 99, default: 10 }
 
-  constructor: (@options = {}) ->
-
-  init: =>
-    @t = 0
-    @speed = 0
-    @v = 0
-
   next: (step) =>
-    @t = 1 if @t > 1
-    t = @t
-    @t += step
+    super step
+    t = @currentT
 
     frequency = Math.max(1, @options.frequency)
     friction = Math.pow(20, (@options.friction / 100))
@@ -307,20 +320,24 @@ class UISlider
     window.removeEventListener('mouseup', @_windowMouseUp)
 
 document.addEventListener "DOMContentLoaded", ->
-  tweenClasses = [TweenSpring]
+  tweenClasses = [TweenSpring, TweenGravity]
   select = document.querySelector('select.tweens')
-  for tweenClass in tweenClasses
+  tweenClass = tweenClasses[0]
+  for aTweenClass in tweenClasses
     option = document.createElement('option')
-    option.innerHTML = tweenClass.tweenName
-    option.value = tweenClass.name
+    option.innerHTML = aTweenClass.tweenName
+    option.value = aTweenClass.name
     select.appendChild option
+  select.addEventListener 'change', =>
+    name = select.options[select.selectedIndex].value
+    tweenClass = eval("#{name}")
+    createTweenOptions()
+    update()
 
   graph = new Graph(document.querySelector('canvas'))
-  tweenClass = TweenSpring
 
   sliders = []
   valuesFromURL = =>
-    sliders = []
     url = (document.location.toString() || '').split('#')
     values = {}
     if url.length > 1
@@ -330,7 +347,10 @@ document.addEventListener "DOMContentLoaded", ->
         values[k] = v
     values
   createTweenOptions = =>
+    tweenOptionsEl = document.querySelector('.tweenOptions')
+    tweenOptionsEl.innerHTML = ''
     values = valuesFromURL()
+    sliders = []
     for property, config of tweenClass.properties
       slider = new UISlider({
         min: config.min,
@@ -338,7 +358,7 @@ document.addEventListener "DOMContentLoaded", ->
         value: values[property] || config.default,
         property: property
       })
-      document.querySelector('.tweenOptions').appendChild(slider.el)
+      tweenOptionsEl.appendChild(slider.el)
       sliders.push slider
 
   @durationSlider = new UISlider({
@@ -355,7 +375,7 @@ document.addEventListener "DOMContentLoaded", ->
     options = {}
     for slider in sliders
       options[slider.options.property] = slider.value()
-    new TweenSpring(options)
+    new tweenClass(options)
 
   animateToRight = true
   animate = =>
