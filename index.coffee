@@ -50,15 +50,29 @@ class TweenSpring
     [t, v, At, frictionT, angle]
 
 class BrowserSupport
-  @transformPrefix: ->
-    return "-webkit-" if document.body.style.webkitTransform != undefined
-    return "-moz-" if document.body.style.mozTransform != undefined
-    ""
+  @transform: ->
+    @withPrefix("transform")
 
-  @keyframesPrefix: ->
-    return "-webkit-" if document.body.style.webkitAnimation != undefined
-    return "-moz-" if document.body.style.mozAnimation != undefined
-    ""
+  @keyframes: ->
+    return "-webkit-keyframes" if document.body.style.webkitAnimation != undefined
+    return "-moz-keyframes" if document.body.style.mozAnimation != undefined
+    "keyframes"
+
+  @withPrefix: (property) ->
+    prefix = @prefixFor(property)
+    return "-#{prefix.toLowerCase()}-#{property}" if prefix != ''
+    property
+
+  @prefixFor: (property) ->
+    propArray = property.split('-')
+    propertyName = ""
+    for prop in propArray
+      propertyName += prop.substring(0, 1).toUpperCase() + prop.substring(1)
+    for prefix in [ "Webkit", "Moz" ]
+      k = prefix + propertyName
+      if document.body.style[k] != undefined
+        return prefix
+    ''
 
 class Animation
   @index: 0
@@ -75,10 +89,17 @@ class Animation
     style.innerHTML = keyframes
     document.head.appendChild(style)
 
-    @el.style.webkitAnimationName = name
-    @el.style.webkitAnimationDuration = @options.duration + 'ms'
-    @el.style.webkitAnimationTimingFunction = 'linear'
-    @el.style.webkitAnimationFillMode = 'forwards'
+    animation = {
+      name: name,
+      duration: @options.duration + 'ms',
+      timingFunction: 'linear',
+      fillMode: 'forwards'
+    }
+    for k, v of animation
+      property = "animation-#{k}"
+      prefix = BrowserSupport.prefixFor(property)
+      propertyName = prefix + "Animation" + k.substring(0, 1).toUpperCase() + k.substring(1)
+      @el.style[propertyName] = v
 
   # Private
   _keyframes: (name) =>
@@ -93,7 +114,7 @@ class Animation
     frame0 = @frames[0]
     frame1 = @frames[100]
 
-    css = "@#{BrowserSupport.keyframesPrefix()}keyframes #{name} {\n"
+    css = "@#{BrowserSupport.keyframes()} #{name} {\n"
     while args = @options.tween.next(step)
       [t, v] = args
 
@@ -122,7 +143,7 @@ class Animation
           properties[k] = newValue
 
       css += "#{(t * 100)}% {\n"
-      css += "#{BrowserSupport.transformPrefix()}transform: #{transform};\n" if transform
+      css += "#{BrowserSupport.transform()}: #{transform};\n" if transform
       for k, v of properties
         css += "#{k}: #{v};\n"
       css += " }\n"
@@ -141,8 +162,8 @@ class Graph
     if @r
       canvas.width = canvas.width * @r
       canvas.height = canvas.height * @r
-      canvas.style.webkitTransformOrigin = "0 0"
-      canvas.style.webkitTransform = 'scale('+(1 / @r)+')'
+      canvas.style[BrowserSupport.prefixFor('transform-origin') + 'TransformOrigin'] = "0 0"
+      canvas.style[BrowserSupport.prefixFor('transform') + 'Transform'] = 'scale('+(1 / @r)+')'
 
   draw: =>
     r = window.devicePixelRatio
@@ -153,8 +174,8 @@ class Graph
 
     @ctx.clearRect(0,0,w,h)
 
-    @ctx.setStrokeColor('gray')
-    @ctx.setLineWidth(1)
+    @ctx.strokeStyle = 'gray'
+    @ctx.lineWidth = 1
     @ctx.beginPath()
     @ctx.moveTo(0, 0.67 * h)
     @ctx.lineTo(w, 0.67 * h)
@@ -183,12 +204,12 @@ class Graph
       color = defaultColor
       color = colors[colorI] if colorI < colors.length
       @ctx.beginPath()
-      @ctx.setStrokeColor(color)
+      @ctx.strokeStyle = color
       @_drawCurve(points)
       if colorI == 0
-        @ctx.setLineWidth(2 * r)
+        @ctx.lineWidth = (2 * r)
       else
-        @ctx.setLineWidth(1 * r)
+        @ctx.lineWidth = (1 * r)
       @ctx.stroke()
       colorI += 1
 

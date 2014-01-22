@@ -70,24 +70,46 @@
 
     function BrowserSupport() {}
 
-    BrowserSupport.transformPrefix = function() {
-      if (document.body.style.webkitTransform !== void 0) {
-        return "-webkit-";
-      }
-      if (document.body.style.mozTransform !== void 0) {
-        return "-moz-";
-      }
-      return "";
+    BrowserSupport.transform = function() {
+      return this.withPrefix("transform");
     };
 
-    BrowserSupport.keyframesPrefix = function() {
+    BrowserSupport.keyframes = function() {
       if (document.body.style.webkitAnimation !== void 0) {
-        return "-webkit-";
+        return "-webkit-keyframes";
       }
       if (document.body.style.mozAnimation !== void 0) {
-        return "-moz-";
+        return "-moz-keyframes";
       }
-      return "";
+      return "keyframes";
+    };
+
+    BrowserSupport.withPrefix = function(property) {
+      var prefix;
+      prefix = this.prefixFor(property);
+      if (prefix !== '') {
+        return "-" + (prefix.toLowerCase()) + "-" + property;
+      }
+      return property;
+    };
+
+    BrowserSupport.prefixFor = function(property) {
+      var k, prefix, prop, propArray, propertyName, _i, _j, _len, _len1, _ref;
+      propArray = property.split('-');
+      propertyName = "";
+      for (_i = 0, _len = propArray.length; _i < _len; _i++) {
+        prop = propArray[_i];
+        propertyName += prop.substring(0, 1).toUpperCase() + prop.substring(1);
+      }
+      _ref = ["Webkit", "Moz"];
+      for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
+        prefix = _ref[_j];
+        k = prefix + propertyName;
+        if (document.body.style[k] !== void 0) {
+          return prefix;
+        }
+      }
+      return '';
     };
 
     return BrowserSupport;
@@ -112,17 +134,28 @@
     }
 
     Animation.prototype.start = function() {
-      var keyframes, name, style;
+      var animation, k, keyframes, name, prefix, property, propertyName, style, v, _results;
       name = "anim_" + Animation.index;
       Animation.index += 1;
       keyframes = this._keyframes(name);
       style = document.createElement('style');
       style.innerHTML = keyframes;
       document.head.appendChild(style);
-      this.el.style.webkitAnimationName = name;
-      this.el.style.webkitAnimationDuration = this.options.duration + 'ms';
-      this.el.style.webkitAnimationTimingFunction = 'linear';
-      return this.el.style.webkitAnimationFillMode = 'forwards';
+      animation = {
+        name: name,
+        duration: this.options.duration + 'ms',
+        timingFunction: 'linear',
+        fillMode: 'forwards'
+      };
+      _results = [];
+      for (k in animation) {
+        v = animation[k];
+        property = "animation-" + k;
+        prefix = BrowserSupport.prefixFor(property);
+        propertyName = prefix + "Animation" + k.substring(0, 1).toUpperCase() + k.substring(1);
+        _results.push(this.el.style[propertyName] = v);
+      }
+      return _results;
     };
 
     Animation.prototype._keyframes = function(name) {
@@ -131,7 +164,7 @@
       step = 0.01;
       frame0 = this.frames[0];
       frame1 = this.frames[100];
-      css = "@" + (BrowserSupport.keyframesPrefix()) + "keyframes " + name + " {\n";
+      css = "@" + (BrowserSupport.keyframes()) + " " + name + " {\n";
       while (args = this.options.tween.next(step)) {
         t = args[0], v = args[1];
         transform = '';
@@ -161,7 +194,7 @@
         }
         css += "" + (t * 100) + "% {\n";
         if (transform) {
-          css += "" + (BrowserSupport.transformPrefix()) + "transform: " + transform + ";\n";
+          css += "" + (BrowserSupport.transform()) + ": " + transform + ";\n";
         }
         for (k in properties) {
           v = properties[k];
@@ -192,8 +225,8 @@
       if (this.r) {
         canvas.width = canvas.width * this.r;
         canvas.height = canvas.height * this.r;
-        canvas.style.webkitTransformOrigin = "0 0";
-        canvas.style.webkitTransform = 'scale(' + (1 / this.r) + ')';
+        canvas.style[BrowserSupport.prefixFor('transform-origin') + 'TransformOrigin'] = "0 0";
+        canvas.style[BrowserSupport.prefixFor('transform') + 'Transform'] = 'scale(' + (1 / this.r) + ')';
       }
     }
 
@@ -204,8 +237,8 @@
       h = this.canvas.height;
       step = 0.001;
       this.ctx.clearRect(0, 0, w, h);
-      this.ctx.setStrokeColor('gray');
-      this.ctx.setLineWidth(1);
+      this.ctx.strokeStyle = 'gray';
+      this.ctx.lineWidth = 1;
       this.ctx.beginPath();
       this.ctx.moveTo(0, 0.67 * h);
       this.ctx.lineTo(w, 0.67 * h);
@@ -237,12 +270,12 @@
           color = colors[colorI];
         }
         this.ctx.beginPath();
-        this.ctx.setStrokeColor(color);
+        this.ctx.strokeStyle = color;
         this._drawCurve(points);
         if (colorI === 0) {
-          this.ctx.setLineWidth(2 * r);
+          this.ctx.lineWidth = 2 * r;
         } else {
-          this.ctx.setLineWidth(1 * r);
+          this.ctx.lineWidth = 1 * r;
         }
         this.ctx.stroke();
         _results.push(colorI += 1);

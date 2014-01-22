@@ -3,6 +3,8 @@
   padding: 0;
   font-family: Helvetica, Arial;
   -webkit-user-select: none;
+  -moz-select: none;
+  user-select: none;
 }
 
 body {
