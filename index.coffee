@@ -1,5 +1,11 @@
 class TweenSpring
-  constructor: (@frequency, @friction, @anticipationStrength, @anticipationSize) ->
+  @properties:
+    frequency: { min: 0, max: 100, default: 15 }
+    friction: { min: 1, max: 1000, default: 100 }
+    anticipationStrength: { min: 0, max: 1000, default: 115 }
+    anticipationSize: { min: 0, max: 100, default: 10 }
+
+  constructor: (@options = {}) ->
 
   init: =>
     @t = 0
@@ -11,9 +17,9 @@ class TweenSpring
     t = @t
     @t += step
 
-    frequency = Math.max(1, @frequency)
-    friction = Math.pow(20, (@friction / 100))
-    s = @anticipationSize / 100
+    frequency = Math.max(1, @options.frequency)
+    friction = Math.pow(20, (@options.friction / 100))
+    s = @options.anticipationSize / 100
     decal = Math.max(0, s)
 
     frictionT = (t / (1 - s)) - (s / (1 - s))
@@ -29,7 +35,7 @@ class TweenSpring
         b = (x0 - (M * x1)) / (x0 - x1)
         a = (M - b) / x0
 
-        (a * t * @anticipationStrength / 100) + b
+        (a * t * @options.anticipationStrength / 100) + b
 
       yS = (s / (1 - s)) - (s / (1 - s))
       y0 = (0 / (1 - s)) - (s / (1 - s))
@@ -282,6 +288,7 @@ class UISlider
 
 document.addEventListener "DOMContentLoaded", ->
   graph = new Graph(document.querySelector('canvas'))
+  tweenClass = TweenSpring
 
   url = (document.location.toString() || '').split('#')
   values = {}
@@ -291,35 +298,29 @@ document.addEventListener "DOMContentLoaded", ->
       [k, v] = arg.split('=')
       values[k] = v
 
-  @frequency = new UISlider(document.querySelector('.slider.frequency'), document.querySelector('.value.frequency'), {
-    end: 100,
-    value: values.frequency || 17
-  })
-  @friction = new UISlider(document.querySelector('.slider.friction'), document.querySelector('.value.friction'), {
-    start: 1,
-    end: 1000,
-    value: values.friction || 100
-  })
-  @anticipationStrength = new UISlider(document.querySelector('.slider.anticipationStrength'), document.querySelector('.value.anticipationStrength'), {
-    start: 0,
-    end: 1000,
-    value: values.anticipationStrength || 115
-  })
-  @anticipationSize = new UISlider(document.querySelector('.slider.anticipationSize'), document.querySelector('.value.anticipationSize'), {
-    start: 0,
-    end: 100,
-    value: values.anticipationSize || 10
-  })
   @duration = new UISlider(document.querySelector('.slider.duration'), document.querySelector('.value.duration'), {
     start: 100,
     end: 4000,
     value: values.duration || 1000
   })
 
+  sliders = []
+  for property, config of tweenClass.properties
+    slider = new UISlider(document.querySelector('.slider.' + property), document.querySelector('.value.' + property), {
+      min: config.min,
+      max: config.max,
+      value: values[property] || config.default,
+      property: property
+    })
+    sliders.push slider
+
   animationTimeout = null
 
   tween = =>
-    new TweenSpring(@frequency.value(), @friction.value(), @anticipationStrength.value(), @anticipationSize.value())
+    options = {}
+    for slider in sliders
+      options[slider.options.property] = slider.value()
+    new TweenSpring(options)
 
   animateToRight = true
   animate = =>
@@ -338,13 +339,9 @@ document.addEventListener "DOMContentLoaded", ->
     anim.start()
 
   update = =>
-    args = {
-      frequency: @frequency.value(),
-      friction: @friction.value(),
-      anticipationStrength: @anticipationStrength.value(),
-      anticipationSize: @anticipationSize.value(),
-      duration: @duration.value()
-    }
+    args = {}
+    for slider in sliders
+      args[slider.options.property] = slider.value()
     argsString = ''
     for k, v of args
       argsString += "," unless argsString == ''
@@ -359,12 +356,10 @@ document.addEventListener "DOMContentLoaded", ->
     clearTimeout animationTimeout if animationTimeout
     animationTimeout = setTimeout(animate, 200)
 
-  update()
-  @frequency.onUpdate = update
-  @friction.onUpdate = update
-  @anticipationStrength.onUpdate = update
-  @anticipationSize.onUpdate = update
   @duration.onUpdate = update
+  for slider in sliders
+    slider.onUpdate = update
+  update()
 
   document.querySelector('div.circle').addEventListener 'click', animate
 

@@ -5,11 +5,31 @@
 
   TweenSpring = (function() {
 
-    function TweenSpring(frequency, friction, anticipationStrength, anticipationSize) {
-      this.frequency = frequency;
-      this.friction = friction;
-      this.anticipationStrength = anticipationStrength;
-      this.anticipationSize = anticipationSize;
+    TweenSpring.properties = {
+      frequency: {
+        min: 0,
+        max: 100,
+        "default": 15
+      },
+      friction: {
+        min: 1,
+        max: 1000,
+        "default": 100
+      },
+      anticipationStrength: {
+        min: 0,
+        max: 1000,
+        "default": 115
+      },
+      anticipationSize: {
+        min: 0,
+        max: 100,
+        "default": 10
+      }
+    };
+
+    function TweenSpring(options) {
+      this.options = options != null ? options : {};
       this.next = __bind(this.next, this);
 
       this.init = __bind(this.init, this);
@@ -30,9 +50,9 @@
       }
       t = this.t;
       this.t += step;
-      frequency = Math.max(1, this.frequency);
-      friction = Math.pow(20, this.friction / 100);
-      s = this.anticipationSize / 100;
+      frequency = Math.max(1, this.options.frequency);
+      friction = Math.pow(20, this.options.friction / 100);
+      s = this.options.anticipationSize / 100;
       decal = Math.max(0, s);
       frictionT = (t / (1 - s)) - (s / (1 - s));
       if (t < s) {
@@ -43,7 +63,7 @@
           x1 = 0;
           b = (x0 - (M * x1)) / (x0 - x1);
           a = (M - b) / x0;
-          return (a * t * _this.anticipationStrength / 100) + b;
+          return (a * t * _this.options.anticipationStrength / 100) + b;
         };
         yS = (s / (1 - s)) - (s / (1 - s));
         y0 = (0 / (1 - s)) - (s / (1 - s));
@@ -386,9 +406,10 @@
   })();
 
   document.addEventListener("DOMContentLoaded", function() {
-    var animate, animateToRight, animationTimeout, arg, graph, k, query, tween, update, url, v, values, _i, _len, _ref, _ref1,
+    var animate, animateToRight, animationTimeout, arg, config, graph, k, property, query, slider, sliders, tween, tweenClass, update, url, v, values, _i, _j, _len, _len1, _ref, _ref1, _ref2,
       _this = this;
     graph = new Graph(document.querySelector('canvas'));
+    tweenClass = TweenSpring;
     url = (document.location.toString() || '').split('#');
     values = {};
     if (url.length > 1) {
@@ -400,33 +421,32 @@
         values[k] = v;
       }
     }
-    this.frequency = new UISlider(document.querySelector('.slider.frequency'), document.querySelector('.value.frequency'), {
-      end: 100,
-      value: values.frequency || 17
-    });
-    this.friction = new UISlider(document.querySelector('.slider.friction'), document.querySelector('.value.friction'), {
-      start: 1,
-      end: 1000,
-      value: values.friction || 100
-    });
-    this.anticipationStrength = new UISlider(document.querySelector('.slider.anticipationStrength'), document.querySelector('.value.anticipationStrength'), {
-      start: 0,
-      end: 1000,
-      value: values.anticipationStrength || 115
-    });
-    this.anticipationSize = new UISlider(document.querySelector('.slider.anticipationSize'), document.querySelector('.value.anticipationSize'), {
-      start: 0,
-      end: 100,
-      value: values.anticipationSize || 10
-    });
     this.duration = new UISlider(document.querySelector('.slider.duration'), document.querySelector('.value.duration'), {
       start: 100,
       end: 4000,
       value: values.duration || 1000
     });
+    sliders = [];
+    _ref2 = tweenClass.properties;
+    for (property in _ref2) {
+      config = _ref2[property];
+      slider = new UISlider(document.querySelector('.slider.' + property), document.querySelector('.value.' + property), {
+        min: config.min,
+        max: config.max,
+        value: values[property] || config["default"],
+        property: property
+      });
+      sliders.push(slider);
+    }
     animationTimeout = null;
     tween = function() {
-      return new TweenSpring(_this.frequency.value(), _this.friction.value(), _this.anticipationStrength.value(), _this.anticipationSize.value());
+      var options, _j, _len1;
+      options = {};
+      for (_j = 0, _len1 = sliders.length; _j < _len1; _j++) {
+        slider = sliders[_j];
+        options[slider.options.property] = slider.value();
+      }
+      return new TweenSpring(options);
     };
     animateToRight = true;
     animate = function() {
@@ -446,14 +466,12 @@
       return anim.start();
     };
     update = function() {
-      var args, argsString, currentURL;
-      args = {
-        frequency: _this.frequency.value(),
-        friction: _this.friction.value(),
-        anticipationStrength: _this.anticipationStrength.value(),
-        anticipationSize: _this.anticipationSize.value(),
-        duration: _this.duration.value()
-      };
+      var args, argsString, currentURL, _j, _len1;
+      args = {};
+      for (_j = 0, _len1 = sliders.length; _j < _len1; _j++) {
+        slider = sliders[_j];
+        args[slider.options.property] = slider.value();
+      }
       argsString = '';
       for (k in args) {
         v = args[k];
@@ -471,12 +489,12 @@
       }
       return animationTimeout = setTimeout(animate, 200);
     };
-    update();
-    this.frequency.onUpdate = update;
-    this.friction.onUpdate = update;
-    this.anticipationStrength.onUpdate = update;
-    this.anticipationSize.onUpdate = update;
     this.duration.onUpdate = update;
+    for (_j = 0, _len1 = sliders.length; _j < _len1; _j++) {
+      slider = sliders[_j];
+      slider.onUpdate = update;
+    }
+    update();
     return document.querySelector('div.circle').addEventListener('click', animate);
   }, false);
 
