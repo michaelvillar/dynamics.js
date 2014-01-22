@@ -482,16 +482,35 @@
   })();
 
   document.addEventListener("DOMContentLoaded", function() {
-    var aTweenClass, animate, animateToRight, animationTimeout, createTweenOptions, graph, option, select, slider, sliders, tween, tweenClass, tweenClasses, update, valuesFromURL, _i, _j, _len, _len1,
+    var aTweenClass, animate, animateToRight, animationTimeout, createTweenOptions, graph, option, select, sliders, tween, tweenClass, tweenClasses, update, valuesFromURL, _i, _len,
       _this = this;
+    valuesFromURL = function() {
+      var arg, k, query, url, v, values, _i, _len, _ref, _ref1;
+      url = (document.location.toString() || '').split('#');
+      values = {};
+      if (url.length > 1) {
+        query = url[1];
+        _ref = query.split(',');
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          arg = _ref[_i];
+          _ref1 = arg.split('='), k = _ref1[0], v = _ref1[1];
+          values[k] = v;
+        }
+      }
+      return values;
+    };
     tweenClasses = [TweenGravity, TweenSpring];
     select = document.querySelector('select.tweens');
     tweenClass = tweenClasses[0];
     for (_i = 0, _len = tweenClasses.length; _i < _len; _i++) {
       aTweenClass = tweenClasses[_i];
+      if (aTweenClass.name === valuesFromURL().tween) {
+        tweenClass = aTweenClass;
+      }
       option = document.createElement('option');
       option.innerHTML = aTweenClass.tweenName;
       option.value = aTweenClass.name;
+      option.selected = aTweenClass === tweenClass;
       select.appendChild(option);
     }
     select.addEventListener('change', function() {
@@ -503,50 +522,6 @@
     });
     graph = new Graph(document.querySelector('canvas'));
     sliders = [];
-    valuesFromURL = function() {
-      var arg, k, query, url, v, values, _j, _len1, _ref, _ref1;
-      url = (document.location.toString() || '').split('#');
-      values = {};
-      if (url.length > 1) {
-        query = url[1];
-        _ref = query.split(',');
-        for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
-          arg = _ref[_j];
-          _ref1 = arg.split('='), k = _ref1[0], v = _ref1[1];
-          values[k] = v;
-        }
-      }
-      return values;
-    };
-    createTweenOptions = function() {
-      var config, property, slider, tweenOptionsEl, values, _ref, _results;
-      tweenOptionsEl = document.querySelector('.tweenOptions');
-      tweenOptionsEl.innerHTML = '';
-      values = valuesFromURL();
-      sliders = [];
-      _ref = tweenClass.properties;
-      _results = [];
-      for (property in _ref) {
-        config = _ref[property];
-        slider = new UISlider({
-          min: config.min,
-          max: config.max,
-          value: values[property] || config["default"],
-          property: property
-        });
-        tweenOptionsEl.appendChild(slider.el);
-        _results.push(sliders.push(slider));
-      }
-      return _results;
-    };
-    this.durationSlider = new UISlider({
-      min: 100,
-      max: 4000,
-      value: valuesFromURL().duration || 1000,
-      property: 'duration'
-    });
-    document.querySelector('.animationOptions').appendChild(this.durationSlider.el);
-    animationTimeout = null;
     tween = function() {
       var options, slider, _j, _len1;
       options = {};
@@ -574,11 +549,14 @@
       return anim.start();
     };
     update = function() {
-      var args, argsString, currentURL, k, slider, v, _j, _len1;
+      var animationTimeout, args, argsString, currentURL, k, slider, v, _j, _len1;
       args = {};
       for (_j = 0, _len1 = sliders.length; _j < _len1; _j++) {
         slider = sliders[_j];
         args[slider.options.property] = slider.value();
+      }
+      if (tweenClass) {
+        args['tween'] = tweenClass.name;
       }
       argsString = '';
       for (k in args) {
@@ -597,12 +575,41 @@
       }
       return animationTimeout = setTimeout(animate, 200);
     };
+    createTweenOptions = function() {
+      var config, property, slider, tweenOptionsEl, values, _j, _len1, _ref, _results;
+      tweenOptionsEl = document.querySelector('.tweenOptions');
+      tweenOptionsEl.innerHTML = '';
+      values = valuesFromURL();
+      sliders = [];
+      _ref = tweenClass.properties;
+      for (property in _ref) {
+        config = _ref[property];
+        slider = new UISlider({
+          min: config.min,
+          max: config.max,
+          value: values[property] || config["default"],
+          property: property
+        });
+        tweenOptionsEl.appendChild(slider.el);
+        sliders.push(slider);
+      }
+      _results = [];
+      for (_j = 0, _len1 = sliders.length; _j < _len1; _j++) {
+        slider = sliders[_j];
+        _results.push(slider.onUpdate = update);
+      }
+      return _results;
+    };
+    this.durationSlider = new UISlider({
+      min: 100,
+      max: 4000,
+      value: valuesFromURL().duration || 1000,
+      property: 'duration'
+    });
+    document.querySelector('.animationOptions').appendChild(this.durationSlider.el);
+    animationTimeout = null;
     this.durationSlider.onUpdate = update;
     createTweenOptions();
-    for (_j = 0, _len1 = sliders.length; _j < _len1; _j++) {
-      slider = sliders[_j];
-      slider.onUpdate = update;
-    }
     update();
     return document.querySelector('div.circle').addEventListener('click', animate);
   }, false);

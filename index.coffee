@@ -335,13 +335,26 @@ class UISlider
     window.removeEventListener('mouseup', @_windowMouseUp)
 
 document.addEventListener "DOMContentLoaded", ->
+  valuesFromURL = =>
+    url = (document.location.toString() || '').split('#')
+    values = {}
+    if url.length > 1
+      query = url[1]
+      for arg in query.split(',')
+        [k, v] = arg.split('=')
+        values[k] = v
+    values
+
   tweenClasses = [TweenGravity, TweenSpring]
   select = document.querySelector('select.tweens')
   tweenClass = tweenClasses[0]
   for aTweenClass in tweenClasses
+    if aTweenClass.name == valuesFromURL().tween
+      tweenClass = aTweenClass
     option = document.createElement('option')
     option.innerHTML = aTweenClass.tweenName
     option.value = aTweenClass.name
+    option.selected = aTweenClass == tweenClass
     select.appendChild option
   select.addEventListener 'change', =>
     name = select.options[select.selectedIndex].value
@@ -352,40 +365,6 @@ document.addEventListener "DOMContentLoaded", ->
   graph = new Graph(document.querySelector('canvas'))
 
   sliders = []
-  valuesFromURL = =>
-    url = (document.location.toString() || '').split('#')
-    values = {}
-    if url.length > 1
-      query = url[1]
-      for arg in query.split(',')
-        [k, v] = arg.split('=')
-        values[k] = v
-    values
-  createTweenOptions = =>
-    tweenOptionsEl = document.querySelector('.tweenOptions')
-    tweenOptionsEl.innerHTML = ''
-    values = valuesFromURL()
-    sliders = []
-    for property, config of tweenClass.properties
-      slider = new UISlider({
-        min: config.min,
-        max: config.max,
-        value: values[property] || config.default,
-        property: property
-      })
-      tweenOptionsEl.appendChild(slider.el)
-      sliders.push slider
-
-  @durationSlider = new UISlider({
-    min: 100,
-    max: 4000,
-    value: valuesFromURL().duration || 1000,
-    property: 'duration'
-  })
-  document.querySelector('.animationOptions').appendChild(@durationSlider.el)
-
-  animationTimeout = null
-
   tween = =>
     options = {}
     for slider in sliders
@@ -412,6 +391,7 @@ document.addEventListener "DOMContentLoaded", ->
     args = {}
     for slider in sliders
       args[slider.options.property] = slider.value()
+    args['tween'] = tweenClass.name if tweenClass
     argsString = ''
     for k, v of args
       argsString += "," unless argsString == ''
@@ -426,10 +406,34 @@ document.addEventListener "DOMContentLoaded", ->
     clearTimeout animationTimeout if animationTimeout
     animationTimeout = setTimeout(animate, 200)
 
+  createTweenOptions = =>
+    tweenOptionsEl = document.querySelector('.tweenOptions')
+    tweenOptionsEl.innerHTML = ''
+    values = valuesFromURL()
+    sliders = []
+    for property, config of tweenClass.properties
+      slider = new UISlider({
+        min: config.min,
+        max: config.max,
+        value: values[property] || config.default,
+        property: property
+      })
+      tweenOptionsEl.appendChild(slider.el)
+      sliders.push slider
+    for slider in sliders
+      slider.onUpdate = update
+
+  @durationSlider = new UISlider({
+    min: 100,
+    max: 4000,
+    value: valuesFromURL().duration || 1000,
+    property: 'duration'
+  })
+  document.querySelector('.animationOptions').appendChild(@durationSlider.el)
+
+  animationTimeout = null
   @durationSlider.onUpdate = update
   createTweenOptions()
-  for slider in sliders
-    slider.onUpdate = update
   update()
 
   document.querySelector('div.circle').addEventListener 'click', animate
