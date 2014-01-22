@@ -13,11 +13,26 @@ class Tween
 
 class TweenGravity extends Tween
   @tweenName: "Gravity"
+  @properties:
+    bounce: { min: 0, max: 100, default: 20 }
+
+  init: =>
+    super
+    @speed = 0
+    @v = 0
 
   next: (step) =>
     super step
     t = @currentT
-    [t, t]
+
+    gravity = 20
+    @speed += gravity * step * step
+    @v += @speed
+
+    if @v > 1 and @speed >= 0
+      @speed = -@speed * (@options.bounce / 100)
+
+    [t, @v, @speed * 200]
 
 class TweenSpring extends Tween
   @tweenName: "Spring"
@@ -124,7 +139,7 @@ class Animation
   # Private
   _keyframes: (name) =>
     @options.tween.init()
-    step = 0.01
+    step = 0.001
 
     # percents = []
     # for percent in @frames
@@ -320,7 +335,7 @@ class UISlider
     window.removeEventListener('mouseup', @_windowMouseUp)
 
 document.addEventListener "DOMContentLoaded", ->
-  tweenClasses = [TweenSpring, TweenGravity]
+  tweenClasses = [TweenGravity, TweenSpring]
   select = document.querySelector('select.tweens')
   tweenClass = tweenClasses[0]
   for aTweenClass in tweenClasses

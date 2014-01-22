@@ -39,16 +39,38 @@
 
     function TweenGravity() {
       this.next = __bind(this.next, this);
+
+      this.init = __bind(this.init, this);
       return TweenGravity.__super__.constructor.apply(this, arguments);
     }
 
     TweenGravity.tweenName = "Gravity";
 
+    TweenGravity.properties = {
+      bounce: {
+        min: 0,
+        max: 100,
+        "default": 20
+      }
+    };
+
+    TweenGravity.prototype.init = function() {
+      TweenGravity.__super__.init.apply(this, arguments);
+      this.speed = 0;
+      return this.v = 0;
+    };
+
     TweenGravity.prototype.next = function(step) {
-      var t;
+      var gravity, t;
       TweenGravity.__super__.next.call(this, step);
       t = this.currentT;
-      return [t, t];
+      gravity = 20;
+      this.speed += gravity * step * step;
+      this.v += this.speed;
+      if (this.v > 1 && this.speed >= 0) {
+        this.speed = -this.speed * (this.options.bounce / 100);
+      }
+      return [t, this.v, this.speed * 200];
     };
 
     return TweenGravity;
@@ -225,7 +247,7 @@
     Animation.prototype._keyframes = function(name) {
       var args, css, dValue, frame0, frame1, isTransform, k, newValue, oldValue, properties, step, t, transform, unit, v, value;
       this.options.tween.init();
-      step = 0.01;
+      step = 0.001;
       frame0 = this.frames[0];
       frame1 = this.frames[100];
       css = "@" + (BrowserSupport.keyframes()) + " " + name + " {\n";
@@ -462,7 +484,7 @@
   document.addEventListener("DOMContentLoaded", function() {
     var aTweenClass, animate, animateToRight, animationTimeout, createTweenOptions, graph, option, select, slider, sliders, tween, tweenClass, tweenClasses, update, valuesFromURL, _i, _j, _len, _len1,
       _this = this;
-    tweenClasses = [TweenSpring, TweenGravity];
+    tweenClasses = [TweenGravity, TweenSpring];
     select = document.querySelector('select.tweens');
     tweenClass = tweenClasses[0];
     for (_i = 0, _len = tweenClasses.length; _i < _len; _i++) {
