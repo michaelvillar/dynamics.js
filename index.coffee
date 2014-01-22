@@ -49,6 +49,17 @@ class TweenSpring
     v = 1 - (At * Math.cos(angle))
     [t, v, At, frictionT, angle]
 
+class BrowserSupport
+  @transformPrefix: ->
+    return "-webkit-" if document.body.style.webkitTransform != undefined
+    return "-moz-" if document.body.style.mozTransform != undefined
+    ""
+
+  @keyframesPrefix: ->
+    return "-webkit-" if document.body.style.webkitAnimation != undefined
+    return "-moz-" if document.body.style.mozAnimation != undefined
+    ""
+
 class Animation
   @index: 0
 
@@ -82,25 +93,43 @@ class Animation
     frame0 = @frames[0]
     frame1 = @frames[100]
 
-    css = "@-webkit-keyframes #{name} {\n"
+    css = "@#{BrowserSupport.keyframesPrefix()}keyframes #{name} {\n"
     while args = @options.tween.next(step)
       [t, v] = args
 
       transform = ''
+      properties = {}
       for k, value of frame1
-        if k == 'translateX'
-          value = parseInt(value)
-          oldValue = frame0.translateX || 0
-          dValue = value - oldValue
-          transform += "translateX(#{oldValue + (dValue * v)}px) "
+        value = parseFloat(value)
+        oldValue = frame0[k] || 0
+        dValue = value - oldValue
+        newValue = oldValue + (dValue * v)
 
-      css += "#{(t * 100)}% { "
-      css += "-webkit-transform: #{transform};" if transform
-      css += " }"
+        unit = ''
+        isTransform = false
+        if k in ['translateX', 'translateY', 'translateZ']
+          unit = 'px'
+          isTransform = true
+        else if k in ['rotateX', 'rotateY', 'rotateZ']
+          unit = 'deg'
+          isTransform = true
+        else if k in ['scaleX', 'scaleY', 'scale']
+          isTransform = true
+
+        if isTransform
+          transform += "#{k}(#{newValue}#{unit}) "
+        else
+          properties[k] = newValue
+
+      css += "#{(t * 100)}% {\n"
+      css += "#{BrowserSupport.transformPrefix()}transform: #{transform};\n" if transform
+      for k, v of properties
+        css += "#{k}: #{v};\n"
+      css += " }\n"
 
       if t >= 1
         break
-    css += "}"
+    css += "}\n"
     css
 
 class Graph
