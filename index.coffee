@@ -1,4 +1,5 @@
 class TweenSpring
+  @tweenName: "Spring"
   @properties:
     frequency: { min: 0, max: 100, default: 15 }
     friction: { min: 1, max: 1000, default: 100 }
@@ -233,19 +234,38 @@ class Graph
         @ctx.lineTo(t * w,h - ((0.33 + (v * 0.33)) * h))
 
 class UISlider
-  constructor: (@el, @valueEl, @options = {}) ->
+  constructor: (@options = {}) ->
     @options.min ||= 0
     @options.max ||= 1000
     @options.value = 10 if @options.value == undefined
 
     @width = 200 - 10
 
+    @el = document.createElement('div')
+
+    @label = document.createElement('label')
+    @label.innerHTML = @options.property
+
+    @valueEl = document.createElement('div')
+    @valueEl.classList.add 'value'
+    @valueEl.classList.add options.property
+
+    @slider = document.createElement('div')
+    @slider.classList.add 'slider'
+    @slider.classList.add options.property
+
     @bar = document.createElement('div')
     @bar.classList.add('bar')
     @control = document.createElement('div')
     @control.classList.add('control')
-    @el.appendChild(@bar)
-    @el.appendChild(@control)
+
+    @slider.appendChild(@bar)
+    @slider.appendChild(@control)
+
+    @el.appendChild(@label)
+    @el.appendChild(@valueEl)
+    @el.appendChild(@slider)
+
     @valueEl.innerHTML = @options.value
 
     @_updateLeftFromValue()
@@ -287,32 +307,47 @@ class UISlider
     window.removeEventListener('mouseup', @_windowMouseUp)
 
 document.addEventListener "DOMContentLoaded", ->
+  tweenClasses = [TweenSpring]
+  select = document.querySelector('select.tweens')
+  for tweenClass in tweenClasses
+    option = document.createElement('option')
+    option.innerHTML = tweenClass.tweenName
+    option.value = tweenClass.name
+    select.appendChild option
+
   graph = new Graph(document.querySelector('canvas'))
   tweenClass = TweenSpring
 
-  url = (document.location.toString() || '').split('#')
-  values = {}
-  if url.length > 1
-    query = url[1]
-    for arg in query.split(',')
-      [k, v] = arg.split('=')
-      values[k] = v
-
-  @duration = new UISlider(document.querySelector('.slider.duration'), document.querySelector('.value.duration'), {
-    start: 100,
-    end: 4000,
-    value: values.duration || 1000
-  })
-
   sliders = []
-  for property, config of tweenClass.properties
-    slider = new UISlider(document.querySelector('.slider.' + property), document.querySelector('.value.' + property), {
-      min: config.min,
-      max: config.max,
-      value: values[property] || config.default,
-      property: property
-    })
-    sliders.push slider
+  valuesFromURL = =>
+    sliders = []
+    url = (document.location.toString() || '').split('#')
+    values = {}
+    if url.length > 1
+      query = url[1]
+      for arg in query.split(',')
+        [k, v] = arg.split('=')
+        values[k] = v
+    values
+  createTweenOptions = =>
+    values = valuesFromURL()
+    for property, config of tweenClass.properties
+      slider = new UISlider({
+        min: config.min,
+        max: config.max,
+        value: values[property] || config.default,
+        property: property
+      })
+      document.querySelector('.tweenOptions').appendChild(slider.el)
+      sliders.push slider
+
+  @durationSlider = new UISlider({
+    min: 100,
+    max: 4000,
+    value: valuesFromURL().duration || 1000,
+    property: 'duration'
+  })
+  document.querySelector('.animationOptions').appendChild(@durationSlider.el)
 
   animationTimeout = null
 
@@ -333,7 +368,7 @@ document.addEventListener "DOMContentLoaded", ->
       }
     }, {
       tween: tween(),
-      duration: @duration.value()
+      duration: @durationSlider.value()
     })
     animateToRight = !animateToRight
     anim.start()
@@ -356,7 +391,8 @@ document.addEventListener "DOMContentLoaded", ->
     clearTimeout animationTimeout if animationTimeout
     animationTimeout = setTimeout(animate, 200)
 
-  @duration.onUpdate = update
+  @durationSlider.onUpdate = update
+  createTweenOptions()
   for slider in sliders
     slider.onUpdate = update
   update()

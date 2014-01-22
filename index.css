@@ -22,6 +22,7 @@ section {
 canvas {
   margin: 20px;
   background: #fff;
+  border-radius: 4px;
 }
 
 div.circle {
@@ -39,6 +40,21 @@ div.options {
   position: absolute;
   top: 20px;
   left: 440px;
+}
+
+div.options select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  border: none;
+  background: rgba(255, 255, 255, .5);
+  width: 100%;
+  border-radius: 4px;
+  padding: 6px;
+  color: #fff;
+  font-size: 14px;
+  margin-bottom: 5px;
+  text-align: center;
 }
 
 div.options h2 {

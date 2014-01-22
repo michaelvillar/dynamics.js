@@ -5,6 +5,8 @@
 
   TweenSpring = (function() {
 
+    TweenSpring.tweenName = "Spring";
+
     TweenSpring.properties = {
       frequency: {
         min: 0,
@@ -327,10 +329,8 @@
 
   UISlider = (function() {
 
-    function UISlider(el, valueEl, options) {
+    function UISlider(options) {
       var _base, _base1;
-      this.el = el;
-      this.valueEl = valueEl;
       this.options = options != null ? options : {};
       this._windowMouseUp = __bind(this._windowMouseUp, this);
 
@@ -348,12 +348,24 @@
         this.options.value = 10;
       }
       this.width = 200 - 10;
+      this.el = document.createElement('div');
+      this.label = document.createElement('label');
+      this.label.innerHTML = this.options.property;
+      this.valueEl = document.createElement('div');
+      this.valueEl.classList.add('value');
+      this.valueEl.classList.add(options.property);
+      this.slider = document.createElement('div');
+      this.slider.classList.add('slider');
+      this.slider.classList.add(options.property);
       this.bar = document.createElement('div');
       this.bar.classList.add('bar');
       this.control = document.createElement('div');
       this.control.classList.add('control');
-      this.el.appendChild(this.bar);
-      this.el.appendChild(this.control);
+      this.slider.appendChild(this.bar);
+      this.slider.appendChild(this.control);
+      this.el.appendChild(this.label);
+      this.el.appendChild(this.valueEl);
+      this.el.appendChild(this.slider);
       this.valueEl.innerHTML = this.options.value;
       this._updateLeftFromValue();
       this.control.addEventListener('mousedown', this._controlMouseDown);
@@ -406,41 +418,64 @@
   })();
 
   document.addEventListener("DOMContentLoaded", function() {
-    var animate, animateToRight, animationTimeout, arg, config, graph, k, property, query, slider, sliders, tween, tweenClass, update, url, v, values, _i, _j, _len, _len1, _ref, _ref1, _ref2,
+    var animate, animateToRight, animationTimeout, createTweenOptions, graph, option, select, slider, sliders, tween, tweenClass, tweenClasses, update, valuesFromURL, _i, _j, _len, _len1,
       _this = this;
+    tweenClasses = [TweenSpring];
+    select = document.querySelector('select.tweens');
+    for (_i = 0, _len = tweenClasses.length; _i < _len; _i++) {
+      tweenClass = tweenClasses[_i];
+      option = document.createElement('option');
+      option.innerHTML = tweenClass.tweenName;
+      option.value = tweenClass.name;
+      select.appendChild(option);
+    }
     graph = new Graph(document.querySelector('canvas'));
     tweenClass = TweenSpring;
-    url = (document.location.toString() || '').split('#');
-    values = {};
-    if (url.length > 1) {
-      query = url[1];
-      _ref = query.split(',');
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        arg = _ref[_i];
-        _ref1 = arg.split('='), k = _ref1[0], v = _ref1[1];
-        values[k] = v;
-      }
-    }
-    this.duration = new UISlider(document.querySelector('.slider.duration'), document.querySelector('.value.duration'), {
-      start: 100,
-      end: 4000,
-      value: values.duration || 1000
-    });
     sliders = [];
-    _ref2 = tweenClass.properties;
-    for (property in _ref2) {
-      config = _ref2[property];
-      slider = new UISlider(document.querySelector('.slider.' + property), document.querySelector('.value.' + property), {
-        min: config.min,
-        max: config.max,
-        value: values[property] || config["default"],
-        property: property
-      });
-      sliders.push(slider);
-    }
+    valuesFromURL = function() {
+      var arg, k, query, url, v, values, _j, _len1, _ref, _ref1;
+      sliders = [];
+      url = (document.location.toString() || '').split('#');
+      values = {};
+      if (url.length > 1) {
+        query = url[1];
+        _ref = query.split(',');
+        for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
+          arg = _ref[_j];
+          _ref1 = arg.split('='), k = _ref1[0], v = _ref1[1];
+          values[k] = v;
+        }
+      }
+      return values;
+    };
+    createTweenOptions = function() {
+      var config, property, slider, values, _ref, _results;
+      values = valuesFromURL();
+      _ref = tweenClass.properties;
+      _results = [];
+      for (property in _ref) {
+        config = _ref[property];
+        slider = new UISlider({
+          min: config.min,
+          max: config.max,
+          value: values[property] || config["default"],
+          property: property
+        });
+        document.querySelector('.tweenOptions').appendChild(slider.el);
+        _results.push(sliders.push(slider));
+      }
+      return _results;
+    };
+    this.durationSlider = new UISlider({
+      min: 100,
+      max: 4000,
+      value: valuesFromURL().duration || 1000,
+      property: 'duration'
+    });
+    document.querySelector('.animationOptions').appendChild(this.durationSlider.el);
     animationTimeout = null;
     tween = function() {
-      var options, _j, _len1;
+      var options, slider, _j, _len1;
       options = {};
       for (_j = 0, _len1 = sliders.length; _j < _len1; _j++) {
         slider = sliders[_j];
@@ -460,13 +495,13 @@
         }
       }, {
         tween: tween(),
-        duration: _this.duration.value()
+        duration: _this.durationSlider.value()
       });
       animateToRight = !animateToRight;
       return anim.start();
     };
     update = function() {
-      var args, argsString, currentURL, _j, _len1;
+      var args, argsString, currentURL, k, slider, v, _j, _len1;
       args = {};
       for (_j = 0, _len1 = sliders.length; _j < _len1; _j++) {
         slider = sliders[_j];
@@ -489,7 +524,8 @@
       }
       return animationTimeout = setTimeout(animate, 200);
     };
-    this.duration.onUpdate = update;
+    this.durationSlider.onUpdate = update;
+    createTweenOptions();
     for (_j = 0, _len1 = sliders.length; _j < _len1; _j++) {
       slider = sliders[_j];
       slider.onUpdate = update;
