@@ -52,12 +52,12 @@
       bounce: {
         min: 0,
         max: 100,
-        "default": 20
+        "default": 40
       },
       gravity: {
         min: 1,
         max: 100,
-        "default": 20
+        "default": 10
       }
     };
 
@@ -292,7 +292,7 @@
     Animation.prototype._keyframes = function(name) {
       var args, css, dValue, frame0, frame1, isTransform, k, newValue, oldValue, properties, step, t, transform, unit, v, value;
       this.options.tween.init();
-      step = 0.001;
+      step = 0.01;
       frame0 = this.frames[0];
       frame1 = this.frames[100];
       css = "@" + (BrowserSupport.keyframes()) + " " + name + " {\n";

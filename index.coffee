@@ -14,8 +14,8 @@ class Tween
 class TweenGravity extends Tween
   @tweenName: "Gravity"
   @properties:
-    bounce: { min: 0, max: 100, default: 20 }
-    gravity: { min: 1, max: 100, default: 20 }
+    bounce: { min: 0, max: 100, default: 40 }
+    gravity: { min: 1, max: 100, default: 10 }
 
   init: =>
     super
@@ -163,7 +163,7 @@ class Animation
   # Private
   _keyframes: (name) =>
     @options.tween.init()
-    step = 0.001
+    step = 0.01
 
     # percents = []
     # for percent in @frames
