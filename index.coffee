@@ -15,24 +15,48 @@ class TweenGravity extends Tween
   @tweenName: "Gravity"
   @properties:
     bounce: { min: 0, max: 100, default: 20 }
+    gravity: { min: 1, max: 100, default: 20 }
 
   init: =>
     super
     @speed = 0
-    @v = 0
+
+    bounce = (@options.bounce / 100)
+    gravity = @options.gravity
+
+    b = Math.sqrt(2 / gravity)
+    @curves = []
+    curve = { a: -b, b: b, H: 1 }
+    @curves.push curve
+    while curve.b < 1 and curve.H > 0.001
+      L = curve.b - curve.a
+      curve = { a: curve.b, b: curve.b + L * bounce, H: curve.H * bounce * bounce }
+      @curves.push curve
+
+  curve: (a, b, H, t) =>
+    L = b - a
+    t2 = (2 / L) * (t) - 1 - (a * 2 / L)
+    t2 * t2 * H - H + 1
 
   next: (step) =>
     super step
     t = @currentT
+    bounce = (@options.bounce / 100)
+    gravity = @options.gravity
 
-    gravity = 20
-    @speed += gravity * step * step
-    @v += @speed
+    i = 0
+    curve = @curves[i]
+    while(!(t >= curve.a and t <= curve.b))
+      i += 1
+      curve = @curves[i]
+      break unless curve
 
-    if @v > 1 and @speed >= 0
-      @speed = -@speed * (@options.bounce / 100)
+    if !curve
+      v = 1
+    else
+      v = @curve(curve.a, curve.b, curve.H, t)
 
-    [t, @v, @speed * 200]
+    [t, v]
 
 class TweenSpring extends Tween
   @tweenName: "Spring"

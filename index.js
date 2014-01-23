@@ -40,6 +40,8 @@
     function TweenGravity() {
       this.next = __bind(this.next, this);
 
+      this.curve = __bind(this.curve, this);
+
       this.init = __bind(this.init, this);
       return TweenGravity.__super__.constructor.apply(this, arguments);
     }
@@ -51,26 +53,69 @@
         min: 0,
         max: 100,
         "default": 20
+      },
+      gravity: {
+        min: 1,
+        max: 100,
+        "default": 20
       }
     };
 
     TweenGravity.prototype.init = function() {
+      var L, b, bounce, curve, gravity, _results;
       TweenGravity.__super__.init.apply(this, arguments);
       this.speed = 0;
-      return this.v = 0;
+      bounce = this.options.bounce / 100;
+      gravity = this.options.gravity;
+      b = Math.sqrt(2 / gravity);
+      this.curves = [];
+      curve = {
+        a: -b,
+        b: b,
+        H: 1
+      };
+      this.curves.push(curve);
+      _results = [];
+      while (curve.b < 1 && curve.H > 0.001) {
+        L = curve.b - curve.a;
+        curve = {
+          a: curve.b,
+          b: curve.b + L * bounce,
+          H: curve.H * bounce * bounce
+        };
+        _results.push(this.curves.push(curve));
+      }
+      return _results;
+    };
+
+    TweenGravity.prototype.curve = function(a, b, H, t) {
+      var L, t2;
+      L = b - a;
+      t2 = (2 / L) * t - 1 - (a * 2 / L);
+      return t2 * t2 * H - H + 1;
     };
 
     TweenGravity.prototype.next = function(step) {
-      var gravity, t;
+      var bounce, curve, gravity, i, t, v;
       TweenGravity.__super__.next.call(this, step);
       t = this.currentT;
-      gravity = 20;
-      this.speed += gravity * step * step;
-      this.v += this.speed;
-      if (this.v > 1 && this.speed >= 0) {
-        this.speed = -this.speed * (this.options.bounce / 100);
+      bounce = this.options.bounce / 100;
+      gravity = this.options.gravity;
+      i = 0;
+      curve = this.curves[i];
+      while (!(t >= curve.a && t <= curve.b)) {
+        i += 1;
+        curve = this.curves[i];
+        if (!curve) {
+          break;
+        }
       }
-      return [t, this.v, this.speed * 200];
+      if (!curve) {
+        v = 1;
+      } else {
+        v = this.curve(curve.a, curve.b, curve.H, t);
+      }
+      return [t, v];
     };
 
     return TweenGravity;
