@@ -19,10 +19,16 @@ section {
   margin-left: -330px;
 }
 
-canvas {
+div.canvasContainer {
   margin: 20px;
-  background: #fff;
   border-radius: 4px;
+  overflow: hidden;
+  background: #fff;
+  width: 400px;
+  height: 400px;
+}
+
+canvas {
 }
 
 div.circle {
