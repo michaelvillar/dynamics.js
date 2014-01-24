@@ -53,11 +53,6 @@
         min: 0,
         max: 100,
         "default": 40
-      },
-      gravity: {
-        min: 1,
-        max: 100,
-        "default": 10
       }
     };
 
@@ -66,7 +61,22 @@
       TweenGravity.__super__.init.apply(this, arguments);
       this.speed = 0;
       bounce = this.options.bounce / 100;
-      gravity = this.options.gravity;
+      gravity = 10;
+      b = Math.sqrt(2 / gravity);
+      curve = {
+        a: -b,
+        b: b,
+        H: 1
+      };
+      while (curve.H > 0.001) {
+        L = curve.b - curve.a;
+        curve = {
+          a: curve.b,
+          b: curve.b + L * bounce,
+          H: curve.H * bounce * bounce
+        };
+      }
+      gravity = gravity * curve.b * curve.b;
       b = Math.sqrt(2 / gravity);
       this.curves = [];
       curve = {

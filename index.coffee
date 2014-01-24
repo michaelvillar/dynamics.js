@@ -15,14 +15,21 @@ class TweenGravity extends Tween
   @tweenName: "Gravity"
   @properties:
     bounce: { min: 0, max: 100, default: 40 }
-    gravity: { min: 1, max: 100, default: 10 }
 
   init: =>
     super
     @speed = 0
 
     bounce = (@options.bounce / 100)
-    gravity = @options.gravity
+
+    # Find gravity from bounce value
+    gravity = 10
+    b = Math.sqrt(2 / gravity)
+    curve = { a: -b, b: b, H: 1 }
+    while curve.H > 0.001
+      L = curve.b - curve.a
+      curve = { a: curve.b, b: curve.b + L * bounce, H: curve.H * bounce * bounce }
+    gravity = gravity * curve.b * curve.b
 
     b = Math.sqrt(2 / gravity)
     @curves = []
