@@ -583,7 +583,7 @@
       }
       return values;
     };
-    tweenClasses = [TweenForce, TweenGravity, TweenSpring];
+    tweenClasses = [TweenSpring, TweenForce, TweenGravity];
     select = document.querySelector('select.tweens');
     tweenClass = tweenClasses[0];
     for (_i = 0, _len = tweenClasses.length; _i < _len; _i++) {

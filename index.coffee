@@ -389,7 +389,7 @@ document.addEventListener "DOMContentLoaded", ->
         values[k] = v
     values
 
-  tweenClasses = [TweenForce, TweenGravity, TweenSpring]
+  tweenClasses = [TweenSpring, TweenForce, TweenGravity]
   select = document.querySelector('select.tweens')
   tweenClass = tweenClasses[0]
   for aTweenClass in tweenClasses
