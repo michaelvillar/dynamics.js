@@ -11,6 +11,21 @@ class Tween
     @currentT = @t
     @t += step
 
+class TweenForce extends Tween
+  @tweenName: "Force"
+
+  init: =>
+    super
+
+  next: (step) =>
+    super step
+    t = @currentT
+
+    gravity = 1
+    v = 2 * t - gravity * t * t
+
+    [t, v]
+
 class TweenGravity extends Tween
   @tweenName: "Gravity"
   @properties:
@@ -18,8 +33,6 @@ class TweenGravity extends Tween
 
   init: =>
     super
-    @speed = 0
-
     bounce = (@options.bounce / 100)
 
     # Find gravity from bounce value
@@ -376,7 +389,7 @@ document.addEventListener "DOMContentLoaded", ->
         values[k] = v
     values
 
-  tweenClasses = [TweenGravity, TweenSpring]
+  tweenClasses = [TweenForce, TweenGravity, TweenSpring]
   select = document.querySelector('select.tweens')
   tweenClass = tweenClasses[0]
   for aTweenClass in tweenClasses
