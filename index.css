@@ -42,13 +42,13 @@ div.circle {
   border-radius: 25px;
 }
 
-div.options {
+div.settings {
   position: absolute;
   top: 20px;
   left: 440px;
 }
 
-div.options select {
+div.settings select {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
@@ -63,7 +63,7 @@ div.options select {
   text-align: center;
 }
 
-div.options h2 {
+div.settings h2 {
   color: #fff;
   font-weight: bold;
   text-align: center;
@@ -71,12 +71,12 @@ div.options h2 {
   padding: 10px 0;
 }
 
-div.options label {
+div.settings label {
   float: left;
   color: #fff;
   font-size: 13px;
 }
-div.options .value {
+div.settings .value {
   float: right;
   color: rgba(255, 255, 255, .7);
   font-size: 13px;
