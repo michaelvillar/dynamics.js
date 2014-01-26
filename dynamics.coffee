@@ -35,21 +35,37 @@ class TweenForce extends Tween
 
 class TweenGravity extends Tween
   @properties:
-    bounce: { min: 0, max: 100, default: 40 }
-    duration: { min: 100, max: 4000, default: 1000 }
+    bounce: { min: 0, max: 99, default: 40 }
+    gravity: { min: 1, max: 4000, default: 1000 }
+    duration: { editable: false }
 
-  init: =>
-    super
+  duration: =>
+    Math.round(1000 * 1000 / @options.gravity * @length())
+
+  bounceValue: =>
     bounce = (@options.bounce / 100)
+    bounce = Math.min(bounce, 99)
+    bounce
 
-    # Find gravity from bounce value
-    gravity = 10
+  gravityValue: =>
+    @options.gravity / 100
+
+  length: =>
+    bounce = @bounceValue()
+    gravity = @gravityValue()
     b = Math.sqrt(2 / gravity)
     curve = { a: -b, b: b, H: 1 }
     while curve.H > 0.001
       L = curve.b - curve.a
       curve = { a: curve.b, b: curve.b + L * bounce, H: curve.H * bounce * bounce }
-    gravity = gravity * curve.b * curve.b
+    curve.b
+
+  init: =>
+    super
+    L = @length()
+    gravity = @gravityValue()
+    gravity = gravity * L * L
+    bounce = @bounceValue()
 
     b = Math.sqrt(2 / gravity)
     @curves = []
@@ -288,7 +304,20 @@ class Spring2 extends Animation
     }
     super @el, @frames, @options
 
+class Gravity extends Animation
+  tweenClass: "TweenGravity"
+  @properties: TweenGravity.properties
+
+  constructor: (@el, @from, @to, @options = {}) ->
+    @frames = {
+      0: @from,
+      100: @to
+    }
+    @options.duration = @tween().duration()
+    super @el, @frames, @options
+
 @Dynamics =
   Spring: Spring
   Spring2: Spring2
+  Gravity: Gravity
   BrowserSupport: BrowserSupport

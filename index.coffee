@@ -70,6 +70,26 @@ class Graph
       else
         @ctx.lineTo(t * w,h - ((0.33 + (v * 0.33)) * h))
 
+class UIProperty
+  constructor: (@options = {}) ->
+    @el = document.createElement('div')
+
+    @label = document.createElement('label')
+    @label.innerHTML = @options.property
+
+    @valueEl = document.createElement('div')
+    @valueEl.classList.add 'value'
+    @valueEl.classList.add options.property
+
+    @el.appendChild(@label)
+    @el.appendChild(@valueEl)
+
+    @valueEl.innerHTML = @options.value
+
+  setValue: (value) =>
+    @options.value = value
+    @valueEl.innerHTML = @options.value
+
 class UISlider
   constructor: (@options = {}) ->
     @options.min ||= 0
@@ -164,7 +184,7 @@ class Tools
     document.location = currentURL + "#" + argsString
 
 class App
-  dynamicsClasses: [Dynamics.Spring, Dynamics.Spring2]
+  dynamicsClasses: [Dynamics.Spring, Dynamics.Spring2, Dynamics.Gravity]
 
   constructor: ->
     @animateToRight = true
@@ -181,6 +201,7 @@ class App
     @select.addEventListener 'change', @selectDidChange
     @graph = new Graph(document.querySelector('canvas'))
     @sliders = []
+    @properties = []
 
     document.querySelector('div.circle').addEventListener 'click', @animate
 
@@ -198,15 +219,24 @@ class App
     tweenOptionsEl.innerHTML = ''
     values = Tools.valuesFromURL()
     @sliders = []
+    @properties = []
     for property, config of @dynamicsClass.properties
-      slider = new UISlider({
-        min: config.min,
-        max: config.max,
-        value: values[property] || config.default,
-        property: property
-      })
-      tweenOptionsEl.appendChild(slider.el)
-      @sliders.push slider
+      if config.editable == false
+        uiProperty = new UIProperty({
+          value: 'N/A',
+          property: property
+        })
+        tweenOptionsEl.appendChild(uiProperty.el)
+        @properties.push(uiProperty)
+      else
+        slider = new UISlider({
+          min: config.min,
+          max: config.max,
+          value: values[property] || config.default,
+          property: property
+        })
+        tweenOptionsEl.appendChild(slider.el)
+        @sliders.push slider
     for slider in @sliders
       slider.onUpdate = @update
 
@@ -223,6 +253,9 @@ class App
 
     @graph.tween = @dynamic.tween()
     @graph.draw()
+
+    for uiProperty in @properties
+      uiProperty.setValue(@dynamic.tween()[uiProperty.options.property]())
 
   createDynamic: =>
     options = { }
