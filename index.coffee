@@ -1,3 +1,28 @@
+class BrowserSupport
+  @transform: ->
+    @withPrefix("transform")
+
+  @keyframes: ->
+    return "-webkit-keyframes" if document.body.style.webkitAnimation != undefined
+    return "-moz-keyframes" if document.body.style.mozAnimation != undefined
+    "keyframes"
+
+  @withPrefix: (property) ->
+    prefix = @prefixFor(property)
+    return "-#{prefix.toLowerCase()}-#{property}" if prefix != ''
+    property
+
+  @prefixFor: (property) ->
+    propArray = property.split('-')
+    propertyName = ""
+    for prop in propArray
+      propertyName += prop.substring(0, 1).toUpperCase() + prop.substring(1)
+    for prefix in [ "Webkit", "Moz" ]
+      k = prefix + propertyName
+      if document.body.style[k] != undefined
+        return prefix
+    ''
+
 class Graph
   constructor: (canvas) ->
     @canvas = canvas
@@ -7,8 +32,8 @@ class Graph
     if @r
       canvas.width = canvas.width * @r
       canvas.height = canvas.height * @r
-      canvas.style[Dynamics.BrowserSupport.prefixFor('transform-origin') + 'TransformOrigin'] = "0 0"
-      canvas.style[Dynamics.BrowserSupport.prefixFor('transform') + 'Transform'] = 'scale('+(1 / @r)+')'
+      canvas.style[BrowserSupport.prefixFor('transform-origin') + 'TransformOrigin'] = "0 0"
+      canvas.style[BrowserSupport.prefixFor('transform') + 'Transform'] = 'scale('+(1 / @r)+')'
 
   draw: =>
     r = window.devicePixelRatio

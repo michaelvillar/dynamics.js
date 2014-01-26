@@ -628,8 +628,7 @@
     Spring: Spring,
     SelfSpring: SelfSpring,
     Gravity: Gravity,
-    GravityWithForce: GravityWithForce,
-    BrowserSupport: BrowserSupport
+    GravityWithForce: GravityWithForce
   };
 
 }).call(this);

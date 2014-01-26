@@ -344,4 +344,3 @@ class GravityWithForce extends Dynamic
   SelfSpring: SelfSpring
   Gravity: Gravity
   GravityWithForce: GravityWithForce
-  BrowserSupport: BrowserSupport
