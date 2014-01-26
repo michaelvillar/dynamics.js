@@ -35,7 +35,7 @@ class TweenForce extends Tween
 
 class TweenGravity extends Tween
   @properties:
-    bounce: { min: 0, max: 99, default: 40 }
+    bounce: { min: 0, max: 80, default: 40 }
     gravity: { min: 1, max: 4000, default: 1000 }
     duration: { editable: false }
 
@@ -44,7 +44,7 @@ class TweenGravity extends Tween
 
   bounceValue: =>
     bounce = (@options.bounce / 100)
-    bounce = Math.min(bounce, 99)
+    bounce = Math.min(bounce, 80)
     bounce
 
   gravityValue: =>
@@ -55,6 +55,7 @@ class TweenGravity extends Tween
     gravity = @gravityValue()
     b = Math.sqrt(2 / gravity)
     curve = { a: -b, b: b, H: 1 }
+    curve.a = 0 if @options.initialForce
     while curve.H > 0.001
       L = curve.b - curve.a
       curve = { a: curve.b, b: curve.b + L * bounce, H: curve.H * bounce * bounce }
@@ -70,6 +71,7 @@ class TweenGravity extends Tween
     b = Math.sqrt(2 / gravity)
     @curves = []
     curve = { a: -b, b: b, H: 1 }
+    curve.a = 0 if @options.initialForce
     @curves.push curve
     while curve.b < 1 and curve.H > 0.001
       L = curve.b - curve.a
@@ -79,7 +81,9 @@ class TweenGravity extends Tween
   curve: (a, b, H, t) =>
     L = b - a
     t2 = (2 / L) * (t) - 1 - (a * 2 / L)
-    t2 * t2 * H - H + 1
+    c = t2 * t2 * H - H + 1
+    c = 1 - c if @options.initialForce
+    c
 
   next: (step) =>
     super step
@@ -95,7 +99,10 @@ class TweenGravity extends Tween
       break unless curve
 
     if !curve
-      v = 1
+      if @options.initialForce
+        v = 0
+      else
+        v = 1
     else
       v = @curve(curve.a, curve.b, curve.H, t)
 
@@ -204,8 +211,9 @@ class BrowserSupport
         return prefix
     ''
 
-class Animation
+class Dynamic
   @index: 0
+  @returnsToSelf: false
   tweenClass: "TweenLinear"
 
   constructor: (@el, @frames = {}, @options = {}) ->
@@ -216,8 +224,8 @@ class Animation
     @_tween
 
   start: =>
-    name = "anim_#{Animation.index}"
-    Animation.index += 1
+    name = "anim_#{Dynamic.index}"
+    Dynamic.index += 1
     keyframes = @_keyframes(name)
     style = document.createElement('style')
     style.innerHTML = keyframes
@@ -282,7 +290,7 @@ class Animation
     css += "}\n"
     css
 
-class Spring extends Animation
+class Spring extends Dynamic
   tweenClass: "TweenSpring"
   @properties: TweenSpring.properties
 
@@ -293,9 +301,10 @@ class Spring extends Animation
     }
     super @el, @frames, @options
 
-class Spring2 extends Animation
+class SelfSpring extends Dynamic
   tweenClass: "TweenSpring2"
   @properties: TweenSpring2.properties
+  @returnsToSelf: true
 
   constructor: (@el, @from, @to, @options = {}) ->
     @frames = {
@@ -304,7 +313,7 @@ class Spring2 extends Animation
     }
     super @el, @frames, @options
 
-class Gravity extends Animation
+class Gravity extends Dynamic
   tweenClass: "TweenGravity"
   @properties: TweenGravity.properties
 
@@ -316,8 +325,23 @@ class Gravity extends Animation
     @options.duration = @tween().duration()
     super @el, @frames, @options
 
+class GravityWithForce extends Dynamic
+  tweenClass: "TweenGravity"
+  @properties: TweenGravity.properties
+  @returnsToSelf: true
+
+  constructor: (@el, @from, @to, @options = {}) ->
+    @frames = {
+      0: @from,
+      100: @to
+    }
+    @options.duration = @tween().duration()
+    @options.initialForce = true
+    super @el, @frames, @options
+
 @Dynamics =
   Spring: Spring
-  Spring2: Spring2
+  SelfSpring: SelfSpring
   Gravity: Gravity
+  GravityWithForce: GravityWithForce
   BrowserSupport: BrowserSupport

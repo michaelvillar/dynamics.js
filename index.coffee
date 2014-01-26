@@ -184,7 +184,7 @@ class Tools
     document.location = currentURL + "#" + argsString
 
 class App
-  dynamicsClasses: [Dynamics.Spring, Dynamics.Spring2, Dynamics.Gravity]
+  dynamicsClasses: [Dynamics.Spring, Dynamics.SelfSpring, Dynamics.Gravity, Dynamics.GravityWithForce]
 
   constructor: ->
     @animateToRight = true
@@ -261,7 +261,7 @@ class App
     options = { }
     for slider in @sliders
       options[slider.options.property] = slider.value()
-    if @dynamicsClass != Dynamics.Spring2
+    if @dynamicsClass != Dynamics.SelfSpring
       from = { translateX: if @animateToRight then 0 else 350 }
       to = { translateX: if !@animateToRight then 0 else 350 }
     else
@@ -272,7 +272,7 @@ class App
   animate: =>
     @createDynamic()
     @dynamic.start()
-    if @dynamicsClass != Dynamics.Spring2
+    if !@dynamicsClass.returnsToSelf
       @animateToRight = !@animateToRight
 
 document.addEventListener "DOMContentLoaded", ->

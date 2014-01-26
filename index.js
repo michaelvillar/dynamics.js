@@ -252,7 +252,7 @@
 
   App = (function() {
 
-    App.prototype.dynamicsClasses = [Dynamics.Spring, Dynamics.Spring2, Dynamics.Gravity];
+    App.prototype.dynamicsClasses = [Dynamics.Spring, Dynamics.SelfSpring, Dynamics.Gravity, Dynamics.GravityWithForce];
 
     function App() {
       this.animate = __bind(this.animate, this);
@@ -371,7 +371,7 @@
         slider = _ref[_i];
         options[slider.options.property] = slider.value();
       }
-      if (this.dynamicsClass !== Dynamics.Spring2) {
+      if (this.dynamicsClass !== Dynamics.SelfSpring) {
         from = {
           translateX: this.animateToRight ? 0 : 350
         };
@@ -392,7 +392,7 @@
     App.prototype.animate = function() {
       this.createDynamic();
       this.dynamic.start();
-      if (this.dynamicsClass !== Dynamics.Spring2) {
+      if (!this.dynamicsClass.returnsToSelf) {
         return this.animateToRight = !this.animateToRight;
       }
     };
