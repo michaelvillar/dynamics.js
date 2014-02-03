@@ -151,6 +151,7 @@
       };
       if (this.options.initialForce) {
         curve.a = 0;
+        curve.b = curve.b * 2;
       }
       while (curve.H > 0.001) {
         L = curve.b - curve.a;
@@ -179,6 +180,7 @@
       };
       if (this.options.initialForce) {
         curve.a = 0;
+        curve.b = curve.b * 2;
       }
       this.curves.push(curve);
       _results = [];

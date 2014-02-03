@@ -55,7 +55,9 @@ class TweenGravity extends Tween
     gravity = @gravityValue()
     b = Math.sqrt(2 / gravity)
     curve = { a: -b, b: b, H: 1 }
-    curve.a = 0 if @options.initialForce
+    if @options.initialForce
+      curve.a = 0
+      curve.b = curve.b * 2
     while curve.H > 0.001
       L = curve.b - curve.a
       curve = { a: curve.b, b: curve.b + L * bounce, H: curve.H * bounce * bounce }
@@ -71,7 +73,9 @@ class TweenGravity extends Tween
     b = Math.sqrt(2 / gravity)
     @curves = []
     curve = { a: -b, b: b, H: 1 }
-    curve.a = 0 if @options.initialForce
+    if @options.initialForce
+      curve.a = 0
+      curve.b = curve.b * 2
     @curves.push curve
     while curve.b < 1 and curve.H > 0.001
       L = curve.b - curve.a
