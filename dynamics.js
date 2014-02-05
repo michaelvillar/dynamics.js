@@ -425,17 +425,20 @@
     Dynamic.prototype.tweenClass = "TweenLinear";
 
     function Dynamic(el, frames, options) {
-      var _base;
+      var _base, _base1;
       this.el = el;
       this.frames = frames != null ? frames : {};
       this.options = options != null ? options : {};
       this._keyframes = __bind(this._keyframes, this);
+
+      this._listenAnimationEnd = __bind(this._listenAnimationEnd, this);
 
       this.start = __bind(this.start, this);
 
       this.tween = __bind(this.tween, this);
 
       (_base = this.options).duration || (_base.duration = 1000);
+      (_base1 = this.options).complete || (_base1.complete = null);
     }
 
     Dynamic.prototype.tween = function() {
@@ -444,7 +447,7 @@
     };
 
     Dynamic.prototype.start = function() {
-      var animation, k, keyframes, name, prefix, property, propertyName, style, v, _results;
+      var animation, k, keyframes, name, prefix, property, propertyName, style, v;
       name = "anim_" + Dynamic.index;
       Dynamic.index += 1;
       keyframes = this._keyframes(name);
@@ -457,15 +460,28 @@
         timingFunction: 'linear',
         fillMode: 'forwards'
       };
-      _results = [];
       for (k in animation) {
         v = animation[k];
         property = "animation-" + k;
         prefix = BrowserSupport.prefixFor(property);
         propertyName = prefix + "Animation" + k.substring(0, 1).toUpperCase() + k.substring(1);
-        _results.push(this.el.style[propertyName] = v);
+        this.el.style[propertyName] = v;
       }
-      return _results;
+      return this._listenAnimationEnd();
+    };
+
+    Dynamic.prototype._listenAnimationEnd = function() {
+      var eventCallback,
+        _this = this;
+      eventCallback = function(e) {
+        var _base;
+        if (e.target !== _this.el) {
+          return;
+        }
+        _this.el.removeEventListener('webkitAnimationEnd', eventCallback);
+        return typeof (_base = _this.options).complete === "function" ? _base.complete() : void 0;
+      };
+      return this.el.addEventListener('webkitAnimationEnd', eventCallback);
     };
 
     Dynamic.prototype._keyframes = function(name) {
@@ -495,6 +511,7 @@
             isTransform = true;
           } else if (k === 'scaleX' || k === 'scaleY' || k === 'scale') {
             isTransform = true;
+            newValue = Math.max(newValue, 0);
           }
           if (isTransform) {
             transform += "" + k + "(" + newValue + unit + ") ";

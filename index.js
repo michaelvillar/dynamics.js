@@ -71,13 +71,13 @@
     }
 
     Graph.prototype.draw = function() {
-      var args, color, colorI, colors, defaultColor, graphes, h, i, points, r, step, w, _i, _j, _len, _name, _ref, _results;
+      var args, color, colorI, colors, defaultColor, graph, graphes, h, i, points, r, step, w, _i, _j, _k, _len, _len1, _name, _ref, _ref1, _results;
       r = window.devicePixelRatio;
       w = this.canvas.width;
       h = this.canvas.height;
       step = 0.001;
       this.ctx.clearRect(0, 0, w, h);
-      this.ctx.strokeStyle = 'gray';
+      this.ctx.strokeStyle = '#D5E6F8';
       this.ctx.lineWidth = 1;
       this.ctx.beginPath();
       this.ctx.moveTo(0, 0.67 * h);
@@ -89,36 +89,44 @@
       this.ctx.stroke();
       this.tween.init();
       graphes = [];
+      colors = ['#007EFF'];
+      defaultColor = '#D5E6F8';
+      colorI = 0;
       while (args = this.tween.next(step)) {
         for (i = _i = 1, _ref = args.length; 1 <= _ref ? _i <= _ref : _i >= _ref; i = 1 <= _ref ? ++_i : --_i) {
-          graphes[_name = i - 1] || (graphes[_name] = []);
-          points = graphes[i - 1];
-          points.push([args[0], args[i]]);
+          graphes[_name = i - 1] || (graphes[_name] = {
+            points: []
+          });
+          graphes[i - 1].points.push([args[0], args[i]]);
         }
         if (args[0] >= 1) {
           break;
         }
       }
-      colors = ['red', 'rgba(0, 0, 255, .3)', 'rgba(0, 255, 0, .3)', 'rgba(0, 255, 255, .3)', 'rgba(255, 255, 0, .3)'];
-      defaultColor = 'rgba(0, 0, 0, .3)';
-      colorI = 0;
-      _results = [];
       for (_j = 0, _len = graphes.length; _j < _len; _j++) {
-        points = graphes[_j];
+        graph = graphes[_j];
         color = defaultColor;
         if (colorI < colors.length) {
           color = colors[colorI];
         }
+        graph.color = color;
+        graph.index = colorI;
+        colorI += 1;
+      }
+      _ref1 = graphes.reverse();
+      _results = [];
+      for (_k = 0, _len1 = _ref1.length; _k < _len1; _k++) {
+        graph = _ref1[_k];
+        points = graph.points;
         this.ctx.beginPath();
-        this.ctx.strokeStyle = color;
+        this.ctx.strokeStyle = graph.color;
         this._drawCurve(points);
-        if (colorI === 0) {
+        if (graph.index === 0) {
           this.ctx.lineWidth = 2 * r;
         } else {
           this.ctx.lineWidth = 1 * r;
         }
-        this.ctx.stroke();
-        _results.push(colorI += 1);
+        _results.push(this.ctx.stroke());
       }
       return _results;
     };
@@ -191,7 +199,7 @@
       if (this.options.value === void 0) {
         this.options.value = 10;
       }
-      this.width = 200 - 10;
+      this.width = 205 - 11;
       this.el = document.createElement('div');
       this.label = document.createElement('label');
       this.label.innerHTML = this.options.property;
@@ -309,6 +317,8 @@
 
       this.createDynamic = __bind(this.createDynamic, this);
 
+      this.updateCode = __bind(this.updateCode, this);
+
       this.update = __bind(this.update, this);
 
       this.updateOptions = __bind(this.updateOptions, this);
@@ -316,7 +326,9 @@
       this.selectDidChange = __bind(this.selectDidChange, this);
 
       var aDynamicsClass, option, _i, _len, _ref;
-      this.animateToRight = true;
+      this.currentCircle = null;
+      this.codeSection = document.querySelector('section.code');
+      this.track = document.querySelector('div.track');
       this.select = document.querySelector('select.dynamics');
       this.dynamicsClass = this.dynamicsClasses[0];
       _ref = this.dynamicsClasses;
@@ -335,7 +347,6 @@
       this.graph = new Graph(document.querySelector('canvas'));
       this.sliders = [];
       this.properties = [];
-      document.querySelector('div.circle').addEventListener('click', this.animate);
       this.updateOptions();
       this.update();
     }
@@ -386,7 +397,7 @@
     };
 
     App.prototype.update = function() {
-      var args, slider, uiProperty, _i, _j, _len, _len1, _ref, _ref1, _results;
+      var args, slider, uiProperty, _i, _j, _len, _len1, _ref, _ref1;
       args = {};
       _ref = this.sliders;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -405,16 +416,32 @@
       this.graph.tween = this.dynamic.tween();
       this.graph.draw();
       _ref1 = this.properties;
-      _results = [];
       for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
         uiProperty = _ref1[_j];
-        _results.push(uiProperty.setValue(this.dynamic.tween()[uiProperty.options.property]()));
+        uiProperty.setValue(this.dynamic.tween()[uiProperty.options.property]());
       }
-      return _results;
+      return this.updateCode();
+    };
+
+    App.prototype.updateCode = function() {
+      var code, options, slider, translateX, _i, _len, _ref;
+      translateX = this.dynamicsClass !== Dynamics.SelfSpring ? 350 : 50;
+      options = '';
+      _ref = this.sliders;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        slider = _ref[_i];
+        if (options !== '') {
+          options += ",\n";
+        }
+        options += "&nbsp;&nbsp;<strong>" + slider.options.property + "</strong>: " + (slider.value());
+      }
+      code = 'new <strong>Dynamics.' + this.dynamicsClass.name + '</strong>(document.getElementId("circle"), {\n&nbsp;&nbsp;<strong>translateX</strong>: 0\n}, {\n&nbsp;&nbsp;<strong>translateX</strong>: ' + translateX + '\n}, {\n' + options + '\n}).start();';
+      return this.codeSection.innerHTML = code;
     };
 
     App.prototype.createDynamic = function() {
-      var from, options, slider, to, _i, _len, _ref;
+      var circle, from, options, shouldDeleteCircle, slider, to, _i, _len, _ref,
+        _this = this;
       options = {};
       _ref = this.sliders;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -423,27 +450,75 @@
       }
       if (this.dynamicsClass !== Dynamics.SelfSpring) {
         from = {
-          translateX: this.animateToRight ? 0 : 350
+          translateX: 0
         };
         to = {
-          translateX: !this.animateToRight ? 0 : 350
+          translateX: 350
         };
       } else {
         from = {
-          translateX: this.animateToRight ? 0 : 350
+          translateX: 0
         };
         to = {
-          translateX: this.animateToRight ? 50 : 300
+          translateX: 50
         };
       }
-      return this.dynamic = new this.dynamicsClass(document.querySelector('div.circle'), from, to, options);
+      if (!this.currentCircle) {
+        this.currentCircle = document.createElement('div');
+        this.currentCircle.classList.add('circle');
+        this.currentCircle.addEventListener('click', function() {
+          return _this.animate();
+        });
+        new Dynamics.Spring(this.currentCircle, {
+          scale: 0
+        }, {
+          scale: 1
+        }, {
+          frequency: 0,
+          friction: 600,
+          anticipationStrength: 100,
+          anticipationSize: 10,
+          duration: 1000
+        }).start();
+        document.querySelector('section.demo').appendChild(this.currentCircle);
+      }
+      circle = this.currentCircle;
+      shouldDeleteCircle = !this.dynamicsClass.returnsToSelf;
+      options.complete = function() {
+        if (!shouldDeleteCircle) {
+          return;
+        }
+        _this.createDynamic();
+        return new Dynamics.Spring(circle, {
+          translateX: !_this.dynamicsClass.returnsToSelf ? 350 : 0,
+          scale: 1
+        }, {
+          translateX: !_this.dynamicsClass.returnsToSelf ? 350 : 0,
+          scale: 0
+        }, {
+          frequency: 0,
+          friction: 600,
+          anticipationStrength: 100,
+          anticipationSize: 10,
+          duration: 1000,
+          complete: function() {
+            return circle.parentNode.removeChild(circle);
+          }
+        }).start();
+      };
+      this.dynamic = new this.dynamicsClass(circle, from, to, options);
+      if (this.dynamicsClass !== Dynamics.SelfSpring) {
+        return this.track.classList.remove('tiny');
+      } else {
+        return this.track.classList.add('tiny');
+      }
     };
 
     App.prototype.animate = function() {
       this.createDynamic();
       this.dynamic.start();
       if (!this.dynamicsClass.returnsToSelf) {
-        return this.animateToRight = !this.animateToRight;
+        return this.currentCircle = null;
       }
     };
 

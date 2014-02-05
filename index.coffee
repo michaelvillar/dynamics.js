@@ -44,7 +44,7 @@ class Graph
 
     @ctx.clearRect(0,0,w,h)
 
-    @ctx.strokeStyle = 'gray'
+    @ctx.strokeStyle = '#D5E6F8'
     @ctx.lineWidth = 1
     @ctx.beginPath()
     @ctx.moveTo(0, 0.67 * h)
@@ -58,30 +58,35 @@ class Graph
 
     @tween.init()
     graphes = []
+    colors = [ '#007EFF' ]
+    defaultColor = '#D5E6F8'
+    colorI = 0
     while args = @tween.next(step)
       for i in [1..args.length]
-        graphes[i - 1] ||= []
-        points = graphes[i - 1]
-        points.push [args[0], args[i]]
+        graphes[i - 1] ||= {
+          points: []
+        }
+        graphes[i - 1].points.push [args[0], args[i]]
       if args[0] >= 1
         break
 
-    colors = [ 'red', 'rgba(0, 0, 255, .3)', 'rgba(0, 255, 0, .3)', 'rgba(0, 255, 255, .3)', 'rgba(255, 255, 0, .3)']
-    defaultColor = 'rgba(0, 0, 0, .3)'
-
-    colorI = 0
-    for points in graphes
+    for graph in graphes
       color = defaultColor
       color = colors[colorI] if colorI < colors.length
+      graph.color = color
+      graph.index = colorI
+      colorI += 1
+
+    for graph in graphes.reverse()
+      points = graph.points
       @ctx.beginPath()
-      @ctx.strokeStyle = color
+      @ctx.strokeStyle = graph.color
       @_drawCurve(points)
-      if colorI == 0
+      if graph.index == 0
         @ctx.lineWidth = (2 * r)
       else
         @ctx.lineWidth = (1 * r)
       @ctx.stroke()
-      colorI += 1
 
   _drawCurve: (points) =>
     r = window.devicePixelRatio
@@ -121,7 +126,7 @@ class UISlider
     @options.max ||= 1000
     @options.value = 10 if @options.value == undefined
 
-    @width = 200 - 10
+    @width = 205 - 11
 
     @el = document.createElement('div')
 
@@ -212,7 +217,9 @@ class App
   dynamicsClasses: [Dynamics.Spring, Dynamics.SelfSpring, Dynamics.Gravity, Dynamics.GravityWithForce]
 
   constructor: ->
-    @animateToRight = true
+    @currentCircle = null
+    @codeSection = document.querySelector('section.code')
+    @track = document.querySelector('div.track')
     @select = document.querySelector('select.dynamics')
     @dynamicsClass = @dynamicsClasses[0]
     for aDynamicsClass in @dynamicsClasses
@@ -227,8 +234,6 @@ class App
     @graph = new Graph(document.querySelector('canvas'))
     @sliders = []
     @properties = []
-
-    document.querySelector('div.circle').addEventListener 'click', @animate
 
     @updateOptions()
     @update()
@@ -282,23 +287,84 @@ class App
     for uiProperty in @properties
       uiProperty.setValue(@dynamic.tween()[uiProperty.options.property]())
 
+    @updateCode()
+
+  updateCode: =>
+    translateX = if @dynamicsClass != Dynamics.SelfSpring then 350 else 50
+    options = ''
+    for slider in @sliders
+      options += ",\n" if options != ''
+      options += "&nbsp;&nbsp;<strong>#{slider.options.property}</strong>: #{slider.value()}"
+    code = '''new <strong>Dynamics.''' + @dynamicsClass.name + '''</strong>(document.getElementId("circle"), {
+&nbsp;&nbsp;<strong>translateX</strong>: 0
+}, {
+&nbsp;&nbsp;<strong>translateX</strong>: ''' + translateX + '''
+
+}, {
+
+''' + options + '''
+
+}).start();'''
+    @codeSection.innerHTML = code
+
   createDynamic: =>
     options = { }
     for slider in @sliders
       options[slider.options.property] = slider.value()
     if @dynamicsClass != Dynamics.SelfSpring
-      from = { translateX: if @animateToRight then 0 else 350 }
-      to = { translateX: if !@animateToRight then 0 else 350 }
+      from = { translateX: 0 }
+      to = { translateX: 350 }
     else
-      from = { translateX: if @animateToRight then 0 else 350 }
-      to = { translateX: if @animateToRight then 50 else 300 }
-    @dynamic = new @dynamicsClass(document.querySelector('div.circle'), from, to, options)
+      from = { translateX: 0 }
+      to = { translateX: 50 }
+    if !@currentCircle
+      @currentCircle = document.createElement('div')
+      @currentCircle.classList.add('circle')
+      @currentCircle.addEventListener 'click', =>
+        @animate()
+      new Dynamics.Spring(@currentCircle, {
+        scale: 0
+      }, {
+        scale: 1
+      }, {
+        frequency: 0,
+        friction: 600,
+        anticipationStrength: 100,
+        anticipationSize: 10,
+        duration: 1000
+      }).start()
+      document.querySelector('section.demo').appendChild(@currentCircle)
+    circle = @currentCircle
+    shouldDeleteCircle = !@dynamicsClass.returnsToSelf
+    options.complete = =>
+      return unless shouldDeleteCircle
+      @createDynamic()
+      new Dynamics.Spring(circle, {
+        translateX: if !@dynamicsClass.returnsToSelf then 350 else 0,
+        scale: 1
+      }, {
+        translateX: if !@dynamicsClass.returnsToSelf then 350 else 0,
+        scale: 0
+      }, {
+        frequency: 0,
+        friction: 600,
+        anticipationStrength: 100,
+        anticipationSize: 10,
+        duration: 1000,
+        complete: =>
+          circle.parentNode.removeChild(circle)
+      }).start()
+    @dynamic = new @dynamicsClass(circle, from, to, options)
+    if @dynamicsClass != Dynamics.SelfSpring
+      @track.classList.remove('tiny')
+    else
+      @track.classList.add('tiny')
 
   animate: =>
     @createDynamic()
     @dynamic.start()
     if !@dynamicsClass.returnsToSelf
-      @animateToRight = !@animateToRight
+      @currentCircle = null
 
 document.addEventListener "DOMContentLoaded", ->
   app = new App

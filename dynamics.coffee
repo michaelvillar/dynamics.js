@@ -222,6 +222,7 @@ class Dynamic
 
   constructor: (@el, @frames = {}, @options = {}) ->
     @options.duration ||= 1000
+    @options.complete ||= null
 
   tween: =>
     @_tween ||= eval("new #{@tweenClass}(this.options)")
@@ -246,8 +247,16 @@ class Dynamic
       prefix = BrowserSupport.prefixFor(property)
       propertyName = prefix + "Animation" + k.substring(0, 1).toUpperCase() + k.substring(1)
       @el.style[propertyName] = v
+    @_listenAnimationEnd()
 
   # Private
+  _listenAnimationEnd: =>
+    eventCallback = (e) =>
+      return if e.target != @el
+      @el.removeEventListener 'webkitAnimationEnd', eventCallback
+      @options.complete?()
+    @el.addEventListener 'webkitAnimationEnd', eventCallback
+
   _keyframes: (name) =>
     @tween().init()
     step = 0.01
@@ -277,6 +286,7 @@ class Dynamic
           isTransform = true
         else if k in ['scaleX', 'scaleY', 'scale']
           isTransform = true
+          newValue = Math.max(newValue, 0)
 
         if isTransform
           transform += "#{k}(#{newValue}#{unit}) "
