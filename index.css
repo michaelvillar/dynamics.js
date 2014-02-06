@@ -38,12 +38,14 @@ section {
 
 div.graph {
   position: relative;
+  height: 350px;
+  width: 350px;
 }
 div.graph > span {
   font-size: 10px;
   color: #8096B1;
   position: absolute;
-  margin-left: 6px;
+  left: 356px;
 }
 div.graph > span.index1 { top: 112px; }
 div.graph > span.index0 { top: 228px; }
