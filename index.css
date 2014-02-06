@@ -79,10 +79,11 @@ div.settings select {
   background: #007EFF url(arrows.png) no-repeat 190px 9px;
   background-size: 5px 8px;
 }
-@media only screen and (-webkit-min-device-pixel-ratio: 1.5),
-       only screen and (min--moz-device-pixel-ratio: 1.5),
-       only screen and (min-device-pixel-ratio: 1.5) {
-  background-image: url(arrows@2x.png);
+@media only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min--moz-device-pixel-ratio: 1.5), only screen and (min-device-pixel-ratio: 1.5)
+{
+  div.settings select {
+    background-image: url(arrows@2x.png);
+  }
 }
 div.settings select:focus {
   outline: none;
