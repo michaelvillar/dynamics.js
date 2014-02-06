@@ -251,11 +251,18 @@ class Dynamic
 
   # Private
   _listenAnimationEnd: =>
-    eventCallback = (e) =>
-      return if e.target != @el
-      @el.removeEventListener 'webkitAnimationEnd', eventCallback
-      @options.complete?()
-    @el.addEventListener 'webkitAnimationEnd', eventCallback
+    events = [
+      'animationend',
+      'webkitAnimationEnd',
+      'MozAnimationEnd',
+      'oAnimationEnd'
+    ]
+    for event in events
+      eventCallback = (e) =>
+        return if e.target != @el
+        @el.removeEventListener event, eventCallback
+        @options.complete?()
+      @el.addEventListener event, eventCallback
 
   _keyframes: (name) =>
     @tween().init()

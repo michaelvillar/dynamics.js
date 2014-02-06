@@ -471,17 +471,23 @@
     };
 
     Dynamic.prototype._listenAnimationEnd = function() {
-      var eventCallback,
+      var event, eventCallback, events, _i, _len, _results,
         _this = this;
-      eventCallback = function(e) {
-        var _base;
-        if (e.target !== _this.el) {
-          return;
-        }
-        _this.el.removeEventListener('webkitAnimationEnd', eventCallback);
-        return typeof (_base = _this.options).complete === "function" ? _base.complete() : void 0;
-      };
-      return this.el.addEventListener('webkitAnimationEnd', eventCallback);
+      events = ['animationend', 'webkitAnimationEnd', 'MozAnimationEnd', 'oAnimationEnd'];
+      _results = [];
+      for (_i = 0, _len = events.length; _i < _len; _i++) {
+        event = events[_i];
+        eventCallback = function(e) {
+          var _base;
+          if (e.target !== _this.el) {
+            return;
+          }
+          _this.el.removeEventListener(event, eventCallback);
+          return typeof (_base = _this.options).complete === "function" ? _base.complete() : void 0;
+        };
+        _results.push(this.el.addEventListener(event, eventCallback));
+      }
+      return _results;
     };
 
     Dynamic.prototype._keyframes = function(name) {
