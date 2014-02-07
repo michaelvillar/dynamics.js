@@ -310,8 +310,6 @@
 
   App = (function() {
 
-    App.prototype.dynamicsClasses = [Dynamics.Spring, Dynamics.SelfSpring, Dynamics.Gravity, Dynamics.GravityWithForce];
-
     function App() {
       this.animate = __bind(this.animate, this);
 
@@ -325,7 +323,12 @@
 
       this.selectDidChange = __bind(this.selectDidChange, this);
 
-      var aDynamicsClass, option, _i, _len, _ref;
+      var aDynamicsClass, k, option, v, _i, _len, _ref;
+      this.dynamicsClasses = [];
+      for (k in Dynamics) {
+        v = Dynamics[k];
+        this.dynamicsClasses.push(v);
+      }
       this.currentCircle = null;
       this.codeSection = document.querySelector('section.code');
       this.track = document.querySelector('div.track');

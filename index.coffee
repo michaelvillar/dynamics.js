@@ -214,9 +214,11 @@ class Tools
     document.location = currentURL + "#" + argsString
 
 class App
-  dynamicsClasses: [Dynamics.Spring, Dynamics.SelfSpring, Dynamics.Gravity, Dynamics.GravityWithForce]
-
   constructor: ->
+    @dynamicsClasses = []
+    for k, v of Dynamics
+      @dynamicsClasses.push v
+
     @currentCircle = null
     @codeSection = document.querySelector('section.code')
     @track = document.querySelector('div.track')

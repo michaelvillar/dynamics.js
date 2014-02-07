@@ -1,3 +1,5 @@
+# Private Classes
+## Tweens
 class Tween
   @properties: {}
 
@@ -12,6 +14,9 @@ class Tween
     @t += step
 
 class TweenLinear extends Tween
+  @properties:
+    duration: { min: 100, max: 4000, default: 1000 }
+
   init: =>
     super
 
@@ -162,7 +167,7 @@ class TweenSpring extends Tween
     v = 1 - (At * Math.cos(angle))
     [t, v, At, frictionT, angle]
 
-class TweenSpring2 extends Tween
+class TweenSelfSpring extends Tween
   @properties:
     frequency: { min: 0, max: 100, default: 15 }
     friction: { min: 1, max: 1000, default: 100 }
@@ -190,6 +195,7 @@ class TweenSpring2 extends Tween
     v = Math.cos(angle) * Ax
     [t, v, Ax, -Ax]
 
+## Helpers
 class BrowserSupport
   @transform: ->
     @withPrefix("transform")
@@ -215,6 +221,7 @@ class BrowserSupport
         return prefix
     ''
 
+## Base
 class Dynamic
   @index: 0
   @returnsToSelf: false
@@ -311,40 +318,38 @@ class Dynamic
     css += "}\n"
     css
 
+# Public Classes
 class Spring extends Dynamic
   tweenClass: "TweenSpring"
   @properties: TweenSpring.properties
 
   constructor: (@el, @from, @to, @options = {}) ->
-    @frames = {
+    super @el, {
       0: @from,
       100: @to
-    }
-    super @el, @frames, @options
+    }, @options
 
 class SelfSpring extends Dynamic
-  tweenClass: "TweenSpring2"
-  @properties: TweenSpring2.properties
+  tweenClass: "TweenSelfSpring"
+  @properties: TweenSelfSpring.properties
   @returnsToSelf: true
 
   constructor: (@el, @from, @to, @options = {}) ->
-    @frames = {
+    super @el, {
       0: @from,
       100: @to
-    }
-    super @el, @frames, @options
+    }, @options
 
 class Gravity extends Dynamic
   tweenClass: "TweenGravity"
   @properties: TweenGravity.properties
 
   constructor: (@el, @from, @to, @options = {}) ->
-    @frames = {
+    @options.duration = @tween().duration()
+    super @el, {
       0: @from,
       100: @to
-    }
-    @options.duration = @tween().duration()
-    super @el, @frames, @options
+    }, @options
 
 class GravityWithForce extends Dynamic
   tweenClass: "TweenGravity"
@@ -352,16 +357,35 @@ class GravityWithForce extends Dynamic
   @returnsToSelf: true
 
   constructor: (@el, @from, @to, @options = {}) ->
-    @frames = {
-      0: @from,
-      100: @to
-    }
     @options.duration = @tween().duration()
     @options.initialForce = true
-    super @el, @frames, @options
+    super @el, {
+      0: @from,
+      100: @to
+    }, @options
 
-@Dynamics =
+class Linear extends Dynamic
+  tweenClass: "TweenLinear"
+  @properties: TweenLinear.properties
+
+  constructor: (@el, @from, @to, @options = {}) ->
+    super @el, {
+      0: @from,
+      100: @to
+    }, @options
+
+# Export
+Dynamics =
   Spring: Spring
   SelfSpring: SelfSpring
   Gravity: Gravity
   GravityWithForce: GravityWithForce
+  Linear: Linear
+
+try
+  if module
+    module.exports = Dynamics
+  else
+    @Dynamics = Dynamics
+catch e
+  @Dynamics = Dynamics
