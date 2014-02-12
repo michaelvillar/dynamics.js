@@ -59,6 +59,8 @@
       this._drawCurve = __bind(this._drawCurve, this);
 
       this.draw = __bind(this.draw, this);
+      this.points = null;
+      this.tween = null;
       this.canvas = canvas;
       this.ctx = canvas.getContext('2d');
       this.r = window.devicePixelRatio || 1;
@@ -71,7 +73,7 @@
     }
 
     Graph.prototype.draw = function() {
-      var args, color, colorI, colors, defaultColor, graph, graphes, h, i, points, r, step, w, _i, _j, _k, _len, _len1, _name, _ref, _ref1, _results;
+      var args, color, colorI, colors, controlPoint, coords, coordsControlPoint, defaultColor, graph, graphes, h, i, point, pointCoordinates_, points, r, step, w, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _len5, _m, _n, _name, _o, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _results;
       r = window.devicePixelRatio;
       w = this.canvas.width;
       h = this.canvas.height;
@@ -114,7 +116,6 @@
         colorI += 1;
       }
       _ref1 = graphes.reverse();
-      _results = [];
       for (_k = 0, _len1 = _ref1.length; _k < _len1; _k++) {
         graph = _ref1[_k];
         points = graph.points;
@@ -126,9 +127,58 @@
         } else {
           this.ctx.lineWidth = 1 * r;
         }
-        _results.push(this.ctx.stroke());
+        this.ctx.stroke();
       }
-      return _results;
+      pointCoordinates_ = function(point) {
+        return {
+          x: point.x * w,
+          y: (0.67 * h) - (point.y * 0.33 * h)
+        };
+      };
+      if (this.points) {
+        _ref2 = this.points;
+        for (_l = 0, _len2 = _ref2.length; _l < _len2; _l++) {
+          point = _ref2[_l];
+          _ref3 = point.controlPoints;
+          for (_m = 0, _len3 = _ref3.length; _m < _len3; _m++) {
+            controlPoint = _ref3[_m];
+            this.ctx.beginPath();
+            this.ctx.strokeStyle = colors[0];
+            this.ctx.lineWidth = 1;
+            coords = pointCoordinates_(point);
+            this.ctx.moveTo(coords.x, coords.y);
+            coordsControlPoint = pointCoordinates_(controlPoint);
+            this.ctx.lineTo(coordsControlPoint.x, coordsControlPoint.y);
+            this.ctx.stroke();
+          }
+        }
+        _ref4 = this.points;
+        _results = [];
+        for (_n = 0, _len4 = _ref4.length; _n < _len4; _n++) {
+          point = _ref4[_n];
+          this.ctx.beginPath();
+          this.ctx.strokeStyle = colors[0];
+          this.ctx.fillStyle = 'white';
+          this.ctx.lineWidth = 2 * r;
+          coords = pointCoordinates_(point);
+          this.ctx.arc(coords.x, coords.y, 5 * r, 0, Math.PI * 2, true);
+          this.ctx.fill();
+          this.ctx.stroke();
+          _ref5 = point.controlPoints;
+          for (_o = 0, _len5 = _ref5.length; _o < _len5; _o++) {
+            controlPoint = _ref5[_o];
+            this.ctx.beginPath();
+            this.ctx.strokeStyle = colors[0];
+            this.ctx.fillStyle = 'white';
+            this.ctx.lineWidth = 1 * r;
+            coords = pointCoordinates_(controlPoint);
+            this.ctx.arc(coords.x, coords.y, 3 * r, 0, Math.PI * 2, true);
+            this.ctx.fill();
+          }
+          _results.push(this.ctx.stroke());
+        }
+        return _results;
+      }
     };
 
     Graph.prototype._drawCurve = function(points) {
@@ -369,10 +419,13 @@
       values = Tools.valuesFromURL();
       this.sliders = [];
       this.properties = [];
+      this.points = null;
       _ref = this.dynamicsClass.properties;
       for (property in _ref) {
         config = _ref[property];
-        if (config.editable === false) {
+        if (config.type === 'points') {
+          this.points = config["default"];
+        } else if (config.editable === false) {
           uiProperty = new UIProperty({
             value: 'N/A',
             property: property
@@ -417,6 +470,7 @@
       this.animationTimeout = setTimeout(this.animate, 400);
       this.createDynamic();
       this.graph.tween = this.dynamic.tween();
+      this.graph.points = this.points;
       this.graph.draw();
       _ref1 = this.properties;
       for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {

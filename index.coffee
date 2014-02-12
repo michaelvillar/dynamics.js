@@ -25,6 +25,8 @@ class BrowserSupport
 
 class Graph
   constructor: (canvas) ->
+    @points = null
+    @tween = null
     @canvas = canvas
     @ctx = canvas.getContext('2d')
 
@@ -87,6 +89,44 @@ class Graph
       else
         @ctx.lineWidth = (1 * r)
       @ctx.stroke()
+
+    pointCoordinates_ = (point) ->
+      { x: point.x * w, y: (0.67 * h) - (point.y * 0.33 * h) }
+
+    if @points
+      for point in @points
+        # Draw line between point and each control points
+        for controlPoint in point.controlPoints
+          @ctx.beginPath()
+          @ctx.strokeStyle = colors[0]
+          @ctx.lineWidth = 1
+          coords = pointCoordinates_(point)
+          @ctx.moveTo(coords.x, coords.y)
+          coordsControlPoint = pointCoordinates_(controlPoint)
+          @ctx.lineTo(coordsControlPoint.x, coordsControlPoint.y)
+          @ctx.stroke()
+
+      for point in @points
+        # Draw point
+        @ctx.beginPath()
+        @ctx.strokeStyle = colors[0]
+        @ctx.fillStyle = 'white'
+        @ctx.lineWidth = 2 * r
+        coords = pointCoordinates_(point)
+        @ctx.arc(coords.x, coords.y, 5 * r, 0, Math.PI*2, true)
+        @ctx.fill()
+        @ctx.stroke()
+
+        # Draw control points
+        for controlPoint in point.controlPoints
+          @ctx.beginPath()
+          @ctx.strokeStyle = colors[0]
+          @ctx.fillStyle = 'white'
+          @ctx.lineWidth = 1 * r
+          coords = pointCoordinates_(controlPoint)
+          @ctx.arc(coords.x, coords.y, 3 * r, 0, Math.PI*2, true)
+          @ctx.fill()
+        @ctx.stroke()
 
   _drawCurve: (points) =>
     r = window.devicePixelRatio
@@ -252,8 +292,11 @@ class App
     values = Tools.valuesFromURL()
     @sliders = []
     @properties = []
+    @points = null
     for property, config of @dynamicsClass.properties
-      if config.editable == false
+      if config.type == 'points'
+        @points = config.default
+      else if config.editable == false
         uiProperty = new UIProperty({
           value: 'N/A',
           property: property
@@ -284,6 +327,7 @@ class App
     @createDynamic()
 
     @graph.tween = @dynamic.tween()
+    @graph.points = @points
     @graph.draw()
 
     for uiProperty in @properties

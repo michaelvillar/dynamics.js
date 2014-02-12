@@ -195,6 +195,65 @@ class TweenSelfSpring extends Tween
     v = Math.cos(angle) * Ax
     [t, v, Ax, -Ax]
 
+class TweenBezier extends Tween
+  @properties:
+    points: { type: 'points', default: [ {
+        x: 0,
+        y: 0,
+        controlPoints: [{
+          x: 0.5,
+          y: 0
+        }]
+      }, {
+        x: 1,
+        y: 1,
+        controlPoints: [{
+          x: 0.5,
+          y: 1
+        }]
+      }] }
+    duration: { min: 100, max: 4000, default: 1000 }
+
+  B_: (t, p0, p1, p2, p3) =>
+    (Math.pow(1 - t, 3) * p0) + (3 * Math.pow(1 - t, 2) * t * p1) + (3 * (1 - t) * Math.pow(t, 2) * p2) + Math.pow(t, 3) * p3
+
+  B: (t, p0, p1, p2, p3) =>
+    {
+      x: @B_(t, p0.x, p1.x, p2.x, p3.x),
+      y: @B_(t, p0.y, p1.y, p2.y, p3.y)
+    }
+
+  yForX: (xTarget, B) =>
+    xTolerance = 0.0001
+    lower = 0
+    upper = 1
+    percent = (upper + lower) / 2
+
+    x = B(percent).x
+    i = 0
+
+    while Math.abs(xTarget - x) > xTolerance and i < 100
+      if xTarget > x
+        lower = percent
+      else
+        upper = percent
+
+      percent = (upper + lower) / 2
+      x = B(percent).x
+      i += 1
+
+    return B(percent).y;
+
+  next: (step) =>
+    super step
+    x = @currentT
+
+    points = @options.points || TweenBezier.properties.points.default
+    B = (t) =>
+      @B(t, points[0], points[0].controlPoints[0], points[1].controlPoints[0], points[1])
+    y = @yForX(x, B)
+    [x, y]
+
 ## Helpers
 class BrowserSupport
   @transform: ->
@@ -374,6 +433,16 @@ class Linear extends Dynamic
       100: @to
     }, @options
 
+class Bezier extends Dynamic
+  tweenClass: "TweenBezier"
+  @properties: TweenBezier.properties
+
+  constructor: (@el, @from, @to, @options = {}) ->
+    super @el, {
+      0: @from,
+      100: @to
+    }, @options
+
 # Export
 Dynamics =
   Spring: Spring
@@ -381,6 +450,7 @@ Dynamics =
   Gravity: Gravity
   GravityWithForce: GravityWithForce
   Linear: Linear
+  Bezier: Bezier
 
 try
   if module
