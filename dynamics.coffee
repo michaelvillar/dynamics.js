@@ -201,14 +201,37 @@ class TweenBezier extends Tween
         x: 0,
         y: 0,
         controlPoints: [{
-          x: 0.5,
+          x: 0.2,
           y: 0
         }]
-      }, {
+      },
+      {
+        x: 0.3,
+        y: 1.2,
+        controlPoints: [{
+          x: 0.2,
+          y: 1.2
+        },{
+          x: 0.4,
+          y: 1.2
+        }]
+      },
+      {
+        x: 0.7,
+        y: 0.8,
+        controlPoints: [{
+          x: 0.6,
+          y: 0.8
+        },{
+          x: 0.8,
+          y: 0.8
+        }]
+      },
+      {
         x: 1,
         y: 1,
         controlPoints: [{
-          x: 0.5,
+          x: 0.9,
           y: 1
         }]
       }] }
@@ -223,7 +246,16 @@ class TweenBezier extends Tween
       y: @B_(t, p0.y, p1.y, p2.y, p3.y)
     }
 
-  yForX: (xTarget, B) =>
+  yForX: (xTarget, Bs) =>
+    # Find the right Bezier curve first
+    B = null
+    for aB in Bs
+      if xTarget >= aB(0).x and xTarget <= aB(1).x
+        B = aB
+      break if B != null
+
+    return 0 unless B
+
     xTolerance = 0.0001
     lower = 0
     upper = 1
@@ -249,9 +281,16 @@ class TweenBezier extends Tween
     x = @currentT
 
     points = @options.points || TweenBezier.properties.points.default
-    B = (t) =>
-      @B(t, points[0], points[0].controlPoints[0], points[1].controlPoints[0], points[1])
-    y = @yForX(x, B)
+    Bs = []
+    for i of points
+      k = parseInt(i)
+      break if k >= points.length - 1
+      ((pointA, pointB) =>
+        B = (t) =>
+          @B(t, pointA, pointA.controlPoints[pointA.controlPoints.length - 1], pointB.controlPoints[0], pointB)
+        Bs.push(B)
+      )(points[k], points[k + 1])
+    y = @yForX(x, Bs)
     [x, y]
 
 ## Helpers

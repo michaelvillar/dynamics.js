@@ -126,7 +126,7 @@ class Graph
           coords = pointCoordinates_(controlPoint)
           @ctx.arc(coords.x, coords.y, 3 * r, 0, Math.PI*2, true)
           @ctx.fill()
-        @ctx.stroke()
+          @ctx.stroke()
 
   _drawCurve: (points) =>
     r = window.devicePixelRatio

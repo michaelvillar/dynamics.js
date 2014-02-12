@@ -73,7 +73,7 @@
     }
 
     Graph.prototype.draw = function() {
-      var args, color, colorI, colors, controlPoint, coords, coordsControlPoint, defaultColor, graph, graphes, h, i, point, pointCoordinates_, points, r, step, w, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _len5, _m, _n, _name, _o, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _results;
+      var args, color, colorI, colors, controlPoint, coords, coordsControlPoint, defaultColor, graph, graphes, h, i, point, pointCoordinates_, points, r, step, w, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _m, _n, _name, _ref, _ref1, _ref2, _ref3, _ref4, _results;
       r = window.devicePixelRatio;
       w = this.canvas.width;
       h = this.canvas.height;
@@ -164,18 +164,23 @@
           this.ctx.arc(coords.x, coords.y, 5 * r, 0, Math.PI * 2, true);
           this.ctx.fill();
           this.ctx.stroke();
-          _ref5 = point.controlPoints;
-          for (_o = 0, _len5 = _ref5.length; _o < _len5; _o++) {
-            controlPoint = _ref5[_o];
-            this.ctx.beginPath();
-            this.ctx.strokeStyle = colors[0];
-            this.ctx.fillStyle = 'white';
-            this.ctx.lineWidth = 1 * r;
-            coords = pointCoordinates_(controlPoint);
-            this.ctx.arc(coords.x, coords.y, 3 * r, 0, Math.PI * 2, true);
-            this.ctx.fill();
-          }
-          _results.push(this.ctx.stroke());
+          _results.push((function() {
+            var _len5, _o, _ref5, _results1;
+            _ref5 = point.controlPoints;
+            _results1 = [];
+            for (_o = 0, _len5 = _ref5.length; _o < _len5; _o++) {
+              controlPoint = _ref5[_o];
+              this.ctx.beginPath();
+              this.ctx.strokeStyle = colors[0];
+              this.ctx.fillStyle = 'white';
+              this.ctx.lineWidth = 1 * r;
+              coords = pointCoordinates_(controlPoint);
+              this.ctx.arc(coords.x, coords.y, 3 * r, 0, Math.PI * 2, true);
+              this.ctx.fill();
+              _results1.push(this.ctx.stroke());
+            }
+            return _results1;
+          }).call(this));
         }
         return _results;
       }

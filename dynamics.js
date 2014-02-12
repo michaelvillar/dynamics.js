@@ -398,8 +398,32 @@
             y: 0,
             controlPoints: [
               {
-                x: 0.5,
+                x: 0.2,
                 y: 0
+              }
+            ]
+          }, {
+            x: 0.3,
+            y: 1.2,
+            controlPoints: [
+              {
+                x: 0.2,
+                y: 1.2
+              }, {
+                x: 0.4,
+                y: 1.2
+              }
+            ]
+          }, {
+            x: 0.7,
+            y: 0.8,
+            controlPoints: [
+              {
+                x: 0.6,
+                y: 0.8
+              }, {
+                x: 0.8,
+                y: 0.8
               }
             ]
           }, {
@@ -407,7 +431,7 @@
             y: 1,
             controlPoints: [
               {
-                x: 0.5,
+                x: 0.9,
                 y: 1
               }
             ]
@@ -432,8 +456,21 @@
       };
     };
 
-    TweenBezier.prototype.yForX = function(xTarget, B) {
-      var i, lower, percent, upper, x, xTolerance;
+    TweenBezier.prototype.yForX = function(xTarget, Bs) {
+      var B, aB, i, lower, percent, upper, x, xTolerance, _i, _len;
+      B = null;
+      for (_i = 0, _len = Bs.length; _i < _len; _i++) {
+        aB = Bs[_i];
+        if (xTarget >= aB(0).x && xTarget <= aB(1).x) {
+          B = aB;
+        }
+        if (B !== null) {
+          break;
+        }
+      }
+      if (!B) {
+        return 0;
+      }
       xTolerance = 0.0001;
       lower = 0;
       upper = 1;
@@ -454,15 +491,27 @@
     };
 
     TweenBezier.prototype.next = function(step) {
-      var B, points, x, y,
+      var Bs, i, k, points, x, y, _fn,
         _this = this;
       TweenBezier.__super__.next.call(this, step);
       x = this.currentT;
       points = this.options.points || TweenBezier.properties.points["default"];
-      B = function(t) {
-        return _this.B(t, points[0], points[0].controlPoints[0], points[1].controlPoints[0], points[1]);
+      Bs = [];
+      _fn = function(pointA, pointB) {
+        var B;
+        B = function(t) {
+          return _this.B(t, pointA, pointA.controlPoints[pointA.controlPoints.length - 1], pointB.controlPoints[0], pointB);
+        };
+        return Bs.push(B);
       };
-      y = this.yForX(x, B);
+      for (i in points) {
+        k = parseInt(i);
+        if (k >= points.length - 1) {
+          break;
+        }
+        _fn(points[k], points[k + 1]);
+      }
+      y = this.yForX(x, Bs);
       return [x, y];
     };
 
