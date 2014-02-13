@@ -58,6 +58,18 @@
     function Graph(canvas) {
       this._drawCurve = __bind(this._drawCurve, this);
 
+      this.canvasMouseUp = __bind(this.canvasMouseUp, this);
+
+      this.canvasMouseMove = __bind(this.canvasMouseMove, this);
+
+      this.canvasMouseDown = __bind(this.canvasMouseDown, this);
+
+      this.pointFromLocation = __bind(this.pointFromLocation, this);
+
+      this.isLocationAroundCenter = __bind(this.isLocationAroundCenter, this);
+
+      this.locationFromEvent = __bind(this.locationFromEvent, this);
+
       this.draw = __bind(this.draw, this);
       this.points = null;
       this.tween = null;
@@ -70,10 +82,13 @@
         canvas.style[BrowserSupport.prefixFor('transform-origin') + 'TransformOrigin'] = "0 0";
         canvas.style[BrowserSupport.prefixFor('transform') + 'Transform'] = 'scale(' + (1 / this.r) + ')';
       }
+      this.canvas.addEventListener('mousedown', this.canvasMouseDown);
+      this.canvas.addEventListener('mousemove', this.canvasMouseMove);
+      this.canvas.addEventListener('mouseup', this.canvasMouseUp);
     }
 
     Graph.prototype.draw = function() {
-      var args, color, colorI, colors, controlPoint, coords, coordsControlPoint, defaultColor, graph, graphes, h, i, point, pointCoordinates_, points, r, step, w, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _m, _n, _name, _ref, _ref1, _ref2, _ref3, _ref4, _results;
+      var args, color, colorI, colors, controlPoint, coords, coordsControlPoint, defaultColor, graph, graphes, h, i, point, points, r, step, w, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _m, _n, _name, _ref, _ref1, _ref2, _ref3, _ref4, _results;
       r = window.devicePixelRatio;
       w = this.canvas.width;
       h = this.canvas.height;
@@ -129,12 +144,6 @@
         }
         this.ctx.stroke();
       }
-      pointCoordinates_ = function(point) {
-        return {
-          x: point.x * w,
-          y: (0.67 * h) - (point.y * 0.33 * h)
-        };
-      };
       if (this.points) {
         _ref2 = this.points;
         for (_l = 0, _len2 = _ref2.length; _l < _len2; _l++) {
@@ -145,9 +154,9 @@
             this.ctx.beginPath();
             this.ctx.strokeStyle = colors[0];
             this.ctx.lineWidth = 1;
-            coords = pointCoordinates_(point);
+            coords = this.pointCoordinates(point);
             this.ctx.moveTo(coords.x, coords.y);
-            coordsControlPoint = pointCoordinates_(controlPoint);
+            coordsControlPoint = this.pointCoordinates(controlPoint);
             this.ctx.lineTo(coordsControlPoint.x, coordsControlPoint.y);
             this.ctx.stroke();
           }
@@ -157,10 +166,10 @@
         for (_n = 0, _len4 = _ref4.length; _n < _len4; _n++) {
           point = _ref4[_n];
           this.ctx.beginPath();
-          this.ctx.strokeStyle = colors[0];
+          this.ctx.strokeStyle = this.selectedPoint === point ? 'red' : colors[0];
           this.ctx.fillStyle = 'white';
           this.ctx.lineWidth = 2 * r;
-          coords = pointCoordinates_(point);
+          coords = this.pointCoordinates(point);
           this.ctx.arc(coords.x, coords.y, 5 * r, 0, Math.PI * 2, true);
           this.ctx.fill();
           this.ctx.stroke();
@@ -171,10 +180,10 @@
             for (_o = 0, _len5 = _ref5.length; _o < _len5; _o++) {
               controlPoint = _ref5[_o];
               this.ctx.beginPath();
-              this.ctx.strokeStyle = colors[0];
+              this.ctx.strokeStyle = this.selectedPoint === controlPoint ? 'red' : colors[0];
               this.ctx.fillStyle = 'white';
               this.ctx.lineWidth = 1 * r;
-              coords = pointCoordinates_(controlPoint);
+              coords = this.pointCoordinates(controlPoint);
               this.ctx.arc(coords.x, coords.y, 3 * r, 0, Math.PI * 2, true);
               this.ctx.fill();
               _results1.push(this.ctx.stroke());
@@ -184,6 +193,101 @@
         }
         return _results;
       }
+    };
+
+    Graph.prototype.locationFromEvent = function(e) {
+      return {
+        x: e.layerX,
+        y: e.layerY
+      };
+    };
+
+    Graph.prototype.isLocationAroundCenter = function(location, center, size) {
+      var r;
+      r = window.devicePixelRatio;
+      center = {
+        x: center.x / r,
+        y: center.y / r
+      };
+      return (location.x >= center.x - size / 2) && (location.x <= center.x + size / 2) && (location.y >= center.y - size / 2) && (location.y <= center.y + size / 2);
+    };
+
+    Graph.prototype.pointFromLocation = function(location) {
+      var controlPoint, point, _i, _j, _len, _len1, _ref, _ref1;
+      if (!this.points || this.points.length < 2) {
+        return null;
+      }
+      _ref = this.points;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        point = _ref[_i];
+        if (point !== this.points[0]) {
+          if (this.isLocationAroundCenter(location, this.pointCoordinates(point), 14)) {
+            return point;
+          }
+        }
+        _ref1 = point.controlPoints;
+        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+          controlPoint = _ref1[_j];
+          if (this.isLocationAroundCenter(location, this.pointCoordinates(controlPoint), 10)) {
+            return controlPoint;
+          }
+        }
+      }
+      return null;
+    };
+
+    Graph.prototype.canvasMouseDown = function(e) {
+      var location, point;
+      location = this.locationFromEvent(e);
+      point = this.pointFromLocation(location);
+      this.selectedPoint = point;
+      return this.draw();
+    };
+
+    Graph.prototype.canvasMouseMove = function(e) {
+      var controlPoint, location, point, _i, _len, _ref;
+      if (!this.selectedPoint) {
+        return;
+      }
+      location = this.locationFromEvent(e);
+      point = this.convertFromCoordinates(location);
+      if (this.selectedPoint.controlPoints) {
+        _ref = this.selectedPoint.controlPoints;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          controlPoint = _ref[_i];
+          controlPoint.x += point.x - this.selectedPoint.x;
+          controlPoint.y += point.y - this.selectedPoint.y;
+        }
+      }
+      this.selectedPoint.x = point.x;
+      this.selectedPoint.y = point.y;
+      return this.draw();
+    };
+
+    Graph.prototype.canvasMouseUp = function(e) {
+      this.selectedPoint = null;
+      return this.draw();
+    };
+
+    Graph.prototype.pointCoordinates = function(point) {
+      var h, w;
+      w = this.canvas.width;
+      h = this.canvas.height;
+      return {
+        x: point.x * w,
+        y: (0.67 * h) - (point.y * 0.33 * h)
+      };
+    };
+
+    Graph.prototype.convertFromCoordinates = function(location) {
+      var h, r, w;
+      r = window.devicePixelRatio;
+      w = this.canvas.width;
+      h = this.canvas.height;
+      return {
+        x: location.x / w * r,
+        y: ((0.67 * h) - (location.y * r)) / (0.33 * h)
+      };
     };
 
     Graph.prototype._drawCurve = function(points) {

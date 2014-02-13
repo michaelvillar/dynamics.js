@@ -37,6 +37,10 @@ class Graph
       canvas.style[BrowserSupport.prefixFor('transform-origin') + 'TransformOrigin'] = "0 0"
       canvas.style[BrowserSupport.prefixFor('transform') + 'Transform'] = 'scale('+(1 / @r)+')'
 
+    @canvas.addEventListener 'mousedown', @canvasMouseDown
+    @canvas.addEventListener 'mousemove', @canvasMouseMove
+    @canvas.addEventListener 'mouseup', @canvasMouseUp
+
   draw: =>
     r = window.devicePixelRatio
     w = @canvas.width
@@ -90,9 +94,6 @@ class Graph
         @ctx.lineWidth = (1 * r)
       @ctx.stroke()
 
-    pointCoordinates_ = (point) ->
-      { x: point.x * w, y: (0.67 * h) - (point.y * 0.33 * h) }
-
     if @points
       for point in @points
         # Draw line between point and each control points
@@ -100,19 +101,19 @@ class Graph
           @ctx.beginPath()
           @ctx.strokeStyle = colors[0]
           @ctx.lineWidth = 1
-          coords = pointCoordinates_(point)
+          coords = @pointCoordinates(point)
           @ctx.moveTo(coords.x, coords.y)
-          coordsControlPoint = pointCoordinates_(controlPoint)
+          coordsControlPoint = @pointCoordinates(controlPoint)
           @ctx.lineTo(coordsControlPoint.x, coordsControlPoint.y)
           @ctx.stroke()
 
       for point in @points
         # Draw point
         @ctx.beginPath()
-        @ctx.strokeStyle = colors[0]
+        @ctx.strokeStyle = if @selectedPoint == point then 'red' else colors[0]
         @ctx.fillStyle = 'white'
         @ctx.lineWidth = 2 * r
-        coords = pointCoordinates_(point)
+        coords = @pointCoordinates(point)
         @ctx.arc(coords.x, coords.y, 5 * r, 0, Math.PI*2, true)
         @ctx.fill()
         @ctx.stroke()
@@ -120,13 +121,63 @@ class Graph
         # Draw control points
         for controlPoint in point.controlPoints
           @ctx.beginPath()
-          @ctx.strokeStyle = colors[0]
+          @ctx.strokeStyle = if @selectedPoint == controlPoint then 'red' else colors[0]
           @ctx.fillStyle = 'white'
           @ctx.lineWidth = 1 * r
-          coords = pointCoordinates_(controlPoint)
+          coords = @pointCoordinates(controlPoint)
           @ctx.arc(coords.x, coords.y, 3 * r, 0, Math.PI*2, true)
           @ctx.fill()
           @ctx.stroke()
+
+  locationFromEvent: (e) =>
+    { x: e.layerX, y: e.layerY }
+
+  isLocationAroundCenter: (location, center, size) =>
+    r = window.devicePixelRatio
+    center = { x: center.x / r, y: center.y / r }
+    (location.x >= center.x - size / 2) and (location.x <= center.x + size / 2) and (location.y >= center.y - size / 2) and (location.y <= center.y + size / 2)
+
+  pointFromLocation: (location) =>
+    return null if !@points or @points.length < 2
+    for point in @points
+      if point != @points[0]
+        return point if @isLocationAroundCenter(location, @pointCoordinates(point), 14)
+      for controlPoint in point.controlPoints
+        return controlPoint if @isLocationAroundCenter(location, @pointCoordinates(controlPoint), 10)
+    null
+
+  canvasMouseDown: (e) =>
+    location = @locationFromEvent(e)
+    point = @pointFromLocation(location)
+    @selectedPoint = point
+    @draw()
+
+  canvasMouseMove: (e) =>
+    return unless @selectedPoint
+    location = @locationFromEvent(e)
+    point = @convertFromCoordinates(location)
+    if @selectedPoint.controlPoints
+      for controlPoint in @selectedPoint.controlPoints
+        controlPoint.x += point.x - @selectedPoint.x
+        controlPoint.y += point.y - @selectedPoint.y
+    @selectedPoint.x = point.x
+    @selectedPoint.y = point.y
+    @draw()
+
+  canvasMouseUp: (e) =>
+    @selectedPoint = null
+    @draw()
+
+  pointCoordinates: (point) ->
+    w = @canvas.width
+    h = @canvas.height
+    { x: point.x * w, y: (0.67 * h) - (point.y * 0.33 * h) }
+
+  convertFromCoordinates: (location) ->
+    r = window.devicePixelRatio
+    w = @canvas.width
+    h = @canvas.height
+    { x: location.x / w * r, y: ((0.67 * h) - (location.y * r)) / (0.33 * h) }
 
   _drawCurve: (points) =>
     r = window.devicePixelRatio

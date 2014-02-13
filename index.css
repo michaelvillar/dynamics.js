@@ -40,6 +40,9 @@ div.graph {
   position: relative;
   height: 350px;
   width: 350px;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: default;
 }
 div.graph > span {
   font-size: 10px;
