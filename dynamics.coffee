@@ -256,6 +256,7 @@ class TweenBezier extends Tween
 
     return 0 unless B
 
+    # Find the percent with dichotomy
     xTolerance = 0.0001
     lower = 0
     upper = 1
@@ -274,6 +275,7 @@ class TweenBezier extends Tween
       x = B(percent).x
       i += 1
 
+    # Returns y at this specific percent
     return B(percent).y;
 
   next: (step) =>
