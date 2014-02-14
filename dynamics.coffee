@@ -324,7 +324,7 @@ class BrowserSupport
 ## Base
 class Dynamic
   @index: 0
-  @returnsToSelf: false
+  returnsToSelf: false
   tweenClass: "TweenLinear"
 
   constructor: (@el, @frames = {}, @options = {}) ->
@@ -432,7 +432,7 @@ class Spring extends Dynamic
 class SelfSpring extends Dynamic
   tweenClass: "TweenSelfSpring"
   @properties: TweenSelfSpring.properties
-  @returnsToSelf: true
+  returnsToSelf: true
 
   constructor: (@el, @from, @to, @options = {}) ->
     super @el, {
@@ -454,7 +454,7 @@ class Gravity extends Dynamic
 class GravityWithForce extends Dynamic
   tweenClass: "TweenGravity"
   @properties: TweenGravity.properties
-  @returnsToSelf: true
+  returnsToSelf: true
 
   constructor: (@el, @from, @to, @options = {}) ->
     @options.duration = @tween().duration()
@@ -479,6 +479,7 @@ class Bezier extends Dynamic
   @properties: TweenBezier.properties
 
   constructor: (@el, @from, @to, @options = {}) ->
+    @returnsToSelf = true if @options.points[@options.points.length - 1].y == 0
     super @el, {
       0: @from,
       100: @to

@@ -110,7 +110,7 @@ class Graph
       for point in @points
         # Draw point
         @ctx.beginPath()
-        @ctx.strokeStyle = if @selectedPoint == point then 'red' else colors[0]
+        @ctx.strokeStyle = if @selectedPoint == point then 'black' else colors[0]
         @ctx.fillStyle = 'white'
         @ctx.lineWidth = 2 * r
         coords = @pointCoordinates(point)
@@ -121,7 +121,7 @@ class Graph
         # Draw control points
         for controlPoint in point.controlPoints
           @ctx.beginPath()
-          @ctx.strokeStyle = if @selectedPoint == controlPoint then 'red' else colors[0]
+          @ctx.strokeStyle = if @selectedPoint == controlPoint then 'black' else colors[0]
           @ctx.fillStyle = 'white'
           @ctx.lineWidth = 1 * r
           coords = @pointCoordinates(controlPoint)
@@ -156,6 +156,9 @@ class Graph
     return unless @selectedPoint
     location = @locationFromEvent(e)
     point = @convertFromCoordinates(location)
+    if @selectedPoint == @points[@points.length - 1]
+      point.x = 1
+      point.y = Math.min(1, Math.max(0, Math.round(point.y)))
     if @selectedPoint.controlPoints
       for controlPoint in @selectedPoint.controlPoints
         controlPoint.x += point.x - @selectedPoint.x
@@ -347,7 +350,6 @@ class App
     for property, config of @dynamicsClass.properties
       if config.type == 'points'
         if values.points
-          console.log values.points
           try
             @points = JSON.parse(values.points)
           catch e
@@ -445,15 +447,16 @@ class App
       }).start()
       document.querySelector('section.demo').appendChild(@currentCircle)
     circle = @currentCircle
-    shouldDeleteCircle = !@dynamicsClass.returnsToSelf
+    @dynamic = dynamic = new @dynamicsClass(circle, from, to, options)
+    shouldDeleteCircle = !dynamic.returnsToSelf
     options.complete = =>
       return unless shouldDeleteCircle
       @createDynamic()
       new Dynamics.Spring(circle, {
-        translateX: if !@dynamicsClass.returnsToSelf then 350 else 0,
+        translateX: if !dynamic.returnsToSelf then 350 else 0,
         scale: 1
       }, {
-        translateX: if !@dynamicsClass.returnsToSelf then 350 else 0,
+        translateX: if !dynamic.returnsToSelf then 350 else 0,
         scale: 0
       }, {
         frequency: 0,
@@ -464,7 +467,6 @@ class App
         complete: =>
           circle.parentNode.removeChild(circle)
       }).start()
-    @dynamic = new @dynamicsClass(circle, from, to, options)
     if @dynamicsClass != Dynamics.SelfSpring
       @track.classList.remove('tiny')
     else
@@ -473,7 +475,7 @@ class App
   animate: =>
     @createDynamic()
     @dynamic.start()
-    if !@dynamicsClass.returnsToSelf
+    if !@dynamic.returnsToSelf
       @currentCircle = null
 
 document.addEventListener "DOMContentLoaded", ->
