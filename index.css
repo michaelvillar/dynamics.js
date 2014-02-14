@@ -185,9 +185,8 @@ section.code {
   box-sizing: border-box;
   background: #F4F9FF;
   padding: 17px;
-}
-section.code {
-  white-space: pre;
+  overflow: hidden;
+  white-space: pre-wrap;
   font-family: Menlo, Courier, Arial;
   font-size: 12px;
   color: #496281;

@@ -166,7 +166,7 @@ class Graph
 
   canvasMouseUp: (e) =>
     @selectedPoint = null
-    @draw()
+    @pointsChanged?()
 
   pointCoordinates: (point) ->
     w = @canvas.width
@@ -292,14 +292,14 @@ class Tools
       query = url[1]
       for arg in query.split(',')
         [k, v] = arg.split('=')
-        values[k] = v
+        values[k] = decodeURIComponent(v)
     values
 
   @saveValues: (args) =>
     argsString = ''
     for k, v of args
       argsString += "," unless argsString == ''
-      argsString += "#{k}=#{v}"
+      argsString += "#{k}=#{encodeURIComponent(v)}"
 
     currentURL = (document.location.toString() || '').split('#')[0]
     document.location = currentURL + "#" + argsString
@@ -346,7 +346,14 @@ class App
     @points = null
     for property, config of @dynamicsClass.properties
       if config.type == 'points'
-        @points = config.default
+        if values.points
+          console.log values.points
+          try
+            @points = JSON.parse(values.points)
+          catch e
+            @points = config.default
+        else
+          @points = config.default
       else if config.editable == false
         uiProperty = new UIProperty({
           value: 'N/A',
@@ -371,6 +378,7 @@ class App
     for slider in @sliders
       args[slider.options.property] = slider.value()
     args['dynamic'] = @dynamicsClass.name if @dynamicsClass
+    args['points'] = JSON.stringify(@points) if @points
     Tools.saveValues(args)
     clearTimeout @animationTimeout if @animationTimeout
     @animationTimeout = setTimeout(@animate, 400)
@@ -379,6 +387,7 @@ class App
 
     @graph.tween = @dynamic.tween()
     @graph.points = @points
+    @graph.pointsChanged = @update
     @graph.draw()
 
     for uiProperty in @properties
@@ -392,6 +401,9 @@ class App
     for slider in @sliders
       options += ",\n" if options != ''
       options += "&nbsp;&nbsp;<strong>#{slider.options.property}</strong>: #{slider.value()}"
+    if @points
+      pointsValue = JSON.stringify(@points)
+      options += ",\n&nbsp;&nbsp;<strong>points</strong>: #{pointsValue}"
     code = '''new <strong>Dynamics.''' + @dynamicsClass.name + '''</strong>(document.getElementId("circle"), {
 &nbsp;&nbsp;<strong>translateX</strong>: 0
 }, {
@@ -408,6 +420,7 @@ class App
     options = { }
     for slider in @sliders
       options[slider.options.property] = slider.value()
+    options.points = @points if @points
     if @dynamicsClass != Dynamics.SelfSpring
       from = { translateX: 0 }
       to = { translateX: 350 }
