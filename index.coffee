@@ -1,3 +1,7 @@
+roundf = (float, decimals) ->
+  factor = Math.pow(10, decimals)
+  Math.round(float * factor) / factor
+
 class BrowserSupport
   @transform: ->
     @withPrefix("transform")
@@ -175,8 +179,8 @@ class Graph
       point.y = Math.min(1, Math.max(0, Math.round(point.y)))
     if @selectedPoint.controlPoints
       for controlPoint in @selectedPoint.controlPoints
-        controlPoint.x += point.x - @selectedPoint.x
-        controlPoint.y += point.y - @selectedPoint.y
+        controlPoint.x = roundf(controlPoint.x + point.x - @selectedPoint.x, 3)
+        controlPoint.y = roundf(controlPoint.y + point.y - @selectedPoint.y, 3)
     @selectedPoint.x = point.x
     @selectedPoint.y = point.y
     @draw()
@@ -207,7 +211,7 @@ class Graph
     r = window.devicePixelRatio
     w = @canvas.width
     h = @canvas.height
-    { x: location.x / w * r, y: ((0.67 * h) - (location.y * r)) / (0.33 * h) }
+    { x: roundf(location.x / w * r, 3), y: roundf(((0.67 * h) - (location.y * r)) / (0.33 * h), 3) }
 
   insertPoint: (toInsertPoint) =>
     index = 0
