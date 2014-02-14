@@ -110,6 +110,9 @@ div.slider {
   width: 100%;
   height: 20px;
   margin-bottom: 7px;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: default;
 }
 div.slider .bar {
   position: absolute;
@@ -129,6 +132,9 @@ div.slider .control {
   width: 7px;
   border: 2px solid #007EFF;
   border-radius: 6px;
+}
+div.slider .control:active {
+  border-color: black;
 }
 
 section.demo {
