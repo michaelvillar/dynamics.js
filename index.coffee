@@ -474,6 +474,7 @@ class App
       @currentCircle.classList.add('circle')
       @currentCircle.addEventListener 'click', =>
         @animate()
+      @currentCircle.style['-webkit-transform'] = 'scale(0)'
       new Dynamics.Animation(@currentCircle, {
         scale: 0
       }, {

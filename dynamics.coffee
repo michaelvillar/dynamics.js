@@ -10,8 +10,12 @@ class Tween
 
   next: (step) =>
     @t = 1 if @t > 1
-    @currentT = @t
+    r = @at(@t)
     @t += step
+    r
+
+  at: (t) =>
+    [t, t]
 
 class Linear extends Tween
   @properties:
@@ -20,19 +24,14 @@ class Linear extends Tween
   init: =>
     super
 
-  next: (step) =>
-    super step
-    t = @currentT
+  at: (t) =>
     [t, t]
 
 class TweenForce extends Tween
   init: =>
     super
 
-  next: (step) =>
-    super step
-    t = @currentT
-
+  at: (t) =>
     gravity = 1
     v = 2 * t - gravity * t * t
 
@@ -101,9 +100,7 @@ class Gravity extends Tween
     c = 1 - c if @options.initialForce
     c
 
-  next: (step) =>
-    super step
-    t = @currentT
+  at: (t) =>
     bounce = (@options.bounce / 100)
     gravity = @options.gravity
 
@@ -139,10 +136,7 @@ class Spring extends Tween
     anticipationSize: { min: 0, max: 99, default: 10 }
     duration: { min: 100, max: 4000, default: 1000 }
 
-  next: (step) =>
-    super step
-    t = @currentT
-
+  at: (t) =>
     frequency = Math.max(1, @options.frequency)
     friction = Math.pow(20, (@options.friction / 100))
     s = @options.anticipationSize / 100
@@ -189,10 +183,7 @@ class SelfSpring extends Tween
 
   returnsToSelf: true
 
-  next: (step) =>
-    super step
-    t = @currentT
-
+  at: (t) =>
     frequency = Math.max(1, @options.frequency)
     friction = Math.pow(20, (@options.friction / 100))
 
@@ -298,10 +289,8 @@ class Bezier extends Tween
     # Returns y at this specific percent
     return B(percent).y;
 
-  next: (step) =>
-    super step
-    x = @currentT
-
+  at: (t) =>
+    x = t
     points = @options.points || Bezier.properties.points.default
     Bs = []
     for i of points
@@ -360,6 +349,58 @@ class Animation
     @_tween
 
   start: =>
+    @ts = null
+    @tween().init()
+    requestAnimationFrame @frame
+
+  frame: (ts) =>
+    t = 0
+    if @ts
+      dTs = ts - @ts
+      t = dTs / @options.duration
+    else
+      @ts = ts
+
+    at = @tween().at(t)
+
+    frame0 = @frames[0]
+    frame1 = @frames[100]
+
+    transform = ''
+    properties = {}
+    for k, value of frame1
+      value = parseFloat(value)
+      oldValue = frame0[k] || 0
+      dValue = value - oldValue
+      newValue = oldValue + (dValue * at[1])
+
+      unit = ''
+      isTransform = false
+      if k in ['translateX', 'translateY', 'translateZ']
+        unit = 'px'
+        isTransform = true
+      else if k in ['rotateX', 'rotateY', 'rotateZ']
+        unit = 'deg'
+        isTransform = true
+      else if k in ['scaleX', 'scaleY', 'scale']
+        isTransform = true
+        newValue = Math.max(newValue, 0)
+
+      if isTransform
+        transform += "#{k}(#{newValue}#{unit}) "
+      else
+        properties[k] = newValue
+
+    @el.style[BrowserSupport.transform()] = transform if transform
+    for k, v of properties
+      @el.style[k] = v
+
+    if t < 1
+      requestAnimationFrame @frame
+    else
+      @options.complete?()
+
+  keyframesStart: =>
     name = "anim_#{Animation.index}"
     Animation.index += 1
     keyframes = @_keyframes(name)
