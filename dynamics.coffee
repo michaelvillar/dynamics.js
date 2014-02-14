@@ -13,7 +13,7 @@ class Tween
     @currentT = @t
     @t += step
 
-class TweenLinear extends Tween
+class Linear extends Tween
   @properties:
     duration: { min: 100, max: 4000, default: 1000 }
 
@@ -38,11 +38,18 @@ class TweenForce extends Tween
 
     [t, v]
 
-class TweenGravity extends Tween
+class Gravity extends Tween
   @properties:
     bounce: { min: 0, max: 80, default: 40 }
     gravity: { min: 1, max: 4000, default: 1000 }
-    duration: { editable: false }
+    expectedDuration: { editable: false }
+
+  constructor: (@options = {}) ->
+    @options.duration = @duration()
+    super @options
+
+  expectedDuration: =>
+    @duration()
 
   duration: =>
     Math.round(1000 * 1000 / @options.gravity * @length())
@@ -117,7 +124,14 @@ class TweenGravity extends Tween
 
     [t, v]
 
-class TweenSpring extends Tween
+class GravityWithForce extends Gravity
+  returnsToSelf: true
+
+  constructor: (@options = {}) ->
+    @options.initialForce = true
+    super @options
+
+class Spring extends Tween
   @properties:
     frequency: { min: 0, max: 100, default: 15 }
     friction: { min: 1, max: 1000, default: 100 }
@@ -167,11 +181,13 @@ class TweenSpring extends Tween
     v = 1 - (At * Math.cos(angle))
     [t, v, At, frictionT, angle]
 
-class TweenSelfSpring extends Tween
+class SelfSpring extends Tween
   @properties:
     frequency: { min: 0, max: 100, default: 15 }
     friction: { min: 1, max: 1000, default: 100 }
     duration: { min: 100, max: 4000, default: 1000 }
+
+  returnsToSelf: true
 
   next: (step) =>
     super step
@@ -195,7 +211,7 @@ class TweenSelfSpring extends Tween
     v = Math.cos(angle) * Ax
     [t, v, Ax, -Ax]
 
-class TweenBezier extends Tween
+class Bezier extends Tween
   @properties:
     points: { type: 'points', default: [ {
         x: 0,
@@ -236,6 +252,10 @@ class TweenBezier extends Tween
         }]
       }] }
     duration: { min: 100, max: 4000, default: 1000 }
+
+  constructor: (@options = {}) ->
+    @returnsToSelf = @options.points[@options.points.length - 1].y == 0
+    super @options
 
   B_: (t, p0, p1, p2, p3) =>
     (Math.pow(1 - t, 3) * p0) + (3 * Math.pow(1 - t, 2) * t * p1) + (3 * (1 - t) * Math.pow(t, 2) * p2) + Math.pow(t, 3) * p3
@@ -282,7 +302,7 @@ class TweenBezier extends Tween
     super step
     x = @currentT
 
-    points = @options.points || TweenBezier.properties.points.default
+    points = @options.points || Bezier.properties.points.default
     Bs = []
     for i of points
       k = parseInt(i)
@@ -321,23 +341,27 @@ class BrowserSupport
         return prefix
     ''
 
-## Base
-class Dynamic
+# Public Classes
+class Animation
   @index: 0
-  returnsToSelf: false
-  tweenClass: "TweenLinear"
 
-  constructor: (@el, @frames = {}, @options = {}) ->
+  constructor: (@el, @from, @to, @options = {}) ->
+    @frames = {
+      0: @from,
+      100: @to
+    }
     @options.duration ||= 1000
     @options.complete ||= null
+    @options.type ||= Linear
+    @returnsToSelf = false || @tween().returnsToSelf
 
   tween: =>
-    @_tween ||= eval("new #{@tweenClass}(this.options)")
+    @_tween ||= new @options.type(this.options)
     @_tween
 
   start: =>
-    name = "anim_#{Dynamic.index}"
-    Dynamic.index += 1
+    name = "anim_#{Animation.index}"
+    Animation.index += 1
     keyframes = @_keyframes(name)
     style = document.createElement('style')
     style.innerHTML = keyframes
@@ -418,81 +442,16 @@ class Dynamic
     css += "}\n"
     css
 
-# Public Classes
-class Spring extends Dynamic
-  tweenClass: "TweenSpring"
-  @properties: TweenSpring.properties
-
-  constructor: (@el, @from, @to, @options = {}) ->
-    super @el, {
-      0: @from,
-      100: @to
-    }, @options
-
-class SelfSpring extends Dynamic
-  tweenClass: "TweenSelfSpring"
-  @properties: TweenSelfSpring.properties
-  returnsToSelf: true
-
-  constructor: (@el, @from, @to, @options = {}) ->
-    super @el, {
-      0: @from,
-      100: @to
-    }, @options
-
-class Gravity extends Dynamic
-  tweenClass: "TweenGravity"
-  @properties: TweenGravity.properties
-
-  constructor: (@el, @from, @to, @options = {}) ->
-    @options.duration = @tween().duration()
-    super @el, {
-      0: @from,
-      100: @to
-    }, @options
-
-class GravityWithForce extends Dynamic
-  tweenClass: "TweenGravity"
-  @properties: TweenGravity.properties
-  returnsToSelf: true
-
-  constructor: (@el, @from, @to, @options = {}) ->
-    @options.duration = @tween().duration()
-    @options.initialForce = true
-    super @el, {
-      0: @from,
-      100: @to
-    }, @options
-
-class Linear extends Dynamic
-  tweenClass: "TweenLinear"
-  @properties: TweenLinear.properties
-
-  constructor: (@el, @from, @to, @options = {}) ->
-    super @el, {
-      0: @from,
-      100: @to
-    }, @options
-
-class Bezier extends Dynamic
-  tweenClass: "TweenBezier"
-  @properties: TweenBezier.properties
-
-  constructor: (@el, @from, @to, @options = {}) ->
-    @returnsToSelf = true if @options.points[@options.points.length - 1].y == 0
-    super @el, {
-      0: @from,
-      100: @to
-    }, @options
-
 # Export
 Dynamics =
-  Spring: Spring
-  SelfSpring: SelfSpring
-  Gravity: Gravity
-  GravityWithForce: GravityWithForce
-  Linear: Linear
-  Bezier: Bezier
+  Animation: Animation
+  Types:
+    Spring: Spring
+    SelfSpring: SelfSpring
+    Gravity: Gravity
+    GravityWithForce: GravityWithForce
+    Linear: Linear
+    Bezier: Bezier
 
 try
   if module

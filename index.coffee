@@ -345,7 +345,7 @@ class Tools
 class App
   constructor: ->
     @dynamicsClasses = []
-    for k, v of Dynamics
+    for k, v of Dynamics.Types
       @dynamicsClasses.push v
 
     @currentCircle = null
@@ -357,7 +357,7 @@ class App
       if aDynamicsClass.name == Tools.valuesFromURL().dynamic
         @dynamicsClass = aDynamicsClass
       option = document.createElement('option')
-      option.innerHTML = "Dynamics.#{aDynamicsClass.name}"
+      option.innerHTML = "Dynamics.Types.#{aDynamicsClass.name}"
       option.value = aDynamicsClass.name
       option.selected = aDynamicsClass == @dynamicsClass
       @select.appendChild option
@@ -371,7 +371,7 @@ class App
 
   selectDidChange: =>
     name = @select.options[@select.selectedIndex].value
-    @dynamicsClass = eval("Dynamics.#{name}")
+    @dynamicsClass = eval("Dynamics.Types.#{name}")
     @updateOptions()
     @update()
 
@@ -382,6 +382,7 @@ class App
     @sliders = []
     @properties = []
     @points = null
+
     for property, config of @dynamicsClass.properties
       if config.type == 'points'
         if values.points
@@ -433,15 +434,15 @@ class App
     @updateCode()
 
   updateCode: =>
-    translateX = if @dynamicsClass != Dynamics.SelfSpring then 350 else 50
-    options = ''
+    translateX = if @dynamicsClass != Dynamics.Types.SelfSpring then 350 else 50
+    options = "&nbsp;&nbsp;<strong>type</strong>: Dynamics.Types.#{@dynamicsClass.name}"
     for slider in @sliders
       options += ",\n" if options != ''
       options += "&nbsp;&nbsp;<strong>#{slider.options.property}</strong>: #{slider.value()}"
     if @points
       pointsValue = JSON.stringify(@points)
       options += ",\n&nbsp;&nbsp;<strong>points</strong>: #{pointsValue}"
-    code = '''new <strong>Dynamics.''' + @dynamicsClass.name + '''</strong>(document.getElementId("circle"), {
+    code = '''new <strong>Dynamics.Animation</strong>(document.getElementId("circle"), {
 &nbsp;&nbsp;<strong>translateX</strong>: 0
 }, {
 &nbsp;&nbsp;<strong>translateX</strong>: ''' + translateX + '''
@@ -458,7 +459,7 @@ class App
     for slider in @sliders
       options[slider.options.property] = slider.value()
     options.points = @points if @points
-    if @dynamicsClass != Dynamics.SelfSpring
+    if @dynamicsClass != Dynamics.Types.SelfSpring
       from = { translateX: 0 }
       to = { translateX: 350 }
     else
@@ -469,11 +470,12 @@ class App
       @currentCircle.classList.add('circle')
       @currentCircle.addEventListener 'click', =>
         @animate()
-      new Dynamics.Spring(@currentCircle, {
+      new Dynamics.Animation(@currentCircle, {
         scale: 0
       }, {
         scale: 1
       }, {
+        type: Dynamics.Types.Spring,
         frequency: 0,
         friction: 600,
         anticipationStrength: 100,
@@ -482,18 +484,20 @@ class App
       }).start()
       document.querySelector('section.demo').appendChild(@currentCircle)
     circle = @currentCircle
-    @dynamic = dynamic = new @dynamicsClass(circle, from, to, options)
+    options.type = @dynamicsClass
+    @dynamic = dynamic = new Dynamics.Animation(circle, from, to, options)
     shouldDeleteCircle = !dynamic.returnsToSelf
     options.complete = =>
       return unless shouldDeleteCircle
       @createDynamic()
-      new Dynamics.Spring(circle, {
+      new Dynamics.Animation(circle, {
         translateX: if !dynamic.returnsToSelf then 350 else 0,
         scale: 1
       }, {
         translateX: if !dynamic.returnsToSelf then 350 else 0,
         scale: 0
       }, {
+        type: Dynamics.Types.Spring,
         frequency: 0,
         friction: 600,
         anticipationStrength: 100,
@@ -502,7 +506,7 @@ class App
         complete: =>
           circle.parentNode.removeChild(circle)
       }).start()
-    if @dynamicsClass != Dynamics.SelfSpring
+    if @dynamicsClass != Dynamics.Types.SelfSpring
       @track.classList.remove('tiny')
     else
       @track.classList.add('tiny')
