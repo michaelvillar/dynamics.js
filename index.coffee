@@ -40,6 +40,7 @@ class Graph
     @canvas.addEventListener 'mousedown', @canvasMouseDown
     @canvas.addEventListener 'mousemove', @canvasMouseMove
     @canvas.addEventListener 'mouseup', @canvasMouseUp
+    window.addEventListener 'keyup', @canvasKeyUp
 
   draw: =>
     r = window.devicePixelRatio
@@ -150,10 +151,23 @@ class Graph
     location = @locationFromEvent(e)
     point = @pointFromLocation(location)
     @selectedPoint = point
+    unless @selectedPoint
+      converted = @convertFromCoordinates(location)
+      @selectedPoint = {
+        x: converted.x,
+        y: converted.y,
+        controlPoints: [
+          { x: converted.x - 0.1, y: converted.y },
+          { x: converted.x + 0.1, y: converted.y }
+        ]
+      }
+      @insertPoint(@selectedPoint)
     @draw()
+    @dragging = true
 
   canvasMouseMove: (e) =>
     return unless @selectedPoint
+    return unless @dragging
     location = @locationFromEvent(e)
     point = @convertFromCoordinates(location)
     if @selectedPoint == @points[@points.length - 1]
@@ -168,8 +182,21 @@ class Graph
     @draw()
 
   canvasMouseUp: (e) =>
-    @selectedPoint = null
+    @dragging = false
     @pointsChanged?()
+
+  canvasKeyUp: (e) =>
+    return unless @selectedPoint
+    if e.keyCode == 8
+      # Cannot delete control points
+      return unless @selectedPoint.controlPoints
+      # Cannot delete first or last
+      return if @selectedPoint == @points[0] or @selectedPoint == @points[@points.length - 1]
+
+      e.preventDefault()
+      @points.splice(@points.indexOf(@selectedPoint), 1)
+      @selectedPoint = null
+      @pointsChanged?()
 
   pointCoordinates: (point) ->
     w = @canvas.width
@@ -181,6 +208,14 @@ class Graph
     w = @canvas.width
     h = @canvas.height
     { x: location.x / w * r, y: ((0.67 * h) - (location.y * r)) / (0.33 * h) }
+
+  insertPoint: (toInsertPoint) =>
+    index = 0
+    for i, point of @points
+      if point.x >= toInsertPoint.x
+        index = i
+        break
+    @points.splice(index, 0, toInsertPoint)
 
   _drawCurve: (points) =>
     r = window.devicePixelRatio
