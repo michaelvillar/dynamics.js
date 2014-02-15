@@ -335,10 +335,10 @@ class Animation
   @index: 0
 
   constructor: (@el, @from, @to, @options = {}) ->
-    @frames = {
+    @frames = @parseFrames({
       0: @from,
       100: @to
-    }
+    })
     @options.duration ||= 1000
     @options.complete ||= null
     @options.type ||= Linear
@@ -347,6 +347,22 @@ class Animation
   tween: =>
     @_tween ||= new @options.type(this.options)
     @_tween
+
+  parseFrames: (frames) =>
+    newFrames = {}
+    for percent, properties of frames
+      newProperties = {}
+      for k, v of properties
+        vString = v + ""
+        match = vString.match /([-0-9.]*)(.*)/
+        value = parseFloat(match[1])
+        unit = match[2]
+        newProperties[k] = {
+          value: value,
+          unit: unit
+        }
+      newFrames[percent] = newProperties
+    newFrames
 
   start: =>
     @ts = null
@@ -368,23 +384,26 @@ class Animation
 
     transform = ''
     properties = {}
-    for k, value of frame1
-      value = parseFloat(value)
-      oldValue = frame0[k] || 0
+    for k, v of frame1
+      value = v.value
+      unit = v.unit
+      oldValue = frame0[k].value || 0
       dValue = value - oldValue
       newValue = oldValue + (dValue * at[1])
 
-      unit = ''
+      defaultUnit = ''
       isTransform = false
       if k in ['translateX', 'translateY', 'translateZ']
-        unit = 'px'
+        defaultUnit = 'px'
         isTransform = true
       else if k in ['rotateX', 'rotateY', 'rotateZ']
-        unit = 'deg'
+        defaultUnit = 'deg'
         isTransform = true
       else if k in ['scaleX', 'scaleY', 'scale']
         isTransform = true
         newValue = Math.max(newValue, 0)
+
+      unit = defaultUnit if unit == ""
 
       if isTransform
         transform += "#{k}(#{newValue}#{unit}) "

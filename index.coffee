@@ -496,10 +496,10 @@ class App
       return unless shouldDeleteCircle
       @createDynamic()
       new Dynamics.Animation(circle, {
-        translateX: if !dynamic.returnsToSelf then 350 else 0,
+        translateX: if !dynamic.returnsToSelf then '350px' else '0px',
         scale: 1
       }, {
-        translateX: if !dynamic.returnsToSelf then 350 else 0,
+        translateX: if !dynamic.returnsToSelf then '350px' else '0px',
         scale: 0
       }, {
         type: Dynamics.Types.Spring,
