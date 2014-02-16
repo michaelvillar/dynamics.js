@@ -183,6 +183,7 @@ div.circle {
   height: 34px;
   background: #007EFF;
   border-radius: 17px;
+  /*-webkit-transform: translate3d(40px,0,100px) rotateZ(170deg) rotateX(45deg) rotateY(210deg);*/
 }
 
 section.code {

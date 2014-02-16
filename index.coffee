@@ -447,8 +447,6 @@ class App
       pointsValue = JSON.stringify(@points)
       options += ",\n&nbsp;&nbsp;<strong>points</strong>: #{pointsValue}"
     code = '''new <strong>Dynamics.Animation</strong>(document.getElementId("circle"), {
-&nbsp;&nbsp;<strong>translateX</strong>: 0
-}, {
 &nbsp;&nbsp;<strong>translateX</strong>: ''' + translateX + '''
 
 }, {
@@ -464,53 +462,46 @@ class App
       options[slider.options.property] = slider.value()
     options.points = @points if @points
     if @dynamicsClass != Dynamics.Types.SelfSpring
-      from = { translateX: 0 }
       to = { translateX: 350 }
     else
-      from = { translateX: 0 }
       to = { translateX: 50 }
     if !@currentCircle
       @currentCircle = document.createElement('div')
       @currentCircle.classList.add('circle')
       @currentCircle.addEventListener 'click', =>
         @animate()
-      @currentCircle.style['-webkit-transform'] = 'scale(0)'
-      new Dynamics.Animation(@currentCircle, {
-        scale: 0
-      }, {
-        scale: 1
-      }, {
-        type: Dynamics.Types.Spring,
-        frequency: 0,
-        friction: 600,
-        anticipationStrength: 100,
-        anticipationSize: 10,
-        duration: 1000
-      }).start()
+      # @currentCircle.style['-webkit-transform'] = 'scale(0)'
+      # new Dynamics.Animation(@currentCircle, {
+      #   scale: 1
+      # }, {
+      #   type: Dynamics.Types.Spring,
+      #   frequency: 0,
+      #   friction: 600,
+      #   anticipationStrength: 100,
+      #   anticipationSize: 10,
+      #   duration: 1000
+      # }).start()
       document.querySelector('section.demo').appendChild(@currentCircle)
     circle = @currentCircle
     options.type = @dynamicsClass
-    @dynamic = dynamic = new Dynamics.Animation(circle, from, to, options)
+    @dynamic = dynamic = new Dynamics.Animation(circle, to, options)
     shouldDeleteCircle = !dynamic.returnsToSelf
     options.complete = =>
       return unless shouldDeleteCircle
       @createDynamic()
-      new Dynamics.Animation(circle, {
-        translateX: if !dynamic.returnsToSelf then '350px' else '0px',
-        scale: 1
-      }, {
-        translateX: if !dynamic.returnsToSelf then '350px' else '0px',
-        scale: 0
-      }, {
-        type: Dynamics.Types.Spring,
-        frequency: 0,
-        friction: 600,
-        anticipationStrength: 100,
-        anticipationSize: 10,
-        duration: 1000,
-        complete: =>
-          circle.parentNode.removeChild(circle)
-      }).start()
+      # new Dynamics.Animation(circle, {
+      #   translateX: if !dynamic.returnsToSelf then '350px' else '0px',
+      #   scale: 0
+      # }, {
+      #   type: Dynamics.Types.Spring,
+      #   frequency: 0,
+      #   friction: 600,
+      #   anticipationStrength: 100,
+      #   anticipationSize: 10,
+      #   duration: 1000,
+      #   complete: =>
+      #     circle.parentNode.removeChild(circle)
+      # }).start()
     if @dynamicsClass != Dynamics.Types.SelfSpring
       @track.classList.remove('tiny')
     else
