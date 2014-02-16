@@ -333,135 +333,12 @@ class BrowserSupport
         return prefix
     ''
 
-class Matrix
-  constructor: (t) ->
-    @t = t
-
-  multiply: (matrix) =>
-    newMatrix = [[],[],[]]
-    for i in [0..3]
-      for j in [0..3]
-        newMatrix[i][j] = (@t[i][0] * matrix.t[0][j]) + (@t[i][1] * matrix.t[1][j]) + (@t[i][2] * matrix.t[2][j]) + (@t[i][3] * matrix.t[3][j])
-    @t = newMatrix
-
-  toString: =>
-    str = "[\n"
-    for row in @t
-      str += row.join ','
-      str += "\n"
-    str + ']'
-
-  value: (i, j) =>
-    @t[j][i]
-
-  @identity: =>
-    new Matrix([
-      [1,0,0,0],
-      [0,1,0,0],
-      [0,0,1,0],
-      [0,0,0,1]
-    ])
-
-class Transform
-  constructor: (matrixStr) ->
-    # format: matrix(a, c, b, d, tx, ty)
-    match = matrixStr.match /matrix\(([-0-9\.]*), ([-0-9\.]*), ([-0-9\.]*), ([-0-9\.]*), ([-0-9\.]*), ([-0-9\.]*)\)/
-    if match
-      a = parseFloat(match[1])
-      b = parseFloat(match[2])
-      c = parseFloat(match[3])
-      d = parseFloat(match[4])
-      tx = parseFloat(match[5])
-      ty = parseFloat(match[6])
-      matrix = [[a,c,0,tx],[b,d,0,ty],[0,0,1,0],[0,0,0,1]]
-    else
-      # format: matrix3d(a, b, 0, 0, c, d, 0, 0, 0, 0, 1, 0, tx, ty, 0, 1)
-      match = matrixStr.match /matrix3d\(([^)]*)\)/
-      if match
-        content = match[1]
-        elements = content.split ','
-        matrix = [[],[],[],[]]
-        for i, element of elements
-          matrix[i % 4][Math.floor(i / 4)] = parseFloat(element)
-
-    @matrix = new Matrix(matrix)
-    console.log @matrix.toString()
-    console.log @decompose()
-
-  decompose: =>
-    a1 = @matrix.value(0,0)
-    a2 = @matrix.value(0,1)
-    a3 = @matrix.value(0,2)
-    b1 = @matrix.value(1,0)
-    b2 = @matrix.value(1,1)
-    b3 = @matrix.value(1,2)
-    c1 = @matrix.value(2,0)
-    c2 = @matrix.value(2,1)
-    c3 = @matrix.value(2,2)
-    rotateX = Math.atan2(b3, c3)
-    rotateY = Math.atan2(-a3, Math.sqrt(Math.pow(b3, 2) + Math.pow(c3, 2)))
-    rotateZ = Math.atan2(a2, a1)
-
-    scaleX = a1 / (Math.cos(rotateZ) * Math.cos(rotateY))
-    scaleY = b2 / ((Math.cos(rotateX) * Math.cos(rotateZ)) - (Math.sin(rotateX) * Math.sin(rotateY) * Math.sin(rotateZ)))
-
-    # scaleX =
-    # sx = a1 / (Math.cos(z) * Math.cos(y))
-    # sx = a3 / Math.sin(y)
-
-    # Math.cos(y) / Math.sin(y) = a1 / (Math.cos(z) * a3)
-    # Math.tan(y) = (Math.cos(z) * a3) / a1
-
-    # Order of transforms
-    # scale() rotateZ() rotateY() rotateX()
-    {
-      translateX: @matrix.value(3,0),
-      translateY: @matrix.value(3,1)
-      translateZ: @matrix.value(3,2),
-      rotateX: rotateX,
-      rotateY: rotateY,
-      rotateZ: rotateZ,
-      scaleX: scaleX,
-      scaleY: scaleY
-    }
-
-  # decompose: =>
-  #   a = @matrix.value(0,0)
-  #   b = @matrix.value(1,0)
-  #   c = @matrix.value(0,1)
-  #   d = @matrix.value(1,1)
-  #   tx = @matrix.value(2,0)
-  #   ty = @matrix.value(2,1)
-  #   signa = Math.abs(a) / a
-  #   signd = Math.abs(d) / d
-  #   sx = signa * Math.sqrt((a * a) + (b * b))
-  #   sy = signd * Math.sqrt((c * c) + (d * d))
-  #   angle = Math.atan(c / d)
-  #   console.log 'tx', tx, 'ty', ty, 'sx', sx, 'sy', sy, 'angle', angle
-
-window.Matrix = Matrix
-window.Transform = Transform
-
-# Transform Test
-setTimeout =>
-  test = document.createElement('div')
-  document.body.appendChild(test)
-  transform = ' scale(10) rotateZ(0.1rad) rotateY(1rad) rotateX(0.5rad)'
-  # transform = 'scale(10) rotateZ(90deg)'
-  console.log transform
-  test.style.webkitTransform = transform
-  setTimeout =>
-    transform = window.getComputedStyle(test, null).webkitTransform
-    console.log transform
-    new Transform(transform)
-  , 100
-, 100
-
 # Public Classes
 class Animation
   @index: 0
 
   constructor: (@el, @to, @options = {}) ->
+    redraw = @el.offsetHeight # Hack to redraw the element
     @frames = @parseFrames({
       0: @getFirstFrame(@to),
       100: @to
@@ -479,23 +356,39 @@ class Animation
     el = document.createElement('div')
     el.style[BrowserSupport.transform()] = transform
     document.body.appendChild(el)
-    window.getComputedStyle(@el, null)
+    style = window.getComputedStyle(el, null)
+    style[BrowserSupport.transform()]
+
+  convertToMatrix3d: (transform) =>
+    unless /matrix/.test transform
+      transform = 'matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)'
+    else
+      # format: matrix(a, c, b, d, tx, ty)
+      match = transform.match /matrix\(([-0-9\.]*), ([-0-9\.]*), ([-0-9\.]*), ([-0-9\.]*), ([-0-9\.]*), ([-0-9\.]*)\)/
+      if match
+        a = parseFloat(match[1])
+        b = parseFloat(match[2])
+        c = parseFloat(match[3])
+        d = parseFloat(match[4])
+        tx = parseFloat(match[5])
+        ty = parseFloat(match[6])
+        transform = "matrix3d(#{a}, #{b}, 0, 0, #{c}, #{d}, 0, 0, 0, 0, 1, 0, #{tx}, #{ty}, 0, 1)"
+
+    # format: matrix3d(a, b, 0, 0, c, d, 0, 0, 0, 0, 1, 0, tx, ty, 0, 1)
+    match = transform.match /matrix3d\(([^)]*)\)/
+    elements = null
+    if match
+      content = match[1]
+      elements = content.split(',').map(parseFloat)
+    elements
 
   getFirstFrame: (properties) =>
     frame = {}
     style = window.getComputedStyle(@el, null)
-    # console.log style
-    transform = style[BrowserSupport.transform()] || ''
-    transformArr = transform.split ' '
-    frame = {}
-    for transform in transformArr
-      match = transform.match /([a-zA-Z]*)\(([^)]*)\)/
-      if match
-        frame[match[1]] = match[2]
     for k of properties
-      v = @el.style[k]
+      v = @el.style[BrowserSupport.withPrefix(k)]
+      v = style[BrowserSupport.withPrefix(k)] unless v
       frame[k] = v if v
-    # console.log frame
     frame
 
   parseFrames: (frames) =>
@@ -503,10 +396,14 @@ class Animation
     for percent, properties of frames
       newProperties = {}
       for k, v of properties
-        vString = v + ""
-        match = vString.match /([-0-9.]*)(.*)/
-        value = parseFloat(match[1])
-        unit = match[2]
+        if k != 'transform'
+          vString = v + ""
+          match = vString.match /([-0-9.]*)(.*)/
+          value = parseFloat(match[1])
+          unit = match[2]
+        else
+          value = @convertToMatrix3d(@convertTransformToMatrix(v))
+          unit = ''
         newProperties[k] = {
           value: value,
           unit: unit
@@ -541,34 +438,24 @@ class Animation
     for k, v of frame1
       value = v.value
       unit = v.unit
-      oldValue = null
-      oldValue = frame0[k].value if frame0[k]
-      oldValue = @defaultForProperty(k) unless oldValue
-      dValue = value - oldValue
-      newValue = oldValue + (dValue * at[1])
 
-      defaultUnit = ''
-      isTransform = false
-      if k in ['translateX', 'translateY', 'translateZ']
-        defaultUnit = 'px'
-        isTransform = true
-      else if k in ['rotateX', 'rotateY', 'rotateZ']
-        defaultUnit = 'deg'
-        isTransform = true
-      else if k in ['scaleX', 'scaleY', 'scale']
-        isTransform = true
-        newValue = Math.max(newValue, 0)
-
-      unit = defaultUnit if unit == ""
-
-      if isTransform
-        transform += "#{k}(#{newValue}#{unit}) "
+      if value instanceof Array
+        oldValue = frame0[k].value
+        newValue = []
+        for i of value
+          dValue = value[i] - oldValue[i]
+          newValue.push(oldValue[i] + (dValue * at[1]))
+        properties['transform'] = "matrix3d(#{newValue.join(',')})"
       else
+        oldValue = null
+        oldValue = frame0[k].value if frame0[k]
+        oldValue = @defaultForProperty(k) unless oldValue
+        dValue = value - oldValue
+        newValue = oldValue + (dValue * at[1])
         properties[k] = newValue
 
-    @el.style[BrowserSupport.transform()] = transform if transform
     for k, v of properties
-      @el.style[k] = v
+      @el.style[BrowserSupport.withPrefix(k)] = v
 
     if t < 1
       requestAnimationFrame @frame
