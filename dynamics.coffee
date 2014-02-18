@@ -268,7 +268,11 @@ class Bezier extends Tween
         B = aB
       break if B != null
 
-    return 0 unless B
+    unless B
+      if @returnsToSelf
+        return 0
+      else
+        return 1
 
     # Find the percent with dichotomy
     xTolerance = 0.0001
