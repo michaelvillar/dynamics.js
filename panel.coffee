@@ -333,7 +333,6 @@ class Panel
       @dynamicsClasses.push v
 
     @currentCircle = null
-    @track = document.querySelector('div.track')
     @select = document.querySelector('select.dynamics')
     @dynamicsClass = @dynamicsClasses[0]
     for aDynamicsClass in @dynamicsClasses
@@ -395,100 +394,22 @@ class Panel
       slider.onUpdate = @update
 
   update: =>
-    args = {}
+    options = {}
     for slider in @sliders
-      args[slider.options.property] = slider.value()
-    args['type'] = @dynamicsClass.name if @dynamicsClass
-    args['points'] = JSON.stringify(@points) if @points
-    @options = args
-    clearTimeout @animationTimeout if @animationTimeout
-    @animationTimeout = setTimeout(@animate, 400)
+      options[slider.options.property] = slider.value()
+    options['type'] = @dynamicsClass if @dynamicsClass
+    options['points'] = JSON.stringify(@points) if @points
+    @options = options
 
-    @createDynamic()
-
-    @graph.tween = @dynamic.tween()
+    dynamic = new Dynamics.Animation(document.createElement('div'), {}, options)
+    @graph.tween = dynamic.tween()
     @graph.points = @points
     @graph.pointsChanged = @update
     @graph.draw()
 
     for uiProperty in @properties
-      uiProperty.setValue(@dynamic.tween()[uiProperty.options.property]())
+      uiProperty.setValue(dynamic.tween()[uiProperty.options.property]())
 
     @onUpdate?()
-
-  code: =>
-    translateX = if @dynamicsClass != Dynamics.Types.SelfSpring then 350 else 50
-    options = "&nbsp;&nbsp;<strong>type</strong>: Dynamics.Types.#{@dynamicsClass.name}"
-    for slider in @sliders
-      options += ",\n" if options != ''
-      options += "&nbsp;&nbsp;<strong>#{slider.options.property}</strong>: #{slider.value()}"
-    if @points
-      pointsValue = JSON.stringify(@points)
-      options += ",\n&nbsp;&nbsp;<strong>points</strong>: #{pointsValue}"
-    code = '''new <strong>Dynamics.Animation</strong>(document.getElementId("circle"), {
-&nbsp;&nbsp;<strong>transform</strong>: "translateX(''' + translateX + '''px)"
-}, {
-
-''' + options + '''
-
-}).start();'''
-    code
-
-  createDynamic: =>
-    options = { }
-    for slider in @sliders
-      options[slider.options.property] = slider.value()
-    options.points = @points if @points
-    if @dynamicsClass != Dynamics.Types.SelfSpring
-      to = { transform: 'translateX(350px)' }
-    else
-      to = { transform: 'translateX(50px)' }
-    if !@currentCircle
-      @currentCircle = document.createElement('div')
-      @currentCircle.classList.add('circle')
-      @currentCircle.addEventListener 'click', =>
-        @animate()
-      @currentCircle.style['-webkit-transform'] = 'scale(0)'
-      @currentCircle.style['transform'] = 'scale(0)'
-      new Dynamics.Animation(@currentCircle, {
-        transform: 'scale(1)'
-      }, {
-        type: Dynamics.Types.Spring,
-        frequency: 0,
-        friction: 600,
-        anticipationStrength: 100,
-        anticipationSize: 10,
-        duration: 1000
-      }).start()
-      document.querySelector('section.demo').appendChild(@currentCircle)
-    circle = @currentCircle
-    options.type = @dynamicsClass
-    @dynamic = dynamic = new Dynamics.Animation(circle, to, options)
-    shouldDeleteCircle = !dynamic.returnsToSelf
-    options.complete = =>
-      return unless shouldDeleteCircle
-      @createDynamic()
-      new Dynamics.Animation(circle, {
-        transform: if !dynamic.returnsToSelf then 'translateX(350px) scale(0)' else 'translateX(0px) scale(0)',
-      }, {
-        type: Dynamics.Types.Spring,
-        frequency: 0,
-        friction: 600,
-        anticipationStrength: 100,
-        anticipationSize: 10,
-        duration: 1000,
-        complete: =>
-          circle.parentNode.removeChild(circle)
-      }).start()
-    if @dynamicsClass != Dynamics.Types.SelfSpring
-      @track.classList.remove('tiny')
-    else
-      @track.classList.add('tiny')
-
-  animate: =>
-    @createDynamic()
-    @dynamic.start()
-    if !@dynamic.returnsToSelf
-      @currentCircle = null
 
 window.Panel = Panel
