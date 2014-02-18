@@ -25,6 +25,7 @@ class App
     @codeSection = document.querySelector('section.code')
     @panel = new Panel(Tools.valuesFromURL())
     @panel.onUpdate = @update
+    document.querySelector('section.panel').appendChild(@panel.el)
     @update()
 
   update: =>

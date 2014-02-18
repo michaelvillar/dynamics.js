@@ -328,12 +328,47 @@ class UISlider
 
 class Panel
   constructor: (@options) ->
+    @el = document.createElement('div')
+    @el.className = 'dynamicsPanel'
+
+    graphEl = document.createElement('div')
+    graphEl.className = 'graph'
+
+    canvas = document.createElement('canvas')
+    canvas.width = "350"
+    canvas.height = "350"
+
+    spanIndex0 = document.createElement('span')
+    spanIndex0.className = 'index0'
+    spanIndex0.innerHTML = '0'
+
+    spanIndex1 = document.createElement('span')
+    spanIndex1.className = 'index1'
+    spanIndex1.innerHTML = '1'
+
+    graphEl.appendChild(canvas)
+    graphEl.appendChild(spanIndex0)
+    graphEl.appendChild(spanIndex1)
+    @el.appendChild(graphEl)
+
+    settingsEl = document.createElement('div')
+    settingsEl.className = 'settings'
+
+    @select = document.createElement('select')
+    @select.className = 'dynamics'
+
+    @optionsEl = document.createElement('div')
+    @optionsEl.className = 'options'
+
+    settingsEl.appendChild(@select)
+    settingsEl.appendChild(@optionsEl)
+    @el.appendChild(settingsEl)
+
     @dynamicsClasses = []
     for k, v of Dynamics.Types
       @dynamicsClasses.push v
 
     @currentCircle = null
-    @select = document.querySelector('select.dynamics')
     @dynamicsClass = @dynamicsClasses[0]
     for aDynamicsClass in @dynamicsClasses
       if aDynamicsClass.name == @options.type
@@ -344,7 +379,7 @@ class Panel
       option.selected = aDynamicsClass == @dynamicsClass
       @select.appendChild option
     @select.addEventListener 'change', @selectDidChange
-    @graph = new Graph(document.querySelector('canvas'))
+    @graph = new Graph(canvas)
     @sliders = []
     @properties = []
 
@@ -358,8 +393,7 @@ class Panel
     @update()
 
   updateOptions: =>
-    tweenOptionsEl = document.querySelector('.options')
-    tweenOptionsEl.innerHTML = ''
+    @optionsEl.innerHTML = ''
     values = @options
     @sliders = []
     @properties = []
@@ -379,7 +413,7 @@ class Panel
           value: 'N/A',
           property: property
         })
-        tweenOptionsEl.appendChild(uiProperty.el)
+        @optionsEl.appendChild(uiProperty.el)
         @properties.push(uiProperty)
       else
         slider = new UISlider({
@@ -388,7 +422,7 @@ class Panel
           value: values[property] || config.default,
           property: property
         })
-        tweenOptionsEl.appendChild(slider.el)
+        @optionsEl.appendChild(slider.el)
         @sliders.push slider
     for slider in @sliders
       slider.onUpdate = @update
