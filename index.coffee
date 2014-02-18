@@ -447,7 +447,7 @@ class App
       pointsValue = JSON.stringify(@points)
       options += ",\n&nbsp;&nbsp;<strong>points</strong>: #{pointsValue}"
     code = '''new <strong>Dynamics.Animation</strong>(document.getElementId("circle"), {
-&nbsp;&nbsp;<strong>transform</strong>: translateX(''' + translateX + '''px)
+&nbsp;&nbsp;<strong>transform</strong>: "translateX(''' + translateX + '''px)"
 }, {
 
 ''' + options + '''
@@ -470,6 +470,7 @@ class App
       @currentCircle.addEventListener 'click', =>
         @animate()
       @currentCircle.style['-webkit-transform'] = 'scale(0)'
+      @currentCircle.style['transform'] = 'scale(0)'
       new Dynamics.Animation(@currentCircle, {
         transform: 'scale(1)'
       }, {

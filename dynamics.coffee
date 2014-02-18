@@ -319,6 +319,7 @@ class BrowserSupport
 
   @withPrefix: (property) ->
     prefix = @prefixFor(property)
+    return "#{prefix}#{property.substring(0, 1).toUpperCase() + property.substring(1)}" if prefix == 'Moz'
     return "-#{prefix.toLowerCase()}-#{property}" if prefix != ''
     property
 
@@ -352,12 +353,12 @@ class Animation
     @_tween ||= new @options.type(this.options)
     @_tween
 
-  convertTransformToMatrix: (transform) =>
-    el = document.createElement('div')
-    el.style[BrowserSupport.transform()] = transform
-    document.body.appendChild(el)
-    style = window.getComputedStyle(el, null)
-    style[BrowserSupport.transform()]
+  convertTransformToMatrix: (transform, callback) =>
+    matrixEl = document.createElement('div')
+    matrixEl.style[BrowserSupport.transform()] = transform
+    document.body.appendChild(matrixEl)
+    style = window.getComputedStyle(matrixEl, null)
+    style.transform || style[BrowserSupport.transform()]
 
   convertToMatrix3d: (transform) =>
     unless /matrix/.test transform
@@ -388,7 +389,7 @@ class Animation
     for k of properties
       v = @el.style[BrowserSupport.withPrefix(k)]
       v = style[BrowserSupport.withPrefix(k)] unless v
-      frame[k] = v if v
+      frame[k] = v
     frame
 
   parseFrames: (frames) =>
