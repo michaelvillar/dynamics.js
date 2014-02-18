@@ -78,7 +78,7 @@ div.settings select {
   color: #fff;
   font-size: 13px;
   margin-bottom: 15px;
-  text-align: center;
+  text-align: left;
   background: #007EFF url(arrows.png) no-repeat 190px 9px;
   background-size: 5px 8px;
 }
