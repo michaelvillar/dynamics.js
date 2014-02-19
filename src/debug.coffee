@@ -56,13 +56,13 @@ div#DynamicsInteractivePanel > div.settings select {
   font-size: 13px;
   margin-bottom: 15px;
   text-align: left;
-  background: #007EFF url(img/arrows.png) no-repeat 190px 9px;
+  background: #007EFF url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAICAYAAAAx8TU7AAAAOUlEQVQIHWNgAIL///8bAPFpEA3igwR4gPgWEIMAiOYBCS4C8ZDAIrBq4gigNkztQEFMi6AuQHESAPMeXiEMiWfpAAAAAElFTkSuQmCC) no-repeat 190px 9px;
   background-size: 5px 8px;
 }
 @media only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min--moz-device-pixel-ratio: 1.5), only screen and (min-device-pixel-ratio: 1.5)
 {
   div#DynamicsInteractivePanel > div.settings select {
-    background-image: url(img/arrows@2x.png);
+    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAQCAYAAAAvf+5AAAAAeklEQVQoFc2SwQ2AIAxFGYALo7CY7OQGMo6beMJXQ5PWYOAoyael/5FAIQQzWmsJHV3JWD4FqEhH9W5f4RYlTCwOxsjoMoCmUssPTBLRqc4gihcD0z4w36XdHeGvi+XLAK61R24KPG+4tgR49ISb+i4Czz+F7AD8/GY3j4s9N2crn9sAAAAASUVORK5CYII=);
   }
 }
 div#DynamicsInteractivePanel > div.settings select:focus {
