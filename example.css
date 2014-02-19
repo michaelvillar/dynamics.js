@@ -1,0 +1,14 @@
+body {
+  background: #f2ddde;
+}
+
+#triangle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0px;
+  height: 0px;
+  border-style: solid;
+  border-width: 0 50px 82px 50px;
+  border-color: transparent transparent red transparent;
+}

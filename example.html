@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dynamics.js - Example</title>
+  <link rel="stylesheet" href="example.css">
+  <script src="js/dynamics.js"></script>
+  <script src="js/debug.js"></script>
+</head>
+<body>
+  <div id="triangle"></div>
+  <script>
+  var triangle = document.getElementById("triangle");
+  window.addEventListener('mousedown', function(e) {
+    new Dynamics.Animation(triangle, {
+      transform: "rotate("+Math.round(Math.random() * 720 - 360)+"deg)"
+    }, {
+      type: Dynamics.Types.Spring,
+      frequency: 15,
+      friction: 100,
+      anticipationStrength: 115,
+      anticipationSize: 10,
+      duration: 1000,
+      debug: false
+    }).start();
+  });
+  </script>
+</body>
+</html>
