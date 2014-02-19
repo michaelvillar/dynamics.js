@@ -7,7 +7,7 @@
 body {
   background: white;
   min-width: 600px;
-  padding: 0 20px 40px 20px;
+  padding: 0 0 40px 0;
 }
 
 header {
@@ -30,114 +30,24 @@ header > h2 {
   margin: 5px auto 0;
 }
 
+/* More specific than the original style */
+body > div#DynamicsInteractivePanel {
+  position: absolute;
+  left: 50%;
+  top: 165px;
+  margin-left: -292px;
+  border: none;
+  box-shadow: none;
+}
+
 section {
   position: relative;
-  width: 600px;
+  width: 564px;
   margin: 0 auto;
 }
 
-div.graph {
-  position: relative;
-  height: 350px;
-  width: 350px;
-  user-select: none;
-  -webkit-user-select: none;
-  cursor: default;
-}
-div.graph > span {
-  font-size: 10px;
-  color: #8096B1;
-  position: absolute;
-  left: 356px;
-}
-div.graph > span.index1 { top: 112px; }
-div.graph > span.index0 { top: 228px; }
-
-canvas {
-  background: #F4F9FF;
-}
-
-div.settings {
-  position: absolute;
-  top: 20px;
-  right: 0;
-  width: 205px;
-  -webkit-user-select: none;
-  -moz-select: none;
-  user-select: none;
-}
-div.settings select {
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  border: none;
-  width: 100%;
-  height: 27px;
-  border-radius: 5px;
-  padding: 6px 20px 6px 6px;
-  color: #fff;
-  font-size: 13px;
-  margin-bottom: 15px;
-  text-align: left;
-  background: #007EFF url(arrows.png) no-repeat 190px 9px;
-  background-size: 5px 8px;
-}
-@media only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min--moz-device-pixel-ratio: 1.5), only screen and (min-device-pixel-ratio: 1.5)
-{
-  div.settings select {
-    background-image: url(arrows@2x.png);
-  }
-}
-div.settings select:focus {
-  outline: none;
-  background-color: #394E6E;
-}
-div.settings label {
-  float: left;
-  color: #394E6E;
-  font-size: 13px;
-}
-div.settings .value {
-  float: right;
-  color: #394E6E;
-  font-size: 13px;
-  margin-bottom: 4px
-}
-
-div.slider {
-  clear: both;
-  position: relative;
-  width: 100%;
-  height: 20px;
-  margin-bottom: 7px;
-  user-select: none;
-  -webkit-user-select: none;
-  cursor: default;
-}
-div.slider .bar {
-  position: absolute;
-  top: 4px;
-  left: 0;
-  background: #e0effe;
-  height: 3px;
-  width: 100%;
-  border-radius: 3px;
-}
-div.slider .control {
-  position: absolute;
-  top: 0;
-  left: 0;
-  background: #fff;
-  height: 7px;
-  width: 7px;
-  border: 2px solid #007EFF;
-  border-radius: 6px;
-}
-div.slider .control:active {
-  border-color: black;
-}
-
 section.demo {
+  margin-top: 370px;
   height: 114px;
 }
 div.track {
