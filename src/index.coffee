@@ -28,7 +28,7 @@ class App
     urlOptions = Tools.valuesFromURL()
     urlOptions.points = JSON.parse(urlOptions.points) if urlOptions.points
     defaultOptions = {
-      type: Dynamics.Types.Spring,
+      type: 'Spring',
       frequency: 15,
       friction: 100,
       anticipationStrength: 115,
