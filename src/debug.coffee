@@ -2,19 +2,41 @@ css = '''
 div#DynamicsInteractivePanel, div#DynamicsInteractivePanel * {
   margin: 0;
   padding: 0;
+  border: 0;
   font-family: "HelveticaNeue", "Helvetica Neue", Helvetica, Arial;
+  color: #000;
 }
 div#DynamicsInteractivePanel {
   position: absolute;
-  width: 564px;
-  height: 350px;
-  padding: 10px;
+  top: 10px;
+  left: 10px;
+  width: 584px;
+  height: 378px;
+  padding: 0 0 10px 0;
   border-radius: 8px;
-  border: 1px solid rgba(0, 0, 0, .1);
-  box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, .15),
+              0 2px 10px rgba(0, 0, 0, .25);
   background: white
 }
-div#DynamicsInteractivePanel > div.graph {
+div#DynamicsInteractivePanel > div.title {
+  position: absolute;
+  padding: 6px 0;
+  width: 100%;
+  color: #394E6E;
+  font-size: 13px;
+  text-align: center;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: default;
+  font-family: "HelveticaNeueMedium", "HelveticaNeue-Medium", "Helvetica Neue Medium", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial
+}
+div#DynamicsInteractivePanel > div.content {
+  position: absolute;
+  top: 28px;
+  left: 10px;
+  right: 10px;
+}
+div#DynamicsInteractivePanel > div.content > div.graph {
   position: relative;
   height: 350px;
   width: 350px;
@@ -23,28 +45,28 @@ div#DynamicsInteractivePanel > div.graph {
   -webkit-user-select: none;
   cursor: default;
 }
-div#DynamicsInteractivePanel > div.graph > span {
+div#DynamicsInteractivePanel > div.content > div.graph > span {
   font-size: 10px;
   color: #8096B1;
   position: absolute;
   left: 2px;
   margin-top: -5px;
 }
-div#DynamicsInteractivePanel > div.graph > span.index1 { top: 112px; }
-div#DynamicsInteractivePanel > div.graph > span.index0 { top: 228px; }
-div#DynamicsInteractivePanel > div.graph > canvas {
+div#DynamicsInteractivePanel > div.content > div.graph > span.index1 { top: 112px; }
+div#DynamicsInteractivePanel > div.content > div.graph > span.index0 { top: 228px; }
+div#DynamicsInteractivePanel > div.content > div.graph > canvas {
   background: #F4F9FF;
 }
-div#DynamicsInteractivePanel > div.settings {
+div#DynamicsInteractivePanel > div.content > div.settings {
   position: absolute;
   top: 10px;
-  right: 10px;
+  right: 0;
   width: 205px;
   -webkit-user-select: none;
   -moz-select: none;
   user-select: none;
 }
-div#DynamicsInteractivePanel > div.settings select {
+div#DynamicsInteractivePanel > div.content > div.settings select {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
@@ -62,26 +84,26 @@ div#DynamicsInteractivePanel > div.settings select {
 }
 @media only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min--moz-device-pixel-ratio: 1.5), only screen and (min-device-pixel-ratio: 1.5)
 {
-  div#DynamicsInteractivePanel > div.settings select {
+  div#DynamicsInteractivePanel > div.content > div.settings select {
     background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAQCAYAAAAvf+5AAAAAeklEQVQoFc2SwQ2AIAxFGYALo7CY7OQGMo6beMJXQ5PWYOAoyael/5FAIQQzWmsJHV3JWD4FqEhH9W5f4RYlTCwOxsjoMoCmUssPTBLRqc4gihcD0z4w36XdHeGvi+XLAK61R24KPG+4tgR49ISb+i4Czz+F7AD8/GY3j4s9N2crn9sAAAAASUVORK5CYII=);
   }
 }
-div#DynamicsInteractivePanel > div.settings select:focus {
+div#DynamicsInteractivePanel > div.content > div.settings select:focus {
   outline: none;
   background-color: #394E6E;
 }
-div#DynamicsInteractivePanel > div.settings label {
+div#DynamicsInteractivePanel > div.content > div.settings label {
   float: left;
   color: #394E6E;
   font-size: 13px;
 }
-div#DynamicsInteractivePanel > div.settings .value {
+div#DynamicsInteractivePanel > div.content > div.settings .value {
   float: right;
   color: #394E6E;
   font-size: 13px;
   margin-bottom: 4px
 }
-div#DynamicsInteractivePanel > div.settings div.slider {
+div#DynamicsInteractivePanel > div.content > div.settings div.slider {
   clear: both;
   position: relative;
   width: 100%;
@@ -91,7 +113,7 @@ div#DynamicsInteractivePanel > div.settings div.slider {
   -webkit-user-select: none;
   cursor: default;
 }
-div#DynamicsInteractivePanel > div.settings div.slider .bar {
+div#DynamicsInteractivePanel > div.content > div.settings div.slider .bar {
   position: absolute;
   top: 4px;
   left: 0;
@@ -100,7 +122,7 @@ div#DynamicsInteractivePanel > div.settings div.slider .bar {
   width: 100%;
   border-radius: 3px;
 }
-div#DynamicsInteractivePanel > div.settings div.slider .control {
+div#DynamicsInteractivePanel > div.content > div.settings div.slider .control {
   position: absolute;
   top: 0;
   left: 0;
@@ -110,7 +132,7 @@ div#DynamicsInteractivePanel > div.settings div.slider .control {
   border: 2px solid #007EFF;
   border-radius: 6px;
 }
-div#DynamicsInteractivePanel > div.settings div.slider .control:active {
+div#DynamicsInteractivePanel > div.content > div.settings div.slider .control:active {
   border-color: black;
 }
 '''
@@ -469,6 +491,17 @@ class UIPanel
 
     @el = document.createElement('div')
     @el.id = 'DynamicsInteractivePanel'
+    @el.addEventListener 'click', (e) ->
+      e.stopPropagation()
+
+    windowTitle = document.createElement('div')
+    windowTitle.className = 'title'
+    windowTitle.innerHTML = "Dynamics.js - Curve creator"
+    @makeDraggable(windowTitle)
+    @el.appendChild(windowTitle)
+
+    contentEl = document.createElement('div')
+    contentEl.className = 'content'
 
     graphEl = document.createElement('div')
     graphEl.className = 'graph'
@@ -488,7 +521,7 @@ class UIPanel
     graphEl.appendChild(canvas)
     graphEl.appendChild(spanIndex0)
     graphEl.appendChild(spanIndex1)
-    @el.appendChild(graphEl)
+    contentEl.appendChild(graphEl)
 
     settingsEl = document.createElement('div')
     settingsEl.className = 'settings'
@@ -501,7 +534,8 @@ class UIPanel
 
     settingsEl.appendChild(@select)
     settingsEl.appendChild(@optionsEl)
-    @el.appendChild(settingsEl)
+    contentEl.appendChild(settingsEl)
+    @el.appendChild(contentEl)
 
     @dynamicsClasses = []
     for k, v of Dynamics.Types
@@ -610,6 +644,26 @@ class UIPanel
       else
         @currentAnimation = null
       @refreshFromAnimation()
+
+  makeDraggable: (el) =>
+    initialPos = null
+    initialTopLeft = null
+    _windowMouseMove = (e) =>
+      pos = { x: e.pageX, y: e.pageY }
+      @el.style.top = (Math.max(0, initialTopLeft.top + pos.y - initialPos.y)) + 'px'
+      @el.style.left = (initialTopLeft.left + pos.x - initialPos.x) + 'px'
+
+    _windowMouseUp = (e) =>
+      window.removeEventListener('mousemove', _windowMouseMove)
+      window.removeEventListener('mouseup', _windowMouseUp)
+
+    el.addEventListener 'mousedown', (e) =>
+      initialPos = { x: e.pageX, y: e.pageY }
+      style = window.getComputedStyle(@el)
+      initialTopLeft = { top: parseInt(style.top, 10), left: parseInt(style.left, 10) }
+
+      window.addEventListener('mousemove', _windowMouseMove)
+      window.addEventListener('mouseup', _windowMouseUp)
 
 Overrides =
   overrides: {}

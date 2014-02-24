@@ -34,10 +34,13 @@ header > h2 {
 body > div#DynamicsInteractivePanel {
   position: absolute;
   left: 50%;
-  top: 165px;
+  top: 140px;
   margin-left: -292px;
   border: none;
   box-shadow: none;
+}
+body > div#DynamicsInteractivePanel > div.title {
+  display: none;
 }
 
 section {
@@ -47,7 +50,7 @@ section {
 }
 
 section.demo {
-  margin-top: 370px;
+  margin-top: 360px;
   height: 114px;
 }
 div.track {
