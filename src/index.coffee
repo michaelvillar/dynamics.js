@@ -54,7 +54,7 @@ class App
     # Update URL
     options = {}
     for k, v of @animation.options
-      continue if k == 'debug' or v == null or (typeof(v) == 'function' and k != 'type')
+      continue if k == 'debugName' or v == null or (typeof(v) == 'function' and k != 'type')
       if k == 'type'
         options[k] = v.name
       else if k == 'points'
@@ -76,7 +76,7 @@ class App
     options = {}
     for k, v of @options
       options[k] = v
-    options.debug = true
+    options.debugName = 'animation1'
     options.complete = =>
       # Create a dummy circle to animate the end
       toDestroyCircle = document.createElement('div')

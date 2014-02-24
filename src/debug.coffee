@@ -576,10 +576,11 @@ class UIPanel
       options[slider.options.property] = slider.value()
     options['type'] = @dynamicsClass if @dynamicsClass
     options['points'] = @points if @points
-    for k in ['complete', 'optionsChanged', 'debug']
+    for k in ['complete', 'optionsChanged', 'debugName']
       options[k] = @currentAnimation.options[k]
     @options = options
 
+    Overrides.setOverride(@options, @currentAnimation.options.debugName)
     @currentAnimation.setOptions(@options)
 
     @graph.dynamic = @currentAnimation.dynamic()
@@ -610,8 +611,30 @@ class UIPanel
         @currentAnimation = null
       @refreshFromAnimation()
 
+Overrides =
+  overrides: {}
+
+  for: (name) =>
+    return true
+
+  getOverride: (options, name) =>
+    return options unless Overrides.overrides[name]
+    newOptions = {}
+    for k, v of options
+      newOptions[k] = v
+    for k, v of Overrides.overrides[name]
+      newOptions[k] = v if k != 'complete'
+    newOptions
+
+  setOverride: (options, name) =>
+    newOptions = {}
+    for k, v of options
+      newOptions[k] = v
+    Overrides.overrides[name] = newOptions
+
 window.Dynamics = {} if !window.Dynamics
 window.Dynamics.InteractivePanel = new UIPanel
+window.Dynamics.Overrides = Overrides
 
 onReady =>
   style = document.createElement('style')

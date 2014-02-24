@@ -651,7 +651,7 @@ class Animation
       100: @to
     })
     @setOptions(options)
-    if @options.debug and Dynamics.InteractivePanel
+    if @options.debugName and Dynamics.InteractivePanel
       Dynamics.InteractivePanel.addAnimation(@)
 
   setOptions: (options = {}) =>
@@ -663,6 +663,9 @@ class Animation
     @options.type ||= Linear
     @returnsToSelf = false || @dynamic().returnsToSelf
     @_dynamic = null
+
+    if @options.debugName and Dynamics.Overrides and Dynamics.Overrides.for(@options.debugName)
+      @options = Dynamics.Overrides.getOverride(@options, @options.debugName)
 
     optionsChanged?()
 
