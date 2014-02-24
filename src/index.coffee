@@ -30,7 +30,7 @@ class App
     defaultOptions = {
       type: 'Spring',
       frequency: 15,
-      friction: 100,
+      friction: 200,
       anticipationStrength: 115,
       anticipationSize: 10,
       duration: 1000
@@ -84,7 +84,7 @@ class App
       toDestroyCircle.style.transform = toDestroyCircle.style.MozTransform = toDestroyCircle.style.webkitTransform = 'translateX(350px)'
       @demoSection.appendChild(toDestroyCircle)
       destroyingAnimation = new Dynamics.Animation(toDestroyCircle, {
-        transform: 'translateX(350px) scale(0)'
+        transform: 'translateX(350px) scale(0.01)'
       }, {
         type: Dynamics.Types.Spring,
         frequency: 0,
@@ -97,7 +97,7 @@ class App
       }).start()
 
       # Position the circle at the starting point
-      @circle.style.transform = @circle.style.MozTransform = @circle.style.webkitTransform = 'scale(0)'
+      @circle.style.transform = @circle.style.MozTransform = @circle.style.webkitTransform = 'scale(0.01)'
       showingAnimation = new Dynamics.Animation(@circle, {
         transform: ''
       }, {

@@ -3,20 +3,26 @@
 <head>
   <title>Dynamics.js - Example</title>
   <link rel="stylesheet" href="example.css">
+  <script src="js/sylvester.js"></script>
   <script src="js/dynamics.js"></script>
   <script src="js/debug.js"></script>
 </head>
 <body>
+  <div id="triangle2"></div>
   <div id="triangle"></div>
   <script>
   var triangle = document.getElementById("triangle");
+  var triangle2 = document.getElementById("triangle2");
+  var done = true;
   window.addEventListener('mousedown', function(e) {
+    var transform = "translateX("+(e.pageX - 50)+"px) translateY("+(e.pageY - 50)+"px) rotate("+Math.round(Math.random() * 360 - 180)+"deg) skew("+(Math.random() * 2 - 1)+"rad)";
+    triangle2.style.transform = triangle2.style['-webkit-transform'] = transform;
     new Dynamics.Animation(triangle, {
-      transform: "rotate("+Math.round(Math.random() * 720 - 360)+"deg)"
+      transform: transform
     }, {
       type: Dynamics.Types.Spring,
       frequency: 15,
-      friction: 100,
+      friction: 166,
       anticipationStrength: 115,
       anticipationSize: 10,
       duration: 1000,

@@ -124,7 +124,7 @@ class GravityWithForce extends Gravity
 class Spring extends Dynamic
   @properties:
     frequency: { min: 0, max: 100, default: 15 }
-    friction: { min: 1, max: 1000, default: 100 }
+    friction: { min: 1, max: 1000, default: 200 }
     anticipationStrength: { min: 0, max: 1000, default: 115 }
     anticipationSize: { min: 0, max: 99, default: 10 }
     duration: { min: 100, max: 4000, default: 1000 }
@@ -328,6 +328,318 @@ class BrowserSupport
         return prefix
     ''
 
+# Matrix
+VectorTools = {}
+VectorTools.length = (vector) ->
+  a = 0
+  for e in vector.elements
+    a += Math.pow(e, 2)
+  Math.sqrt(a)
+VectorTools.normalize = (vector) ->
+  length = VectorTools.length(vector)
+  newElements = []
+  for i, e of vector.elements
+    newElements[i] = e / length
+  Vector.create(newElements)
+VectorTools.combine = (a, b, ascl, bscl) ->
+  result = []
+  result[0] = (ascl * a.elements[0]) + (bscl * b.elements[0])
+  result[1] = (ascl * a.elements[1]) + (bscl * b.elements[1])
+  result[2] = (ascl * a.elements[2]) + (bscl * b.elements[2])
+  return Vector.create(result)
+
+window.MatrixTools = MatrixTools = {}
+MatrixTools.decompose = (matrix) ->
+  translate = []
+  scale = []
+  skew = []
+  quaternion = []
+  perspective = []
+
+  # Normalize the matrix.
+  if (matrix.elements[3][3] == 0)
+    return false
+
+  for i in [0..3]
+    for j in [0..3]
+      matrix.elements[i][j] /= matrix.elements[3][3]
+
+  # perspectiveMatrix is used to solve for perspective, but it also provides
+  # an easy way to test for singularity of the upper 3x3 component.
+  perspectiveMatrix = matrix.dup()
+
+  for i in [0..2]
+    perspectiveMatrix.elements[i][3] = 0
+  perspectiveMatrix.elements[3][3] = 1
+
+  if perspectiveMatrix.determinant() == 0
+    return false
+
+  # First, isolate perspective.
+  if matrix.elements[0][3] != 0 || matrix.elements[1][3] != 0 || matrix.elements[2][3] != 0
+    # rightHandSide is the right hand side of the equation.
+    rightHandSide = Vector.create([
+      matrix.elements[0][3],
+      matrix.elements[1][3],
+      matrix.elements[2][3],
+      matrix.elements[3][3]
+    ])
+
+    # Solve the equation by inverting perspectiveMatrix and multiplying
+    # rightHandSide by the inverse.
+    inversePerspectiveMatrix = perspectiveMatrix.inverse()
+    transposedInversePerspectiveMatrix = inversePerspectiveMatrix.transpose()
+    perspective = transposedInversePerspectiveMatrix.multiply(rightHandSide).elements
+
+    # Clear the perspective partition
+    matrix.elements[0][3] = 0
+    matrix.elements[1][3] = 0
+    matrix.elements[2][3] = 0
+    matrix.elements[3][3] = 1
+  else
+    # No perspective.
+    perspective = [0,0,0,1]
+
+  # Next take care of translation
+  for i in [0..2]
+    translate[i] = matrix.elements[3][i]
+    matrix.elements[3][i] = 0
+
+  # Now get scale and shear. 'row' is a 3 element array of 3 component vectors
+  row = []
+  for i in [0..2]
+    row[i] = Vector.create([
+      matrix.elements[i][0],
+      matrix.elements[i][1],
+      matrix.elements[i][2]
+    ])
+
+  # Compute X scale factor and normalize first row.
+  scale[0] = VectorTools.length(row[0])
+  row[0] = VectorTools.normalize(row[0])
+
+  # Compute XY shear factor and make 2nd row orthogonal to 1st.
+  skew[0] = row[0].dot(row[1])
+  row[1] = VectorTools.combine(row[1], row[0], 1.0, -skew[0])
+
+  # Now, compute Y scale and normalize 2nd row.
+  scale[1] = VectorTools.length(row[1])
+  row[1] = VectorTools.normalize(row[1])
+  skew[0] /= scale[1]
+
+  # Compute XZ and YZ shears, orthogonalize 3rd row
+  skew[1] = row[0].dot(row[2])
+  row[2] = VectorTools.combine(row[2], row[0], 1.0, -skew[1])
+  skew[2] = row[1].dot(row[2])
+  row[2] = VectorTools.combine(row[2], row[1], 1.0, -skew[2])
+
+  # Next, get Z scale and normalize 3rd row.
+  scale[2] = VectorTools.length(row[2])
+  row[2] = VectorTools.normalize(row[2])
+  skew[1] /= scale[2]
+  skew[2] /= scale[2]
+
+  # At this point, the matrix (in rows) is orthonormal.
+  # Check for a coordinate system flip.  If the determinant
+  # is -1, then negate the matrix and the scaling factors.
+  pdum3 = row[1].cross(row[2])
+  if row[0].dot(pdum3) < 0
+    for i in [0..2]
+      scale[i] *= -1
+      row[i].elements[0] *= -1
+      row[i].elements[1] *= -1
+      row[i].elements[2] *= -1
+
+  # Euler angles
+  rotate = []
+  rotate[1] = Math.asin(-row[0].elements[2])
+  if Math.cos(rotate[1]) != 0
+    rotate[0] = Math.atan2(row[1].elements[2], row[2].elements[2])
+    rotate[2] = Math.atan2(row[0].elements[1], row[0].elements[0])
+  else
+    rotate[0] = Math.atan2(-row[2].elements[0], row[1].elements[1])
+    rotate[1] = 0;
+
+  # Now, get the rotations out
+  t = row[0].elements[0] + row[1].elements[1] + row[2].elements[2] + 1.0
+  if t > 1e-4
+    s = 0.5 / Math.sqrt(t)
+    w = 0.25 / s
+    x = (row[2].elements[1] - row[1].elements[2]) * s
+    y = (row[0].elements[2] - row[2].elements[0]) * s
+    z = (row[1].elements[0] - row[0].elements[1]) * s
+  else if (row[0].elements[0] > row[1].elements[1]) && (row[0].elements[0] > row[2].elements[2])
+    s = Math.sqrt(1.0 + row[0].elements[0] - row[1].elements[1] - row[2].elements[2]) * 2.0
+    x = 0.25 * s
+    y = (row[0].elements[1] + row[1].elements[0]) / s
+    z = (row[0].elements[2] + row[2].elements[0]) / s
+    w = (row[2].elements[1] - row[1].elements[2]) / s
+  else if row[1].elements[1] > row[2].elements[2]
+    s = Math.sqrt(1.0 + row[1].elements[1] - row[0].elements[0] - row[2].elements[2]) * 2.0
+    x = (row[0].elements[1] + row[1].elements[0]) / s
+    y = 0.25 * s
+    z = (row[1].elements[2] + row[2].elements[1]) / s
+    w = (row[0].elements[2] - row[2].elements[0]) / s
+  else
+    s = Math.sqrt(1.0 + row[2].elements[2] - row[0].elements[0] - row[1].elements[1]) * 2.0
+    x = (row[0].elements[2] + row[2].elements[0]) / s
+    y = (row[1].elements[2] + row[2].elements[1]) / s
+    z = 0.25 * s
+    w = (row[1].elements[0] - row[0].elements[1]) / s
+
+  quaternion[0] = x
+  quaternion[1] = y
+  quaternion[2] = z
+  quaternion[3] = w
+
+  {
+    translate: translate,
+    scale: scale,
+    skew: skew,
+    quaternion: quaternion,
+    perspective: perspective,
+    rotate: rotate
+  }
+
+MatrixTools.interpolate = (decomposedA, decomposedB, t) ->
+  # New decomposedMatrix
+  decomposed = {
+    translate: [],
+    scale: [],
+    skew: [],
+    quaternion: [],
+    perspective: []
+  }
+
+  # Linearly interpolate translate, scale, skew and perspective
+  for k in [ 'translate', 'scale', 'skew', 'perspective' ]
+    for i in [0..decomposedA[k].length-1]
+      decomposed[k][i] = (decomposedB[k][i] - decomposedA[k][i]) * t + decomposedA[k][i]
+
+  # Interpolate quaternion
+  qa = decomposedA.quaternion
+  qb = decomposedB.quaternion
+
+  ax = qa[0]
+  ay = qa[1]
+  az = qa[2]
+  aw = qa[3]
+  bx = qb[0]
+  By = qb[1]
+  bz = qb[2]
+  bw = qb[3]
+
+  angle = ax * bx + ay * By + az * bz + aw * bw
+
+  if angle < 0.0
+    ax = -ax
+    ay = -ay
+    az = -az
+    aw = -aw
+    angle = -angle
+
+  if angle + 1.0 > .05
+    if 1.0 - angle >= .05
+      th = Math.acos(angle)
+      invth = 1.0 / Math.sin(th)
+      scale = Math.sin(th * (1.0 - t)) * invth
+      invscale = Math.sin(th * t) * invth
+    else
+      scale = 1.0 - t
+      invscale = t
+  else
+    bx = -ay
+    By = ax
+    bz = -aw
+    bw = az
+    scale = Math.sin(piDouble * (.5 - t))
+    invscale = Math.sin(piDouble * t)
+
+  cx = ax * scale + bx * invscale
+  cy = ay * scale + By * invscale
+  cz = az * scale + bz * invscale
+  cw = aw * scale + bw * invscale
+
+  decomposed.quaternion[0] = cx
+  decomposed.quaternion[1] = cy
+  decomposed.quaternion[2] = cz
+  decomposed.quaternion[3] = cw
+
+  return decomposed
+
+MatrixTools.recompose = (decomposedMatrix) ->
+  translate = decomposedMatrix.translate
+  scale = decomposedMatrix.scale
+  skew = decomposedMatrix.skew
+  quaternion = decomposedMatrix.quaternion
+  perspective = decomposedMatrix.perspective
+
+  matrix = Matrix.I(4)
+
+  # apply perspective
+  for i in [0..3]
+    matrix.elements[i][3] = perspective[i]
+
+  # apply rotation
+  x = quaternion[0]
+  y = quaternion[1]
+  z = quaternion[2]
+  w = quaternion[3]
+
+  # apply skew
+  # temp is a identity 4x4 matrix initially
+  if skew[2]
+    temp = Matrix.I(4)
+    temp.elements[2][1] = skew[2]
+    matrix = matrix.multiply(temp)
+
+  if skew[1]
+    temp = Matrix.I(4)
+    temp.elements[2][0] = skew[1]
+    matrix = matrix.multiply(temp)
+
+  if skew[0]
+    temp = Matrix.I(4)
+    temp.elements[1][0] = skew[0]
+    matrix = matrix.multiply(temp)
+
+
+  # Construct a composite rotation matrix from the quaternion values
+  # rotationMatrix is a identity 4x4 matrix initially
+  rotationMatrix = Matrix.I(4)
+  rotationMatrix.elements[0][0] = 1 - 2 * (y * y + z * z)
+  rotationMatrix.elements[0][1] = 2 * (x * y - z * w)
+  rotationMatrix.elements[0][2] = 2 * (x * z + y * w)
+  rotationMatrix.elements[1][0] = 2 * (x * y + z * w)
+  rotationMatrix.elements[1][1] = 1 - 2 * (x * x + z * z)
+  rotationMatrix.elements[1][2] = 2 * (y * z - x * w)
+  rotationMatrix.elements[2][0] = 2 * (x * z - y * w)
+  rotationMatrix.elements[2][1] = 2 * (y * z + x * w)
+  rotationMatrix.elements[2][2] = 1 - 2 * (x * x + y * y)
+
+  matrix = matrix.multiply(rotationMatrix)
+
+  # apply scale
+  for i in [0..2]
+    for j in [0..2]
+      matrix.elements[i][j] *= scale[i]
+
+  # apply translation
+  for i in [0..2]
+    matrix.elements[3][i] = translate[i]
+
+  matrix
+
+MatrixTools.matrixToString = (matrix) ->
+  str = 'matrix3d('
+  els = []
+  for i in [0..3]
+    for j in [0..3]
+      els[i * 4 + j] = matrix.elements[i][j]
+  str += els.join(',')
+  str += ')'
+  str
+
 # Public Classes
 class Animation
   @index: 0
@@ -388,7 +700,11 @@ class Animation
     if match
       content = match[1]
       elements = content.split(',').map(parseFloat)
-    elements
+
+    matrixElements = []
+    for i in [0..3]
+      matrixElements.push(elements.slice(i * 4,i * 4 + 4))
+    Matrix.create(matrixElements)
 
   getFirstFrame: (properties) =>
     frame = {}
@@ -410,7 +726,7 @@ class Animation
           value = parseFloat(match[1])
           unit = match[2]
         else
-          value = @convertToMatrix3d(@convertTransformToMatrix(v))
+          value = MatrixTools.decompose(@convertToMatrix3d(@convertTransformToMatrix(v)))
           unit = ''
         newProperties[k] = {
           value: value,
@@ -447,13 +763,10 @@ class Animation
       value = v.value
       unit = v.unit
 
-      if value instanceof Array
-        oldValue = frame0[k].value
-        newValue = []
-        for i of value
-          dValue = value[i] - oldValue[i]
-          newValue.push(oldValue[i] + (dValue * at[1]))
-        properties['transform'] = "matrix3d(#{newValue.join(',')})"
+      if k == 'transform'
+        decomposedMatrix = MatrixTools.interpolate(frame0[k].value, frame1[k].value, at[1])
+        matrix = MatrixTools.recompose(decomposedMatrix)
+        properties['transform'] = MatrixTools.matrixToString(matrix)
       else
         oldValue = null
         oldValue = frame0[k].value if frame0[k]
@@ -469,89 +782,6 @@ class Animation
       requestAnimationFrame @frame
     else
       @options.complete?()
-
-  keyframesStart: =>
-    name = "anim_#{Animation.index}"
-    Animation.index += 1
-    keyframes = @_keyframes(name)
-    style = document.createElement('style')
-    style.innerHTML = keyframes
-    document.head.appendChild(style)
-
-    animation = {
-      name: name,
-      duration: @options.duration + 'ms',
-      timingFunction: 'linear',
-      fillMode: 'forwards'
-    }
-    for k, v of animation
-      property = "animation-#{k}"
-      prefix = BrowserSupport.prefixFor(property)
-      propertyName = prefix + "Animation" + k.substring(0, 1).toUpperCase() + k.substring(1)
-      @el.style[propertyName] = v
-    @_listenAnimationEnd()
-
-  # Private
-  _listenAnimationEnd: =>
-    events = [
-      'animationend',
-      'webkitAnimationEnd',
-      'MozAnimationEnd',
-      'oAnimationEnd'
-    ]
-    for event in events
-      eventCallback = (e) =>
-        return if e.target != @el
-        @el.removeEventListener event, eventCallback
-        @options.complete?()
-      @el.addEventListener event, eventCallback
-
-  _keyframes: (name) =>
-    @dynamic().init()
-    step = 0.01
-
-    frame0 = @frames[0]
-    frame1 = @frames[100]
-
-    css = "@#{BrowserSupport.keyframes()} #{name} {\n"
-    while args = @dynamic().next(step)
-      [t, v] = args
-
-      transform = ''
-      properties = {}
-      for k, value of frame1
-        value = parseFloat(value)
-        oldValue = frame0[k] || 0
-        dValue = value - oldValue
-        newValue = oldValue + (dValue * v)
-
-        unit = ''
-        isTransform = false
-        if k in ['translateX', 'translateY', 'translateZ']
-          unit = 'px'
-          isTransform = true
-        else if k in ['rotateX', 'rotateY', 'rotateZ']
-          unit = 'deg'
-          isTransform = true
-        else if k in ['scaleX', 'scaleY', 'scale']
-          isTransform = true
-          newValue = Math.max(newValue, 0)
-
-        if isTransform
-          transform += "#{k}(#{newValue}#{unit}) "
-        else
-          properties[k] = newValue
-
-      css += "#{(t * 100)}% {\n"
-      css += "#{BrowserSupport.transform()}: #{transform};\n" if transform
-      for k, v of properties
-        css += "#{k}: #{v};\n"
-      css += " }\n"
-
-      if t >= 1
-        break
-    css += "}\n"
-    css
 
 # Export
 Dynamics =
