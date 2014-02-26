@@ -665,9 +665,10 @@ class Animation
     optionsChanged = @options?.optionsChanged
 
     @options = options
-    @options.duration ||= 1000
-    @options.complete ||= null
-    @options.type ||= Linear
+    @options.duration ?= 1000
+    @options.complete ?= null
+    @options.type ?= Linear
+    @options.animated ?= true
     @returnsToSelf = false || @dynamic().returnsToSelf
     @_dynamic = null
 
@@ -677,7 +678,7 @@ class Animation
     optionsChanged?()
 
   dynamic: =>
-    @_dynamic ||= new @options.type(this.options)
+    @_dynamic ?= new @options.type(this.options)
     @_dynamic
 
   convertTransformToMatrix: (transform, callback) =>
@@ -751,23 +752,25 @@ class Animation
 
   start: =>
     stopAnimationsForEl(@el)
+
+    unless @options.animated
+      @apply(1)
+      return
+
     @animating = true
-    if @paused
-      @paused = false
+    @ts = null
+    if @stopped
+      @stopped = false
     else
-      @ts = null
       @dynamic().init()
     requestAnimationFrame @frame
 
   stop: =>
-    @pause()
-
-  pause: =>
     @animating = false
-    @paused = true
+    @stopped = true
 
   frame: (ts) =>
-    return if @paused
+    return if @stopped
     t = 0
     if @ts
       dTs = ts - @ts
@@ -777,6 +780,16 @@ class Animation
 
     at = @dynamic().at(t)
 
+    @apply(at[1])
+
+    if t < 1
+      requestAnimationFrame @frame
+    else
+      @animating = false
+      @dynamic().init()
+      @options.complete?()
+
+  apply: (t) =>
     frame0 = @frames[0]
     frame1 = @frames[100]
 
@@ -787,7 +800,7 @@ class Animation
       unit = v.unit
 
       if k == 'transform'
-        decomposedMatrix = MatrixTools.interpolate(frame0[k].value, frame1[k].value, at[1])
+        decomposedMatrix = MatrixTools.interpolate(frame0[k].value, frame1[k].value, t)
         matrix = MatrixTools.recompose(decomposedMatrix)
         properties['transform'] = MatrixTools.matrixToString(matrix)
       else
@@ -795,19 +808,11 @@ class Animation
         oldValue = frame0[k].value if frame0[k]
         oldValue = @defaultForProperty(k) unless oldValue
         dValue = value - oldValue
-        newValue = oldValue + (dValue * at[1])
+        newValue = oldValue + (dValue * t)
         properties[k] = newValue
 
     for k, v of properties
       @el.style[BrowserSupport.withPrefix(k)] = v
-
-    if t < 1
-      requestAnimationFrame @frame
-    else
-      @animating = false
-      @ts = null
-      @dynamic().init()
-      @options.complete?()
 
 # Export
 Dynamics =
