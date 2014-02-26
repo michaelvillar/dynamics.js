@@ -197,44 +197,7 @@ class SelfSpring extends Dynamic
 
 class Bezier extends Dynamic
   @properties:
-    points: { type: 'points', default: [ {
-        x: 0,
-        y: 0,
-        controlPoints: [{
-          x: 0.2,
-          y: 0
-        }]
-      },
-      {
-        x: 0.3,
-        y: 1.2,
-        controlPoints: [{
-          x: 0.2,
-          y: 1.2
-        },{
-          x: 0.4,
-          y: 1.2
-        }]
-      },
-      {
-        x: 0.7,
-        y: 0.8,
-        controlPoints: [{
-          x: 0.6,
-          y: 0.8
-        },{
-          x: 0.8,
-          y: 0.8
-        }]
-      },
-      {
-        x: 1,
-        y: 1,
-        controlPoints: [{
-          x: 0.9,
-          y: 1
-        }]
-      }] }
+    points: { type: 'points', default: [{"x":0,"y":0,"controlPoints":[{"x":0.2,"y":0}]},{"x":0.574,"y":1.208,"controlPoints":[{"x":0.291,"y":1.199},{"x":0.806,"y":1.19}]},{"x":1,"y":1,"controlPoints":[{"x":0.846,"y":1}]}] }
     duration: { min: 100, max: 4000, default: 1000 }
 
   constructor: (@options = {}) ->
@@ -300,6 +263,40 @@ class Bezier extends Dynamic
       )(points[k], points[k + 1])
     y = @yForX(x, Bs)
     [x, y]
+
+class EaseInOut extends Dynamic
+  @properties:
+    friction: { min: 1, max: 1000, default: 500 }
+    duration: { min: 100, max: 4000, default: 1000 }
+
+  constructor: (@options = {}) ->
+    super
+    friction = @options.friction || EaseInOut.properties.friction.default
+    points = [
+      {
+        "x":0,
+        "y":0,
+        "controlPoints":[{
+          "x":1 - (friction / 1000),
+          "y":0
+        }]
+      },
+      {
+        "x":1,
+        "y":1,
+        "controlPoints":[{
+          "x":friction / 1000,
+          "y":1
+        }]
+      }
+    ]
+    @bezier = new Bezier({
+      duration: @options.duration,
+      points: points
+    })
+
+  at: (t) =>
+    @bezier.at(t)
 
 ## Helpers
 class BrowserSupport
@@ -796,6 +793,7 @@ Dynamics =
     GravityWithForce: GravityWithForce
     Linear: Linear
     Bezier: Bezier
+    EaseInOut: EaseInOut
 
 try
   if module

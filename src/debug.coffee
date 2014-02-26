@@ -16,7 +16,8 @@ div#DynamicsInteractivePanel {
   border-radius: 8px;
   box-shadow: 0 4px 30px rgba(0, 0, 0, .15),
               0 2px 10px rgba(0, 0, 0, .25);
-  background: white
+  background: white;
+  z-index: 10000000;
 }
 div#DynamicsInteractivePanel > div.title {
   position: absolute;
@@ -192,7 +193,9 @@ class UIGraph
     @canvas.addEventListener 'mousedown', @canvasMouseDown
     @canvas.addEventListener 'mousemove', @canvasMouseMove
     @canvas.addEventListener 'mouseup', @canvasMouseUp
-    window.addEventListener 'keyup', @canvasKeyUp
+    @canvas.addEventListener 'keyup', @canvasKeyUp
+    @canvas.addEventListener 'keydown', (e) =>
+      e.preventDefault()
 
   draw: =>
     r = window.devicePixelRatio
@@ -346,6 +349,7 @@ class UIGraph
       return if @selectedPoint == @points[0] or @selectedPoint == @points[@points.length - 1]
 
       e.preventDefault()
+      e.stopPropagation()
       @points.splice(@points.indexOf(@selectedPoint), 1)
       @selectedPoint = null
       @pointsChanged?()
@@ -507,6 +511,7 @@ class UIPanel
     graphEl.className = 'graph'
 
     canvas = document.createElement('canvas')
+    canvas.setAttribute('tabIndex', '0')
     canvas.width = "350"
     canvas.height = "350"
 

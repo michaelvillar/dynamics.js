@@ -126,6 +126,7 @@ class App
     for k, v of options
       continue if v == null or typeof(v) == 'function' or k == 'points'
       optionsStr += ",\n" if optionsStr != ''
+      v = "\"#{v}\"" if k == 'debugName'
       optionsStr += "&nbsp;&nbsp;<strong>#{k}</strong>: #{v}"
     if options.points
       pointsValue = JSON.stringify(options.points)
