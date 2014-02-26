@@ -648,6 +648,8 @@ class Animation
   @index: 0
 
   constructor: (@el, @to, options = {}) ->
+    if window['jQuery'] and @el instanceof jQuery
+      @el = @el[0]
     @animating = false
     redraw = @el.offsetHeight # Hack to redraw the element
     @frames = @parseFrames({
