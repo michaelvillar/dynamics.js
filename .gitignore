@@ -1,2 +1,4 @@
-*.js
+js/debug.js
+js/index.js
+js/dynamics.js
 *.sketch
