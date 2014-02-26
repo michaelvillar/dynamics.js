@@ -637,11 +637,18 @@ MatrixTools.matrixToString = (matrix) ->
   str += ')'
   str
 
+Animations = []
+stopAnimationsForEl = (el) ->
+  for animation in Animations
+    if animation.el == el
+      animation.stop()
+
 # Public Classes
 class Animation
   @index: 0
 
   constructor: (@el, @to, options = {}) ->
+    @animating = false
     redraw = @el.offsetHeight # Hack to redraw the element
     @frames = @parseFrames({
       0: @getFirstFrame(@to),
@@ -650,6 +657,7 @@ class Animation
     @setOptions(options)
     if @options.debugName and Dynamics.InteractivePanel
       Dynamics.InteractivePanel.addAnimation(@)
+    Animations.push(@)
 
   setOptions: (options = {}) =>
     optionsChanged = @options?.optionsChanged
@@ -740,11 +748,24 @@ class Animation
     0
 
   start: =>
-    @ts = null
-    @dynamic().init()
+    stopAnimationsForEl(@el)
+    @animating = true
+    if @paused
+      @paused = false
+    else
+      @ts = null
+      @dynamic().init()
     requestAnimationFrame @frame
 
+  stop: =>
+    @pause()
+
+  pause: =>
+    @animating = false
+    @paused = true
+
   frame: (ts) =>
+    return if @paused
     t = 0
     if @ts
       dTs = ts - @ts
@@ -781,6 +802,9 @@ class Animation
     if t < 1
       requestAnimationFrame @frame
     else
+      @animating = false
+      @ts = null
+      @dynamic().init()
       @options.complete?()
 
 # Export
