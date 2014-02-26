@@ -746,7 +746,7 @@ class Animation
     newFrames
 
   defaultForProperty: (property) =>
-    return 1 if property in ['scaleX', 'scaleY', 'scale']
+    return 1 if property == 'opacity'
     0
 
   start: =>

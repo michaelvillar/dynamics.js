@@ -600,7 +600,7 @@ class UIPanel
         slider = new UISlider({
           min: config.min,
           max: config.max,
-          value: values[property] || config.default,
+          value: values[property] ? config.default,
           property: property
         })
         @optionsEl.appendChild(slider.el)
