@@ -42,6 +42,9 @@ body > div#DynamicsInteractivePanel {
 body > div#DynamicsInteractivePanel > div.title {
   display: none;
 }
+body > div#DynamicsInteractivePanel > div.resizeButton {
+  display: none;
+}
 
 section {
   position: relative;

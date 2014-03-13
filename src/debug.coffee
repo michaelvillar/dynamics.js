@@ -19,6 +19,16 @@ div#DynamicsInteractivePanel {
   background: white;
   z-index: 10000000;
 }
+div#DynamicsInteractivePanel > div.resizeButton {
+  position: absolute;
+  bottom: -15px;
+  right: -15px;
+  width: 30px;
+  height: 30px;
+  background: transparent;
+  cursor: nwse-resize;
+  z-index: 100
+}
 div#DynamicsInteractivePanel > div.title {
   position: absolute;
   padding: 6px 0;
@@ -36,11 +46,12 @@ div#DynamicsInteractivePanel > div.content {
   top: 28px;
   left: 10px;
   right: 10px;
+  height: calc(100% - 28px);
 }
 div#DynamicsInteractivePanel > div.content > div.graph {
   position: relative;
-  height: 350px;
-  width: 350px;
+  height: 100%;
+  width: calc(100% - 214px);
   overflow: hidden;
   user-select: none;
   -webkit-user-select: none;
@@ -53,8 +64,8 @@ div#DynamicsInteractivePanel > div.content > div.graph > span {
   left: 2px;
   margin-top: -5px;
 }
-div#DynamicsInteractivePanel > div.content > div.graph > span.index1 { top: 112px; }
-div#DynamicsInteractivePanel > div.content > div.graph > span.index0 { top: 228px; }
+div#DynamicsInteractivePanel > div.content > div.graph > span.index1 { top: calc(33% - 8px); }
+div#DynamicsInteractivePanel > div.content > div.graph > span.index0 { top: calc(66% - 11px); }
 div#DynamicsInteractivePanel > div.content > div.graph > canvas {
   background: #F4F9FF;
 }
@@ -63,6 +74,8 @@ div#DynamicsInteractivePanel > div.content > div.settings {
   top: 10px;
   right: 0;
   width: 205px;
+  height: calc(100% - 20px);
+  overflow-y: auto;
   -webkit-user-select: none;
   -moz-select: none;
   user-select: none;
@@ -498,6 +511,11 @@ class UIPanel
     @el.addEventListener 'click', (e) ->
       e.stopPropagation()
 
+    resizeButton = document.createElement('div')
+    resizeButton.className = 'resizeButton'
+    @makeResizable(resizeButton)
+    @el.appendChild(resizeButton)
+
     windowTitle = document.createElement('div')
     windowTitle.className = 'title'
     windowTitle.innerHTML = "Dynamics.js - Curve creator"
@@ -510,10 +528,10 @@ class UIPanel
     graphEl = document.createElement('div')
     graphEl.className = 'graph'
 
-    canvas = document.createElement('canvas')
-    canvas.setAttribute('tabIndex', '0')
-    canvas.width = "350"
-    canvas.height = "350"
+    @canvas = document.createElement('canvas')
+    @canvas.setAttribute('tabIndex', '0')
+    @canvas.width = "350"
+    @canvas.height = "350"
 
     spanIndex0 = document.createElement('span')
     spanIndex0.className = 'index0'
@@ -523,7 +541,7 @@ class UIPanel
     spanIndex1.className = 'index1'
     spanIndex1.innerHTML = '1'
 
-    graphEl.appendChild(canvas)
+    graphEl.appendChild(@canvas)
     graphEl.appendChild(spanIndex0)
     graphEl.appendChild(spanIndex1)
     contentEl.appendChild(graphEl)
@@ -556,7 +574,7 @@ class UIPanel
       option.value = aDynamicsClass.name
       @select.appendChild option
     @select.addEventListener 'change', @selectDidChange
-    @graph = new UIGraph(canvas)
+    @graph = new UIGraph(@canvas)
     @sliders = []
     @properties = []
 
@@ -669,6 +687,44 @@ class UIPanel
 
       window.addEventListener('mousemove', _windowMouseMove)
       window.addEventListener('mouseup', _windowMouseUp)
+
+  makeResizable: (el) =>
+    initialPos = null
+    initialSize = null
+    _windowMouseMove = (e) =>
+      pos = { x: e.pageX, y: e.pageY }
+      @setSize(initialSize.width + pos.x - initialPos.x, initialSize.height + pos.y - initialPos.y)
+
+    _windowMouseUp = (e) =>
+      window.removeEventListener('mousemove', _windowMouseMove)
+      window.removeEventListener('mouseup', _windowMouseUp)
+
+    el.addEventListener 'mousedown', (e) =>
+      initialPos = { x: e.pageX, y: e.pageY }
+      style = window.getComputedStyle(@el)
+      initialSize = { width: parseInt(style.width, 10), height: parseInt(style.height, 10) }
+
+      window.addEventListener('mousemove', _windowMouseMove)
+      window.addEventListener('mouseup', _windowMouseUp)
+
+
+  setSize: (width, height) =>
+    if width > 584
+      width = 584
+    if width < 438
+      width = 438
+
+    height = (width - 234) + 28
+
+    @el.style.width = width + 'px'
+    @el.style.height = height + 'px'
+
+    r = window.devicePixelRatio || 1
+    canvasSize = (width - 234) * r
+    @canvas.width = "#{canvasSize}"
+    @canvas.height = "#{canvasSize}"
+
+    @graph.draw()
 
 Overrides =
   overrides: {}
