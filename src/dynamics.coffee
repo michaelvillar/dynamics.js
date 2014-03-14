@@ -675,6 +675,8 @@ class Animation
     if @options.debugName and Dynamics.Overrides and Dynamics.Overrides.for(@options.debugName)
       @options = Dynamics.Overrides.getOverride(@options, @options.debugName)
 
+    @dynamic().init()
+
     optionsChanged?()
 
   dynamic: =>
@@ -761,8 +763,6 @@ class Animation
     @ts = null
     if @stopped
       @stopped = false
-    else
-      @dynamic().init()
     requestAnimationFrame @frame
 
   stop: =>
