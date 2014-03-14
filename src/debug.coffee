@@ -19,6 +19,17 @@ div#DynamicsInteractivePanel {
   background: white;
   z-index: 10000000;
 }
+div#DynamicsInteractivePanel > div.closeButton {
+  position: absolute;
+  top: 5px;
+  left: 4px;
+  width: 19px;
+  height: 19px;
+  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAABLElEQVQ4Ea2UTU7DMBBGPzu9BCfgHL1AK7EBqVyjrYTEihXiGmQBEgtOwHG4BNT4TTttmtpJFkykyJ6f529s2RK2Sdd6SO/apqXNp/zIpYbabMEGjb7y6Eo7/eZvpZfwNsjapruc/6qoRknfuWYeNdOTQagk0KjVOt1WQV0ISQjIjJhprSnxyiFYH0LNvos26jl8Wjs43EowVHo7nudbkRnBfdYObQFx80TmtdhhP08gklm1VECstEDnUM5BNRh+N1fZgRC6BOEtKcNfgRCK/P7DLhXV1PhqFVXnoBKEQmzyZtcgXBmsdJqd67RXNATx0xnJCXbjgz7GpJuqGmynGzpfTYJAQh3t+L7hgzDTfdSPHu0pwFk5EUJH68N4RmCY+cO2SYtjwdig97D9AYL5tI8mNx25AAAAAElFTkSuQmCC) no-repeat;
+  background-size: 9px 9px;
+  background-position: center center;
+  z-index: 100
+}
 div#DynamicsInteractivePanel > div.resizeButton {
   position: absolute;
   bottom: -15px;
@@ -100,6 +111,9 @@ div#DynamicsInteractivePanel > div.content > div.settings select {
 {
   div#DynamicsInteractivePanel > div.content > div.settings select {
     background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAQCAYAAAAvf+5AAAAAeklEQVQoFc2SwQ2AIAxFGYALo7CY7OQGMo6beMJXQ5PWYOAoyael/5FAIQQzWmsJHV3JWD4FqEhH9W5f4RYlTCwOxsjoMoCmUssPTBLRqc4gihcD0z4w36XdHeGvi+XLAK61R24KPG+4tgR49ISb+i4Czz+F7AD8/GY3j4s9N2crn9sAAAAASUVORK5CYII=);
+  }
+  div#DynamicsInteractivePanel > div.closeButton {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAACDElEQVRYCc3YO1LDMBAG4JWZ1BwiDTUNR+AIUIQOuEFmwglghoIe0kFBjsARKOjTwB0omcwg9DtZKzaSrZU2AyriR6zdT7YkPwx1y9SekKEDWtEj3ZmP7t8q21M7djkmZGlJt2axHdP4DWtoRvdU0Xm975s+XaVjujav/hiFtSt75CAvLs/+Js+cbuiSyFhsb0AdDOfVRnUxPk+DWoNm9qE5M3wQL7VQMYzP41DmwhD6zIieeX9wWYoawnDSFZ1WdQfmHbElrjeuOwJLSyoGcd1gqlyiJ8IZGCo5KAkGBjeyKzfs3uvRpI2SYjCi3TTjh31OgNiUUBDLg3DJCgI1V7wwRhtUiirEIP1vUC4K9bZnYGzHSs80EgYhkLS1qMO3A6zHSg8GVeIg/CtB4fihMoBB9X4QjtBCJWDSQBqoREw6qAQlwMhAOSghBikq/PynMtypWZvbuYVnKQ2Ui+HGCFDDoFKMENUP0sIIUHGQBINLgrKzW4cUg4crlJ3cXHMw/KBWUrduUfdephBQdO8LjD7fhzQwm1aWoNYgTUwhCi+KY9qjN40RwpZmKW3oFx3iRXGyEwxU6OwYgTwtNNLACqaMEZ3hRXEZ+Lu9K9D52gf0bElQzoIXxYVrwTwasgTDQVNQMDjL+vED32dCKA1MCgq5629ErXmo841IE8MoLLsdvcG0Plht1fjjT3o/uTx2nIf8KNoAAAAASUVORK5CYII=');
   }
 }
 div#DynamicsInteractivePanel > div.content > div.settings select:focus {
@@ -211,6 +225,8 @@ class UIGraph
       e.preventDefault()
 
   draw: =>
+    return unless @dynamic
+
     r = window.devicePixelRatio
     w = @canvas.width
     h = @canvas.height
@@ -506,10 +522,19 @@ class UIPanel
 
     @hidden = false
 
+    if @el
+      @open()
+      return
+
     @el = document.createElement('div')
     @el.id = 'DynamicsInteractivePanel'
     @el.addEventListener 'click', (e) ->
       e.stopPropagation()
+
+    closeButton = document.createElement('div')
+    closeButton.className = 'closeButton'
+    closeButton.addEventListener('click', @close)
+    @el.appendChild(closeButton)
 
     resizeButton = document.createElement('div')
     resizeButton.className = 'resizeButton'
@@ -579,9 +604,14 @@ class UIPanel
     @properties = []
 
     @el.style.opacity = 0.0001
+
+    @setSize(438,500)
+
+    @open()
+
+  open: =>
     @el.style.transform = @el.style.MozTransform = @el.style.webkitTransform = 'scale(.7)'
     document.body.appendChild(@el)
-
     new Dynamics.Animation(@el, {
       transform: 'scale(1)',
       opacity: 1
@@ -664,6 +694,23 @@ class UIPanel
       uiProperty.setValue(@currentAnimation.dynamic()[uiProperty.options.property]())
 
     @onUpdate?()
+
+  close: =>
+    @hidden = true
+    new Dynamics.Animation(@el, {
+      transform: 'scale(.1)',
+      opacity: 0
+    }, {
+      type: Dynamics.Types.Spring,
+      frequency: 6,
+      friction: 130,
+      anticipationStrength: 0,
+      anticipationSize: 0,
+      duration: 500,
+      animated: true,
+      complete: =>
+        @el.parentNode.removeChild(@el)
+    }).start();
 
   addAnimation: (animation) =>
     @show()
