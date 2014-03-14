@@ -578,7 +578,22 @@ class UIPanel
     @sliders = []
     @properties = []
 
+    @el.style.opacity = 0.0001
+    @el.style.transform = @el.style.MozTransform = @el.style.webkitTransform = 'scale(.7)'
     document.body.appendChild(@el)
+
+    new Dynamics.Animation(@el, {
+      transform: 'scale(1)',
+      opacity: 1
+    }, {
+      type: Dynamics.Types.Spring,
+      frequency: 6,
+      friction: 130,
+      anticipationStrength: 0,
+      anticipationSize: 0,
+      duration: 500,
+      animated: true
+    }).start();
 
   refreshFromAnimation: =>
     return if @hidden

@@ -680,7 +680,7 @@ class Animation
     optionsChanged?()
 
   dynamic: =>
-    @_dynamic ?= new @options.type(this.options)
+    @_dynamic ?= new @options.type(@options)
     @_dynamic
 
   convertTransformToMatrix: (transform, callback) =>

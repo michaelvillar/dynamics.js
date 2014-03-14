@@ -109,7 +109,7 @@ class App
         duration: 1000
       }).start()
     options.optionsChanged = @update
-    @animation = new Dynamics.Animation(@circle, to, options)
+    window.anim = @animation = new Dynamics.Animation(@circle, to, options)
 
   createCircle: =>
     return if @circle
