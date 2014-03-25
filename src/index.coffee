@@ -128,6 +128,9 @@ class App
     optionsStr = "&nbsp;&nbsp;<strong>type</strong>: Dynamics.Types.#{options.type.name}"
     for k, v of options
       continue if v == null or typeof(v) == 'function' or k == 'points'
+      continue if k == 'debugName'
+      continue if k == 'animated'
+      continue if k == 'duration' and @animation.dynamic().expectedDuration
       optionsStr += ",\n" if optionsStr != ''
       v = "\"#{v}\"" if k == 'debugName'
       optionsStr += "&nbsp;&nbsp;<strong>#{k}</strong>: #{v}"
