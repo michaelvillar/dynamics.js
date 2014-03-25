@@ -183,8 +183,8 @@ class BrowserSupport
     @withPrefix("transform")
 
   @keyframes: ->
-    return "-webkit-keyframes" if document.body.style.webkitAnimation != undefined
-    return "-moz-keyframes" if document.body.style.mozAnimation != undefined
+    return "-webkit-keyframes" if document.body.style.webkitAnimation?
+    return "-moz-keyframes" if document.body.style.mozAnimation?
     "keyframes"
 
   @withPrefix: (property) ->
@@ -199,7 +199,7 @@ class BrowserSupport
       propertyName += prop.substring(0, 1).toUpperCase() + prop.substring(1)
     for prefix in [ "Webkit", "Moz" ]
       k = prefix + propertyName
-      if document.body.style[k] != undefined
+      if document.body.style[k]?
         return prefix
     ''
 
@@ -323,7 +323,7 @@ class UIGraph
     (location.x >= center.x - size / 2) and (location.x <= center.x + size / 2) and (location.y >= center.y - size / 2) and (location.y <= center.y + size / 2)
 
   pointFromLocation: (location) =>
-    return null if !@points or @points.length < 2
+    return null if !@points? or @points.length < 2
     for point in @points
       if point != @points[0]
         return point if @isLocationAroundCenter(location, @pointCoordinates(point), 14)
@@ -609,7 +609,7 @@ class UIPanel
     @setSize(@width, @height)
 
     if @openingAnimation
-      @el.style.opacity = 0.0001
+      @el.style.opacity = 0
       @open()
     else
       document.body.appendChild(@el)
@@ -720,7 +720,7 @@ class UIPanel
   addAnimation: (animation) =>
     @show()
     @animations.push animation
-    if !@currentAnimation
+    if !@currentAnimation?
       @currentAnimation = animation
       @refreshFromAnimation()
 
@@ -818,7 +818,7 @@ Overrides =
       newOptions[k] = v
     Overrides.overrides[name] = newOptions
 
-window.Dynamics = {} if !window.Dynamics
+window.Dynamics = {} if !window.Dynamics?
 window.Dynamics.InteractivePanel = new UIPanel
 window.Dynamics.Overrides = Overrides
 

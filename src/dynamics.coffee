@@ -811,7 +811,7 @@ class Animation
       else
         oldValue = null
         oldValue = frame0[k].value if frame0[k]
-        oldValue = @defaultForProperty(k) unless oldValue
+        oldValue = @defaultForProperty(k) unless oldValue?
         dValue = value - oldValue
         newValue = oldValue + (dValue * t)
         properties[k] = newValue
