@@ -178,6 +178,9 @@ roundf = (float, decimals) ->
   factor = Math.pow(10, decimals)
   Math.round(float * factor) / factor
 
+getName = (func) ->
+  func.name || func.toString().match(/^function\s*([^\s(]+)/)[1]
+
 class BrowserSupport
   @transform: ->
     @withPrefix("transform")
@@ -598,8 +601,8 @@ class UIPanel
       if aDynamicsClass.name == @options.type
         @dynamicsClass = aDynamicsClass
       option = document.createElement('option')
-      option.innerHTML = "Dynamics.Types.#{aDynamicsClass.name}"
-      option.value = aDynamicsClass.name
+      option.innerHTML = "Dynamics.Types.#{getName(aDynamicsClass)}"
+      option.value = getName(aDynamicsClass)
       @select.appendChild option
     @select.addEventListener 'change', @selectDidChange
     @graph = new UIGraph(@canvas)
@@ -632,7 +635,7 @@ class UIPanel
 
   refreshFromAnimation: =>
     return if @hidden
-    @select.value = @currentAnimation.options.type.name
+    @select.value = getName(@currentAnimation.options.type)
     @selectDidChange()
 
   selectDidChange: =>
@@ -648,6 +651,7 @@ class UIPanel
     @properties = []
     @points = null
 
+    return unless @dynamicsClass?
     for property, config of @dynamicsClass.properties
       if config.type == 'points'
         if values.points
