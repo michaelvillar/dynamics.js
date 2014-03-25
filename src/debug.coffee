@@ -513,6 +513,8 @@ class UIPanel
     @animations = []
     @currentAnimation = null
     @hidden = true
+    @width = 438
+    @height = 500
 
   show: (loaded = false) =>
     return unless @hidden
@@ -605,7 +607,7 @@ class UIPanel
 
     @el.style.opacity = 0.0001
 
-    @setSize(438,500)
+    @setSize(@width, @height)
 
     @open()
 
@@ -769,7 +771,6 @@ class UIPanel
       window.addEventListener('mousemove', _windowMouseMove)
       window.addEventListener('mouseup', _windowMouseUp)
 
-
   setSize: (width, height) =>
     if width > 584
       width = 584
@@ -777,6 +778,11 @@ class UIPanel
       width = 438
 
     height = (width - 234) + 28
+
+    @width = width
+    @height = height
+
+    return unless @el
 
     @el.style.width = width + 'px'
     @el.style.height = height + 'px'

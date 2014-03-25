@@ -42,7 +42,8 @@ body > div#DynamicsInteractivePanel {
 body > div#DynamicsInteractivePanel > div.title {
   display: none;
 }
-body > div#DynamicsInteractivePanel > div.resizeButton {
+body > div#DynamicsInteractivePanel > div.resizeButton,
+body > div#DynamicsInteractivePanel > div.closeButton {
   display: none;
 }
 
