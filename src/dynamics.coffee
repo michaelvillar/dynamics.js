@@ -353,10 +353,10 @@ MatrixTools.decompose = (matrix) ->
   quaternion = []
   perspective = []
 
-  # Normalize the matrix.
   if (matrix.elements[3][3] == 0)
     return false
 
+  # Normalize the matrix.
   for i in [0..3]
     for j in [0..3]
       matrix.elements[i][j] /= matrix.elements[3][3]
@@ -369,8 +369,9 @@ MatrixTools.decompose = (matrix) ->
     perspectiveMatrix.elements[i][3] = 0
   perspectiveMatrix.elements[3][3] = 1
 
-  if perspectiveMatrix.determinant() == 0
-    return false
+  # Don't do this anymore, it would return false for scale(0)..
+  # if perspectiveMatrix.determinant() == 0
+  #   return false
 
   # First, isolate perspective.
   if matrix.elements[0][3] != 0 || matrix.elements[1][3] != 0 || matrix.elements[2][3] != 0
@@ -488,6 +489,10 @@ MatrixTools.decompose = (matrix) ->
   quaternion[1] = y
   quaternion[2] = z
   quaternion[3] = w
+
+  for type in [translate, scale, skew, quaternion, perspective, rotate]
+    for k, v of type
+      type[k] = 0 if isNaN(v)
 
   {
     translate: translate,

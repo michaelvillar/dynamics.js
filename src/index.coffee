@@ -84,7 +84,7 @@ class App
       # Create a dummy circle to animate the end
       toDestroyCircle = document.createElement('div')
       toDestroyCircle.classList.add('circle')
-      transform = 'scale(0.01)'
+      transform = 'scale(0)'
       if !animation.dynamic().returnsToSelf
         toDestroyCircle.style.transform = toDestroyCircle.style.MozTransform = toDestroyCircle.style.webkitTransform = 'translateX(350px)'
         transform = "translateX(350px) #{transform}"
@@ -103,7 +103,7 @@ class App
       }).start()
 
       # Position the circle at the starting point
-      @circle.style.transform = @circle.style.MozTransform = @circle.style.webkitTransform = 'scale(0.01)'
+      @circle.style.transform = @circle.style.MozTransform = @circle.style.webkitTransform = 'scale(0)'
       showingAnimation = new Dynamics.Animation(@circle, {
         transform: ''
       }, {
