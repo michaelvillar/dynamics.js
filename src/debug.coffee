@@ -515,6 +515,7 @@ class UIPanel
     @hidden = true
     @width = 438
     @height = 500
+    @openingAnimation = true
 
   show: (loaded = false) =>
     return unless @hidden
@@ -605,11 +606,13 @@ class UIPanel
     @sliders = []
     @properties = []
 
-    @el.style.opacity = 0.0001
-
     @setSize(@width, @height)
 
-    @open()
+    if @openingAnimation
+      @el.style.opacity = 0.0001
+      @open()
+    else
+      document.body.appendChild(@el)
 
   open: =>
     @el.style.transform = @el.style.MozTransform = @el.style.webkitTransform = 'scale(.7)'

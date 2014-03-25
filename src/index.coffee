@@ -21,6 +21,7 @@ class Tools
 class App
   constructor: ->
     Dynamics.InteractivePanel.setSize(1000, 1000)
+    Dynamics.InteractivePanel.openingAnimation = false
 
     @firstCircle = true
     @track = document.querySelector('div.track')
