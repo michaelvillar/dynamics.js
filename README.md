@@ -1,3 +1,7 @@
+Demo:
+- http://michaelvillar.github.io/dynamics.js
+- http://michaelvillar.github.io/dynamics.js/example.html
+
 To compile: `coffee -w -c -o js/ src/*.coffee`
 
 Tested on
