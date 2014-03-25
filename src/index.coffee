@@ -80,14 +80,17 @@ class App
     for k, v of @options
       options[k] = v
     options.debugName = 'animation1'
-    options.complete = =>
+    options.complete = (animation) =>
       # Create a dummy circle to animate the end
       toDestroyCircle = document.createElement('div')
       toDestroyCircle.classList.add('circle')
-      toDestroyCircle.style.transform = toDestroyCircle.style.MozTransform = toDestroyCircle.style.webkitTransform = 'translateX(350px)'
+      transform = 'scale(0.01)'
+      if !animation.dynamic().returnsToSelf
+        toDestroyCircle.style.transform = toDestroyCircle.style.MozTransform = toDestroyCircle.style.webkitTransform = 'translateX(350px)'
+        transform = "translateX(350px) #{transform}"
       @demoSection.appendChild(toDestroyCircle)
       destroyingAnimation = new Dynamics.Animation(toDestroyCircle, {
-        transform: 'translateX(350px) scale(0.01)'
+        transform: transform
       }, {
         type: Dynamics.Types.Spring,
         frequency: 0,

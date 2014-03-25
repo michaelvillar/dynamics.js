@@ -787,7 +787,7 @@ class Animation
     else
       @animating = false
       @dynamic().init()
-      @options.complete?()
+      @options.complete?(@)
 
   apply: (t) =>
     frame0 = @frames[0]
