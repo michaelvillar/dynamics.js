@@ -648,6 +648,11 @@ stopAnimationsForEl = (el) ->
     if animation.el == el
       animation.stop()
 
+# Public Methods
+css = (el, properties) ->
+  for k, v of properties
+    el.style[BrowserSupport.withPrefix(k)] = v
+
 # Public Classes
 class Animation
   @index: 0
@@ -761,7 +766,7 @@ class Animation
     stopAnimationsForEl(@el)
 
     unless @options.animated
-      @apply(1)
+      @apply(1, { progress: 1 })
       return
 
     @animating = true
@@ -785,7 +790,7 @@ class Animation
 
     at = @dynamic().at(t)
 
-    @apply(at[1])
+    @apply(at[1], { progress: t })
 
     if t < 1
       requestAnimationFrame @frame
@@ -794,9 +799,11 @@ class Animation
       @dynamic().init()
       @options.complete?(@)
 
-  apply: (t) =>
+  apply: (t, args = {}) =>
     frame0 = @frames[0]
     frame1 = @frames[100]
+    progress = args.progress
+    progress ?= -1
 
     transform = ''
     properties = {}
@@ -805,7 +812,13 @@ class Animation
       unit = v.unit
 
       if k == 'transform'
-        decomposedMatrix = MatrixTools.interpolate(frame0[k].value, frame1[k].value, t)
+        decomposedMatrix = null
+        if progress >= 1
+          if @returnsToSelf
+            decomposedMatrix = frame0[k].value
+          else
+            decomposedMatrix = frame1[k].value
+        decomposedMatrix ?= MatrixTools.interpolate(frame0[k].value, frame1[k].value, t)
         matrix = MatrixTools.recompose(decomposedMatrix)
         properties['transform'] = MatrixTools.matrixToString(matrix)
       else
@@ -830,6 +843,7 @@ Dynamics =
     Linear: Linear
     Bezier: Bezier
     EaseInOut: EaseInOut
+  css: css
 
 try
   if module

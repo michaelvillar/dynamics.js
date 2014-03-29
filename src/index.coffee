@@ -140,7 +140,7 @@ class App
     if options.points
       pointsValue = JSON.stringify(options.points)
       optionsStr += ",\n&nbsp;&nbsp;<strong>points</strong>: #{pointsValue}"
-    code = '''new <strong>Dynamics.Animation</strong>(document.getElementId("circle"), {
+    code = '''new <strong>Dynamics.Animation</strong>(document.getElementById("circle"), {
 &nbsp;&nbsp;<strong>transform</strong>: "translateX(''' + translateX + '''px)"
 }, {
 
