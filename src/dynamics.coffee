@@ -126,8 +126,8 @@ class Spring extends Dynamic
   @properties:
     frequency: { min: 0, max: 100, default: 15 }
     friction: { min: 1, max: 1000, default: 200 }
-    anticipationStrength: { min: 0, max: 1000, default: 115 }
-    anticipationSize: { min: 0, max: 99, default: 10 }
+    anticipationStrength: { min: 0, max: 1000, default: 0 }
+    anticipationSize: { min: 0, max: 99, default: 0 }
     duration: { min: 100, max: 4000, default: 1000 }
 
   at: (t) =>
