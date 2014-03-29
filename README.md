@@ -6,8 +6,8 @@ To see some demos, checkout [Dynamics.js's website](http://michaelvillar.github.
 ## Usage
 Dynamics depends on [Sylvester](https://github.com/jcoglan/sylvester). You'll then include `dynamics.js`.
 ```
-<script src="js/sylvester.js" type="text/javascript"></script>  
-<script src="js/dynamics.js" type="text/javascript"></script>  
+<script src="lib/sylvester.js" type="text/javascript"></script>  
+<script src="lib/dynamics.js" type="text/javascript"></script>  
 ```
 Create a `Dynamics.Animation` to animate properties of an element.
 ```
@@ -53,7 +53,7 @@ Dynamics.css(element, {
 ### Using the curve creator in your app
 You need to include `debug.js` in development.
 ```
-<script src="js/debug.js" type="text/javascript"></script>  
+<script src="lib/debug.js" type="text/javascript"></script>  
 ```
 Then, you can just pass the property `debugName` to your animation properties.
 ```
