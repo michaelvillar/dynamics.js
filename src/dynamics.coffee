@@ -37,6 +37,7 @@ class Gravity extends Dynamic
     expectedDuration: { editable: false }
 
   constructor: (@options = {}) ->
+    @initialForce ?= false
     @options.duration = @duration()
     super @options
 
@@ -59,7 +60,7 @@ class Gravity extends Dynamic
     gravity = @gravityValue()
     b = Math.sqrt(2 / gravity)
     curve = { a: -b, b: b, H: 1 }
-    if @options.initialForce
+    if @initialForce
       curve.a = 0
       curve.b = curve.b * 2
     while curve.H > 0.001
@@ -77,7 +78,7 @@ class Gravity extends Dynamic
     b = Math.sqrt(2 / gravity)
     @curves = []
     curve = { a: -b, b: b, H: 1 }
-    if @options.initialForce
+    if @initialForce
       curve.a = 0
       curve.b = curve.b * 2
     @curves.push curve
@@ -90,7 +91,7 @@ class Gravity extends Dynamic
     L = b - a
     t2 = (2 / L) * (t) - 1 - (a * 2 / L)
     c = t2 * t2 * H - H + 1
-    c = 1 - c if @options.initialForce
+    c = 1 - c if @initialForce
     c
 
   at: (t) =>
@@ -105,7 +106,7 @@ class Gravity extends Dynamic
       break unless curve
 
     if !curve
-      if @options.initialForce
+      if @initialForce
         v = 0
       else
         v = 1
@@ -118,7 +119,7 @@ class GravityWithForce extends Gravity
   returnsToSelf: true
 
   constructor: (@options = {}) ->
-    @options.initialForce = true
+    @initialForce = true
     super @options
 
 class Spring extends Dynamic
@@ -811,22 +812,24 @@ class Animation
       value = v.value
       unit = v.unit
 
+      newValue = null
+      if progress >= 1
+        if @returnsToSelf
+          newValue = frame0[k].value
+        else
+          newValue = frame1[k].value
+
       if k == 'transform'
-        decomposedMatrix = null
-        if progress >= 1
-          if @returnsToSelf
-            decomposedMatrix = frame0[k].value
-          else
-            decomposedMatrix = frame1[k].value
-        decomposedMatrix ?= MatrixTools.interpolate(frame0[k].value, frame1[k].value, t)
-        matrix = MatrixTools.recompose(decomposedMatrix)
+        newValue ?= MatrixTools.interpolate(frame0[k].value, frame1[k].value, t)
+        matrix = MatrixTools.recompose(newValue)
         properties['transform'] = MatrixTools.matrixToString(matrix)
       else
-        oldValue = null
-        oldValue = frame0[k].value if frame0[k]
-        oldValue = @defaultForProperty(k) unless oldValue?
-        dValue = value - oldValue
-        newValue = oldValue + (dValue * t)
+        unless newValue
+          oldValue = null
+          oldValue = frame0[k].value if frame0[k]
+          oldValue = @defaultForProperty(k) unless oldValue?
+          dValue = value - oldValue
+          newValue = oldValue + (dValue * t)
         properties[k] = newValue
 
     for k, v of properties
