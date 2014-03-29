@@ -1,6 +1,3 @@
-# Browser Support
-# IE9+ because of window.getComputedStyle
-
 # Private Classes
 ## Dynamics
 class Dynamic
@@ -326,7 +323,7 @@ class BrowserSupport
         return prefix
     ''
 
-# Matrix
+# Additional vector tools
 VectorTools = {}
 VectorTools.length = (vector) ->
   a = 0
@@ -346,7 +343,8 @@ VectorTools.combine = (a, b, ascl, bscl) ->
   result[2] = (ascl * a.elements[2]) + (bscl * b.elements[2])
   return Vector.create(result)
 
-window.MatrixTools = MatrixTools = {}
+# Matrix tools
+MatrixTools = {}
 MatrixTools.decompose = (matrix) ->
   translate = []
   scale = []
@@ -832,8 +830,7 @@ class Animation
           newValue = oldValue + (dValue * t)
         properties[k] = newValue
 
-    for k, v of properties
-      @el.style[BrowserSupport.withPrefix(k)] = v
+    css(@el, properties)
 
 # Export
 Dynamics =
