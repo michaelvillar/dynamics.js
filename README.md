@@ -16,7 +16,7 @@ var animation = new Dynamics.Animation(element, properties, options);
 - `element` is a DOM element
 - `properties` is an object of the CSS properties
 - `options` is an object representing the animation
-  - `type` is the animation type: `Dynamics.Types.Spring`, `Dynamics.Types.Gravity`,...
+  - `type` is the [animation type](#animation-types): `Dynamics.Types.Spring`, `Dynamics.Types.Gravity`,...
   - `frequency`, `friction`, `gravity`,... are specific to the animation type you are using
   - `duration` is the duration in milliseconds
   - `complete` (optional) is the completion callback
@@ -63,6 +63,59 @@ var animation = new Dynamics.Animation(element, properties, {
 });
 ```
 When the animation is started, the curve creator will open allowing you to test your curve in realtime.
+
+## Animation Types
+### Dynamics.Type.Spring
+- `frequency`: default is 15
+- `friction`: default is 200
+- `anticipationStrength` (optional)
+- `anticipationSize` (optional)
+- `duration`: default is 1000
+    
+### Dynamics.Type.SelfSpring
+- `frequency`: default is 15
+- `friction`: default is 200
+- `duration`: default is 1000
+
+### Dynamics.Type.Gravity
+- `bounce`: default is 40
+- `gravity`: default is 1000
+
+### Dynamics.Type.GravityWithForce
+- `bounce`: default is 40
+- `gravity`: default is 1000
+
+### Dynamics.Type.EaseInOut
+- `friction`: default is 500
+- `duration`: default is 1000
+
+### Dynamics.Type.Linear
+No properties
+
+### Dynamics.Type.Bezier
+- `points`: array of points and control points
+
+The easiest way to output this kind of array is to use the [curve creator](http://michaelvillar.github.io/dynamics.js). Here is an example:
+```
+[{
+  x: 0, y: 0,
+  controlPoints: [{
+    x: 0.2, y: 0
+  }]
+},{
+  x: 0.5, y: 1.2,
+  controlPoints: [{
+    x: 0.3, y: 1.2
+  }, {
+    x: 0.7, y: 1.2
+  }]
+},{
+  x: 1, y: 1,
+  controlPoints: [{
+    x: 0.8, y: 1
+  }]
+}]
+```
 
 ## Contributing
 To compile: `coffee -w -c -o js/ src/*.coffee`
