@@ -18,8 +18,9 @@ var animation = new Dynamics.Animation(element, properties, options);
 - `options` is an object representing the animation
   - `type` is the [animation type](#animation-types): `Dynamics.Types.Spring`, `Dynamics.Types.Gravity`,...
   - `frequency`, `friction`, `gravity`,... are specific to the animation type you are using
-  - `duration` is the duration in milliseconds
+  - `duration` is in milliseconds
   - `complete` (optional) is the completion callback
+  - `animated` (optional) default is true
   - `debugName` (optional) is used to debug your curve using the curve creator 
 
 You can then start the animation:
