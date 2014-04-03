@@ -4,6 +4,9 @@ class Dynamic
   @properties: {}
 
   constructor: (@options = {}) ->
+    for k, v of @options.type.properties
+      if !@options[k]? and !v.editable
+        @options[k] = v.default
 
   init: =>
     @t = 0
@@ -169,7 +172,7 @@ class Spring extends Dynamic
 class SelfSpring extends Dynamic
   @properties:
     frequency: { min: 0, max: 100, default: 15 }
-    friction: { min: 1, max: 1000, default: 100 }
+    friction: { min: 1, max: 1000, default: 200 }
     duration: { min: 100, max: 4000, default: 1000 }
 
   returnsToSelf: true
