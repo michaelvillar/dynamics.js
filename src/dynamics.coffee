@@ -292,6 +292,7 @@ class EaseInOut extends Dynamic
       }
     ]
     @bezier = new Bezier({
+      type: Bezier,
       duration: @options.duration,
       points: points
     })
