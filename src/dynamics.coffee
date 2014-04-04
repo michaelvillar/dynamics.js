@@ -301,6 +301,18 @@ class EaseInOut extends Dynamic
     @bezier.at(t)
 
 ## Helpers
+cacheFn = (func) ->
+  data = {}
+  cachedMethod = ->
+    key = ""
+    for k in arguments
+      key += k.toString() + ","
+    result = data[key]
+    unless result
+      data[key] = result = func.apply(this, arguments)
+    result
+  cachedMethod
+
 class BrowserSupport
   @transform: ->
     @withPrefix("transform")
@@ -316,7 +328,7 @@ class BrowserSupport
     return "-#{prefix.toLowerCase()}-#{property}" if prefix != ''
     property
 
-  @prefixFor: (property) ->
+  @prefixFor: cacheFn (property) ->
     propArray = property.split('-')
     propertyName = ""
     for prop in propArray
@@ -637,13 +649,21 @@ MatrixTools.recompose = (decomposedMatrix) ->
 
 MatrixTools.matrixToString = (matrix) ->
   str = 'matrix3d('
-  els = []
   for i in [0..3]
     for j in [0..3]
-      els[i * 4 + j] = matrix.elements[i][j]
-  str += els.join(',')
+      str += matrix.elements[i][j]
+      str += ',' unless i == 3 and j == 3
   str += ')'
   str
+
+MatrixTools.transformStringToMatrixString = cacheFn (transform) ->
+  matrixEl = document.createElement('div')
+  matrixEl.style[BrowserSupport.transform()] = transform
+  document.body.appendChild(matrixEl)
+  style = window.getComputedStyle(matrixEl, null)
+  result = style.transform || style[BrowserSupport.transform()]
+  document.body.removeChild(matrixEl)
+  result
 
 Animations = []
 stopAnimationsForEl = (el) ->
@@ -696,14 +716,8 @@ class Animation
     @_dynamic ?= new @options.type(@options)
     @_dynamic
 
-  convertTransformToMatrix: (transform, callback) =>
-    matrixEl = document.createElement('div')
-    matrixEl.style[BrowserSupport.transform()] = transform
-    document.body.appendChild(matrixEl)
-    style = window.getComputedStyle(matrixEl, null)
-    result = style.transform || style[BrowserSupport.transform()]
-    document.body.removeChild(matrixEl)
-    result
+  convertTransformToMatrix: (transform) =>
+    MatrixTools.transformStringToMatrixString(transform)
 
   convertToMatrix3d: (transform) =>
     unless /matrix/.test transform
