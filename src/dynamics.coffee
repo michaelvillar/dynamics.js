@@ -666,9 +666,13 @@ MatrixTools.transformStringToMatrixString = cacheFn (transform) ->
   result
 
 Animations = []
-stopAnimationsForEl = (el) ->
+hasCommonProperties = (props1, props2) ->
+  for k, v of props1
+    return true if props2[k]?
+  false
+stopAnimationsForEl = (el, properties) ->
   for animation in Animations
-    if animation.el == el
+    if animation.el == el and hasCommonProperties(animation.to, properties)
       animation.stop()
 
 # Public Methods
@@ -780,7 +784,7 @@ class Animation
     0
 
   start: =>
-    stopAnimationsForEl(@el)
+    stopAnimationsForEl(@el, @to)
 
     unless @options.animated
       @apply(1, { progress: 1 })
