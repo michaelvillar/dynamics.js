@@ -676,9 +676,17 @@ stopAnimationsForEl = (el, properties) ->
       animation.stop()
 
 # Public Methods
+pxProperties = [
+  'marginTop', 'marginLeft', 'marginBottom', 'marginRight',
+  'paddingTop', 'paddingLeft', 'paddingBottom', 'paddingRight',
+  'top', 'left', 'bottom', 'right',
+]
 css = (el, properties) ->
   for k, v of properties
-    el.style[BrowserSupport.withPrefix(k)] = v
+    unit = ''
+    if pxProperties.indexOf(k.toLowerCase()) != -1
+      unit = 'px'
+    el.style[BrowserSupport.withPrefix(k)] = "#{v}#{unit}"
 
 # Public Classes
 class Animation
