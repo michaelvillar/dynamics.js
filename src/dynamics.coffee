@@ -732,26 +732,17 @@ class Animation
     MatrixTools.transformStringToMatrixString(transform)
 
   convertToMatrix3d: (transform) =>
-    unless /matrix/.test transform
-      transform = 'matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)'
-    else
-      # format: matrix(a, c, b, d, tx, ty)
-      match = transform.match /matrix\(([-0-9\.]*), ([-0-9\.]*), ([-0-9\.]*), ([-0-9\.]*), ([-0-9\.]*), ([-0-9\.]*)\)/
-      if match
-        a = parseFloat(match[1])
-        b = parseFloat(match[2])
-        c = parseFloat(match[3])
-        d = parseFloat(match[4])
-        tx = parseFloat(match[5])
-        ty = parseFloat(match[6])
-        transform = "matrix3d(#{a}, #{b}, 0, 0, #{c}, #{d}, 0, 0, 0, 0, 1, 0, #{tx}, #{ty}, 0, 1)"
-
-    # format: matrix3d(a, b, 0, 0, c, d, 0, 0, 0, 0, 1, 0, tx, ty, 0, 1)
-    match = transform.match /matrix3d\(([^)]*)\)/
-    elements = null
+    match = transform.match /matrix3?d?\(([-0-9, \.]*)\)/
     if match
-      content = match[1]
-      elements = content.split(',').map(parseFloat)
+      digits = match[1].split(',')
+      digits = digits.map(parseFloat)
+      if digits.length == 6
+        # format: matrix(a, c, b, d, tx, ty)
+        elements = [digits[0], digits[1], 0, 0, digits[2], digits[3], 0, 0, 0, 0, 1, 0, digits[4], digits[5], 0, 1]
+      else
+        elements = digits
+    else
+      elements = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
 
     matrixElements = []
     for i in [0..3]
