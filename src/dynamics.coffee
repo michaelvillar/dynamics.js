@@ -791,9 +791,15 @@ class Animation
     return 1 if property == 'opacity'
     0
 
-  start: =>
+  start: (options = {}) =>
+    options.delay ?= 0
     stopAnimationsForEl(@el, @to)
+    if options.delay <= 0
+      @_start()
+    else
+      setTimeout @_start, options.delay
 
+  _start: =>
     unless @options.animated
       @apply(1, { progress: 1 })
       return
