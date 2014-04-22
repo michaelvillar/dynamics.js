@@ -680,6 +680,7 @@ pxProperties = [
   'marginTop', 'marginLeft', 'marginBottom', 'marginRight',
   'paddingTop', 'paddingLeft', 'paddingBottom', 'paddingRight',
   'top', 'left', 'bottom', 'right',
+  'width', 'height', 'maxWidth', 'maxHeight', 'minWidth', 'minHeight',
 ]
 css = (el, properties) ->
   for k, v of properties
