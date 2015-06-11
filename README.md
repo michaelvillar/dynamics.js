@@ -90,8 +90,12 @@ Compile: `npm run build` or `npm run build:watch`
 Run tests: `npm test`
 
 ## Browser Support
-Tested on
-[TODO]
+Working on
+- Safari 7+
+- Firefox 35+
+- Chrome 34+
+- IE10+
+
 
 ## Sylvester
 Some code from Sylvester.js has been used (part of Vector and Matrix).
