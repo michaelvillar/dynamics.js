@@ -7,7 +7,7 @@ dynamics = require('../src/dynamics')
 jsdom()
 
 dynamics.tests =
-  matrix3dForTransform: (transform) ->
+  matrixForTransform: (transform) ->
     if transform == "translateX(50px) rotateZ(45deg)"
       return "matrix3d(0.7071067811865476, 0.7071067811865475, 0, 0, -0.7071067811865475, 0.7071067811865476, 0, 0, 0, 0, 1, 0, 50, 0, 0, 1)"
 
@@ -58,7 +58,7 @@ describe 'dynamics.animate', ->
     setTimeout ->
       expect(el.style.left).eql("100px")
       expect(el.style.top).eql("50px")
-      expectEqualMatrix3d(el.style.transform, dynamics.tests.matrix3dForTransform("translateX(50px) rotateZ(45deg)"))
+      expectEqualMatrix3d(el.style.transform, dynamics.tests.matrixForTransform("translateX(50px) rotateZ(45deg)"))
       done()
     , 50
 

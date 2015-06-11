@@ -798,19 +798,19 @@ class Matrix
     str += ')'
     str
 
-  @matrix3dForTransform: cacheFn (transform) ->
+  @matrixForTransform: cacheFn (transform) ->
     matrixEl = document.createElement('div')
     matrixEl.style.position = 'absolute'
     matrixEl.style.visibility = 'hidden'
     matrixEl.style[propertyWithPrefix("transform")] = transform
     document.body.appendChild(matrixEl)
     style = window.getComputedStyle(matrixEl, null)
-    result = style.transform ? style[propertyWithPrefix("transform")] ? dynamics.tests?.matrix3dForTransform(transform)
+    result = style.transform ? style[propertyWithPrefix("transform")] ? dynamics.tests?.matrixForTransform(transform)
     document.body.removeChild(matrixEl)
     result
 
   @fromTransform: (transform) ->
-    match = transform?.match /matrix3?d?\(([-0-9, \.]*)\)/
+    match = transform?.match /matrix3?d?\(([-0-9,e \.]*)\)/
     if match
       digits = match[1].split(',')
       digits = digits.map(parseFloat)
@@ -1252,7 +1252,7 @@ dynamics.animate = (el, properties, options={}) ->
         # We don't have the unit, we'll get the default one
         endProperties[k].prefix = ''
         endProperties[k].suffix ?= unitForProperty(k, 0)
-  endProperties['transform'] = Matrix.fromTransform(Matrix.matrix3dForTransform(transforms.join(' '))).decompose() if transforms.length > 0
+  endProperties['transform'] = Matrix.fromTransform(Matrix.matrixForTransform(transforms.join(' '))).decompose() if transforms.length > 0
 
   applyDefaults(options, {
     type: dynamics.easeInOut,
