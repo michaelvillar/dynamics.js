@@ -8,18 +8,45 @@ Include `dynamics.js` into your page: [download here](https://github.com/michael
 ```
 <script src="dynamics.js"></script>
 ```
-Example:
+You can animate CSS properties of any DOM element.
 ```
 var el = document.getElementById("logo")
-dynamics.animate(el).to({
+dynamics.animate(el, {
   translateX: 350,
   scale: 2,
   opacity: 0.5
 }, {
-  type: dynamic.Spring,
+  type: dynamics.spring,
   frequency: 200,
   friction: 200,
-  duration: 1000
+  duration: 1500
+})
+```
+
+You also can animate SVG properties.
+```
+var path = document.querySelector("path")
+dynamics.animate(el, {
+  d: "M0,0 L0,100 L100,50 L0,0 Z",
+  fill: "#FF0000"
+}, {
+  friction: 800
+})
+```
+
+And any Javascript object.
+```
+var o = {
+  number: 10,
+  color: "#FFFFFF",
+  string: "10deg",
+  array: [ 1, 10 ]
+}
+dynamics.animate(o, {
+  number: 20,
+  color: "#000000",
+  string: "90deg",
+  array: [-9, 99 ]
 })
 ```
 
