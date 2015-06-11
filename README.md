@@ -96,7 +96,6 @@ Working on
 - Chrome 34+
 - IE10+
 
-
 ## Sylvester
 Some code from Sylvester.js has been used (part of Vector and Matrix).
 
