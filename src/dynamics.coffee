@@ -32,20 +32,29 @@ applyDefaults = (options, defaults) ->
 
 applyFrame = (el, properties) ->
   if(el.style?)
-    dynamics.css(el, properties)
-    if properties.svg?
-      applyAttributes(el, properties.svg.format())
+    applyProperties(el, properties)
   else
     for k, v of properties
       el[k] = v.format()
 
-applyAttributes = (el, attributes) ->
-  for k, v of attributes
-    if v.format?
-      v = v.format()
+applyProperties = (el, properties, onlyCSS=false) ->
+  properties = parseProperties(properties)
+  transforms = []
+  isSVG = el instanceof SVGElement
+  for k, v of properties
+    if transformProperties.contains(k)
+      transforms.push(transformValueForProperty(k, v))
     else
-      v = "#{v}#{unitForProperty(k, v)}"
-    el.setAttribute(k, v)
+      if v.format?
+        v = v.format()
+      else
+        v = "#{v}#{unitForProperty(k, v)}"
+      if !onlyCSS && isSVG && svgProperties.contains(k)
+        el.setAttribute(k, v)
+      else
+        el.style[propertyWithPrefix(k)] = v
+
+  el.style[propertyWithPrefix("transform")] = transforms.join(' ') if transforms.length > 0
 
 # Math
 roundf = (v, decimal) ->
@@ -67,26 +76,10 @@ toDashed = (str) ->
   return str.replace(/([A-Z])/g, ($1) -> "-" + $1.toLowerCase())
 
 # CSS Helpers
-pxProperties = new Set([
-  'marginTop', 'marginLeft', 'marginBottom', 'marginRight',
-  'paddingTop', 'paddingLeft', 'paddingBottom', 'paddingRight',
-  'top', 'left', 'bottom', 'right',
-  'translateX', 'translateY', 'translateZ',
-  'perspectiveX', 'perspectiveY', 'perspectiveZ',
-  'width', 'height', 'maxWidth', 'maxHeight', 'minWidth', 'minHeight',
-  'borderRadius'
-])
-degProperties = new Set([
-  'rotate', 'rotateX', 'rotateY', 'rotateZ',
-  'skew', 'skewX', 'skewY', 'skewZ'
-])
-transformProperties = new Set([
-  'translateX', 'translateY', 'translateZ',
-  'scale', 'scaleX', 'scaleY', 'scaleZ',
-  'rotate', 'rotateX', 'rotateY', 'rotateZ',
-  'skew', 'skewX', 'skewY', 'skewZ',
-  'perspective',
-])
+pxProperties = new Set('marginTop,marginLeft,marginBottom,marginRight,paddingTop,paddingLeft,paddingBottom,paddingRight,top,left,bottom,right,translateX,translateY,translateZ,perspectiveX,perspectiveY,perspectiveZ,width,height,maxWidth,maxHeight,minWidth,minHeight,borderRadius'.split(','))
+degProperties = new Set('rotate,rotateX,rotateY,rotateZ,skew,skewX,skewY,skewZ'.split(','))
+transformProperties = new Set('translateX,translateY,translateZ,scale,scaleX,scaleY,scaleZ,rotate,rotateX,rotateY,rotateZ,skew,skewX,skewY,skewZ,perspective'.split(','))
+svgProperties = new Set('accent-height,ascent,azimuth,baseFrequency,baseline-shift,bias,cx,cy,d,diffuseConstant,divisor,dx,dy,elevation,filterRes,fx,fy,gradientTransform,height,k1,k2,k3,k4,kernelMatrix,kernelUnitLength,letter-spacing,limitingConeAngle,markerHeight,markerWidth,numOctaves,order,overline-position,overline-thickness,pathLength,points,pointsAtX,pointsAtY,pointsAtZ,r,radius,rx,ry,seed,specularConstant,specularExponent,stdDeviation,stop-color,stop-opacity,strikethrough-position,strikethrough-thickness,surfaceScale,target,targetX,targetY,transform,underline-position,underline-thickness,viewBox,width,x,x1,x2,y,y1,y2,z'.split(','))
 
 unitForProperty = (k, v) ->
   return '' unless typeof v == 'number'
@@ -135,7 +128,7 @@ defaultValueForKey = (key) ->
   v = if key == 'opacity' then 1 else 0
   "#{v}#{unitForProperty(key, v)}"
 
-getCurrentProperties = (el, keys, svgKeys) ->
+getCurrentProperties = (el, keys) ->
   properties = {}
   if el.style?
     style = window.getComputedStyle(el, null)
@@ -144,12 +137,11 @@ getCurrentProperties = (el, keys, svgKeys) ->
         unless properties['transform']?
           properties['transform'] = Matrix.fromTransform(style[propertyWithPrefix('transform')]).decompose()
       else
-        properties[key] = createInterpolable(style[key] ? defaultValueForKey(key))
-    if svgKeys? and svgKeys.length > 0
-      svg = {}
-      for key in svgKeys
-        svg[key] = el.getAttribute(key) ? defaultValueForKey(key)
-      properties.svg = createInterpolable(svg)
+        v = style[key]
+        if !v? && svgProperties.contains(key)
+          v = el.getAttribute(key)
+        v ?= defaultValueForKey(key)
+        properties[key] = createInterpolable(v)
   else
     for key in keys
       properties[key] = createInterpolable(el[key])
@@ -1247,26 +1239,13 @@ dynamics.easeInOut.defaults = dynamics.easeIn.defaults = dynamics.easeOut.defaul
 
 # CSS
 dynamics.css = (el, properties) ->
-  properties = parseProperties(properties)
-  transforms = []
-  for k, v of properties
-    continue if k == "svg"
-    if transformProperties.contains(k)
-      transforms.push(transformValueForProperty(k, v))
-    else
-      if v.format?
-        v = v.format()
-      else
-        v = "#{v}#{unitForProperty(k, v)}"
-      el.style[propertyWithPrefix(k)] = v
-
-  el.style[propertyWithPrefix("transform")] = transforms.join(' ') if transforms.length > 0
+  applyProperties(el, properties, true)
 
 # Animation
 dynamics.animate = (el, properties, options={}) ->
   dynamics.stop(el)
   properties = parseProperties(properties)
-  startProperties = getCurrentProperties(el, Object.keys(properties), Object.keys(properties.svg ? {}))
+  startProperties = getCurrentProperties(el, Object.keys(properties))
   endProperties = {}
   transforms = []
   for k, v of properties
