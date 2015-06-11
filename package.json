@@ -1,0 +1,27 @@
+{
+  "name": "dynamics.js",
+  "title": "Dynamics.js",
+  "description": "Physics animation curves",
+  "version": "0.0.1",
+  "homepage": "http://dynamicsjs.com",
+  "author": {
+    "name": "Michael Villar"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/michaelvillar/dynamics.js"
+  },
+  "devDependencies": {
+    "coffee-script": "1.7.1",
+    "uglify-js": "2.4.14",
+    "jsdom": "3.x.x",
+    "mocha-jsdom": "0.4.0",
+    "chai": "3.0.0",
+    "mocha": "2.2.5"
+  },
+  "scripts": {
+    "test": "mocha --compilers coffee:coffee-script/register",
+    "build": "coffee -c -o ./lib/ ./src/dynamics.coffee && ./node_modules/uglify-js/bin/uglifyjs ./lib/dynamics.js -m -c -o ./lib/dynamics.min.js",
+    "build:watch": "coffee -w -c -o ./lib/ ./src/dynamics.coffee"
+  }
+}
