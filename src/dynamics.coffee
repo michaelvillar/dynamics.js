@@ -40,7 +40,7 @@ applyFrame = (el, properties) ->
 applyProperties = (el, properties, onlyCSS=false) ->
   properties = parseProperties(properties)
   transforms = []
-  isSVG = el instanceof SVGElement
+  isSVG = if SVGElement? then el instanceof SVGElement else dynamics.tests?.isSVG?(el) ? false
   for k, v of properties
     if transformProperties.contains(k)
       transforms.push(transformValueForProperty(k, v))
@@ -140,7 +140,8 @@ getCurrentProperties = (el, keys) ->
         v = style[key]
         if !v? && svgProperties.contains(key)
           v = el.getAttribute(key)
-        v ?= defaultValueForKey(key)
+        if v == "" or !v?
+          v = defaultValueForKey(key)
         properties[key] = createInterpolable(v)
   else
     for key in keys

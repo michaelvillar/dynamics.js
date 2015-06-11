@@ -127,6 +127,8 @@ describe 'dynamics.animate', ->
 
   it 'animates the points of a svg element correctly', (done) ->
     regex = /M([.\d]*),([.\d]*) C([.\d]*),([.\d]*)/
+    dynamics.tests.isSVG = (el) ->
+      true
     el = document.createElement('polygon')
     el.setAttribute("points", "M101.88,22 C101.88,18.25")
     previous = el.getAttribute("points").match(regex)
