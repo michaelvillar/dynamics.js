@@ -1,11 +1,13 @@
 {
   "name": "dynamics.js",
   "title": "Dynamics.js",
-  "description": "Physics animation curves",
+  "description": "Javascript library to create physics-related CSS animations",
   "version": "0.0.1",
   "homepage": "http://dynamicsjs.com",
   "author": {
-    "name": "Michael Villar"
+    "name": "Michael Villar",
+    "email": "me@michaelvillar.com",
+    "url": "http://twitter.com/michaelvillar"
   },
   "repository": {
     "type": "git",
