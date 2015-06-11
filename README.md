@@ -26,9 +26,11 @@ dynamics.animate(el, {
 You also can animate SVG properties.
 ```
 var path = document.querySelector("path")
-dynamics.animate(el, {
-  d: "M0,0 L0,100 L100,50 L0,0 Z",
-  fill: "#FF0000"
+dynamics.animate(path, {
+  svg: {
+    d: "M0,0 L0,100 L100,50 L0,0 Z",
+    fill: "#FF0000"
+  }
 }, {
   friction: 800
 })

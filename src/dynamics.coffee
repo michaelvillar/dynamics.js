@@ -33,9 +33,19 @@ applyDefaults = (options, defaults) ->
 applyFrame = (el, properties) ->
   if(el.style?)
     dynamics.css(el, properties)
+    if properties.svg?
+      applyAttributes(el, properties.svg.format())
   else
     for k, v of properties
       el[k] = v.format()
+
+applyAttributes = (el, attributes) ->
+  for k, v of attributes
+    if v.format?
+      v = v.format()
+    else
+      v = "#{v}#{unitForProperty(k, v)}"
+    el.setAttribute(k, v)
 
 # Math
 roundf = (v, decimal) ->
@@ -77,12 +87,6 @@ transformProperties = new Set([
   'skew', 'skewX', 'skewY', 'skewZ',
   'perspective',
 ])
-noUnitProperties = new Set([
-  'opacity', 'transform', 'background', 'backgroundColor',
-  'borderBottomColor', 'borderTopColor', 'borderLeftColor', 'borderRightColor'
-])
-isCSSProperty = (property) ->
-  noUnitProperties.contains(property) or pxProperties.contains(property) or transformProperties.contains(property)
 
 unitForProperty = (k, v) ->
   return '' unless typeof v == 'number'
@@ -131,7 +135,7 @@ defaultValueForKey = (key) ->
   v = if key == 'opacity' then 1 else 0
   "#{v}#{unitForProperty(key, v)}"
 
-getCurrentProperties = (el, keys) ->
+getCurrentProperties = (el, keys, svgKeys) ->
   properties = {}
   if el.style?
     style = window.getComputedStyle(el, null)
@@ -140,13 +144,12 @@ getCurrentProperties = (el, keys) ->
         unless properties['transform']?
           properties['transform'] = Matrix.fromTransform(style[propertyWithPrefix('transform')]).decompose()
       else
-        attributeValue = el.getAttribute(key)
-        if attributeValue
-          properties[key] = createInterpolable(attributeValue)
-        else if style[key]
-          properties[key] = createInterpolable(style[key])
-        else
-          properties[key] = createInterpolable(defaultValueForKey(key))
+        properties[key] = createInterpolable(style[key] ? defaultValueForKey(key))
+    if svgKeys? and svgKeys.length > 0
+      svg = {}
+      for key in svgKeys
+        svg[key] = el.getAttribute(key) ? defaultValueForKey(key)
+      properties.svg = createInterpolable(svg)
   else
     for key in keys
       properties[key] = createInterpolable(el[key])
@@ -155,11 +158,37 @@ getCurrentProperties = (el, keys) ->
 
 # Interpolable
 createInterpolable = (value) ->
-  klasses = [InterpolableColor, InterpolableConcatenatedArray, InterpolableWithUnit]
+  klasses = [InterpolableColor, InterpolableArray, InterpolableObject, InterpolableWithUnit]
   for klass in klasses
     interpolable = klass.create(value)
     return interpolable if interpolable?
   null
+
+class InterpolableObject
+  constructor: (obj) ->
+    @obj = obj
+
+  interpolate: (endInterpolable, t) =>
+    start = @obj
+    end = endInterpolable.obj
+    newObj = {}
+    for k, v of start
+      if v.interpolate?
+        newObj[k] = v.interpolate(end[k], t)
+      else
+        newObj[k] = v
+    new InterpolableObject(newObj)
+
+  format: =>
+    @obj
+
+  @create: (value) =>
+    if value instanceof Object
+      obj = {}
+      for k, v of value
+        obj[k] = createInterpolable(v)
+      return new InterpolableObject(obj)
+    null
 
 class InterpolableWithUnit
   constructor: (value, @prefix, @suffix) ->
@@ -181,7 +210,7 @@ class InterpolableWithUnit
       return new InterpolableWithUnit(match[2], match[1], match[3])
     null
 
-class InterpolableConcatenatedArray
+class InterpolableArray
   constructor: (@values, @sep) ->
 
   interpolate: (endInterpolable, t) =>
@@ -193,7 +222,7 @@ class InterpolableConcatenatedArray
         newValues.push(start[i].interpolate(end[i], t))
       else
         newValues.push(start[i])
-    new InterpolableConcatenatedArray(newValues, @sep)
+    new InterpolableArray(newValues, @sep)
 
   format: =>
     values = (@values.map (val) ->
@@ -212,7 +241,7 @@ class InterpolableConcatenatedArray
       createInterpolable(val) || val
     values = values.filter (val) ->
       val?
-    return new InterpolableConcatenatedArray(values, sep)
+    return new InterpolableArray(values, sep)
 
   @create: (value) =>
     return @createFromArray(value, null) if value instanceof Array
@@ -1221,6 +1250,7 @@ dynamics.css = (el, properties) ->
   properties = parseProperties(properties)
   transforms = []
   for k, v of properties
+    continue if k == "svg"
     if transformProperties.contains(k)
       transforms.push(transformValueForProperty(k, v))
     else
@@ -1228,11 +1258,7 @@ dynamics.css = (el, properties) ->
         v = v.format()
       else
         v = "#{v}#{unitForProperty(k, v)}"
-
-      if isCSSProperty(k)
-        el.style[propertyWithPrefix(k)] = v
-      else
-        el.setAttribute(k, v)
+      el.style[propertyWithPrefix(k)] = v
 
   el.style[propertyWithPrefix("transform")] = transforms.join(' ') if transforms.length > 0
 
@@ -1240,7 +1266,7 @@ dynamics.css = (el, properties) ->
 dynamics.animate = (el, properties, options={}) ->
   dynamics.stop(el)
   properties = parseProperties(properties)
-  startProperties = getCurrentProperties(el, Object.keys(properties))
+  startProperties = getCurrentProperties(el, Object.keys(properties), Object.keys(properties.svg ? {}))
   endProperties = {}
   transforms = []
   for k, v of properties
