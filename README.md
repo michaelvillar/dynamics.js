@@ -75,6 +75,7 @@ This is applying the CSS properties to your element with the correct browser pre
 Dynamics.js has its own `setTimeout`. The reason is that `requestAnimationFrame` and `setTimeout` have different behaviors. In most browsers, `requestAnimationFrame` will not run in a background tab while `setTimeout` will. This can cause a lot of problems while using `setTimeout` along your animations. I suggest you use Dynamics's `setTimeout` and `clearTimeout` to handle these scenarios.
 - `fn` is the callback
 - `delay` is in milliseconds
+
 Returns a unique id
 
 ### dynamics.clearTimeout(id)
