@@ -953,7 +953,8 @@ addTimeout = (fn, delay) ->
     id: timeoutLastId,
     tStart: Date.now(),
     fn: fn,
-    delay: delay
+    delay: delay,
+    originalDelay: delay
   }
   setRealTimeout(timeout)
   timeouts.push(timeout)
@@ -968,9 +969,9 @@ cancelTimeout = (id) ->
 leftDelayForTimeout = (time, timeout) ->
   if time?
     consumedDelay = time - timeout.tStart
-    timeout.delay - consumedDelay
+    timeout.originalDelay - consumedDelay
   else
-    timeout.delay
+    timeout.originalDelay
 
 window?.addEventListener('unload', ->
   # This is a hack for Safari to fix the case where the user does back/forward
