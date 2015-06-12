@@ -882,6 +882,8 @@ propertyWithPrefix = cacheFn (property) ->
 
 # Run loop
 rAF = window?.requestAnimationFrame
+animations = []
+animationsTimeouts = []
 if !rAF?
   lastTime = 0
   rAF = (callback) ->
@@ -895,7 +897,6 @@ if !rAF?
 
 runLoopRunning = false
 runLoopPaused = false
-animations = []
 startRunLoop = ->
   unless runLoopRunning
     runLoopRunning = true
@@ -919,8 +920,7 @@ runLoopTick = (t) ->
     rAF(runLoopTick)
 
 animationTick = (t, animation) ->
-  animation.tStart ?= t + animation.options.delay
-  return true if t < animation.tStart
+  animation.tStart ?= t
   tt = (t - animation.tStart) / animation.options.duration
   y = animation.curve(tt)
 
@@ -946,6 +946,35 @@ interpolate = (start, end, y) ->
   if start? and start.interpolate?
     return start.interpolate(end, y)
   null
+
+# Animations
+startAnimation = (el, properties, options) ->
+  dynamics.stop(el)
+  properties = parseProperties(properties)
+  startProperties = getCurrentProperties(el, Object.keys(properties))
+  endProperties = {}
+  transforms = []
+  for k, v of properties
+    if transformProperties.contains(k)
+      transforms.push(transformValueForProperty(k, v))
+    else
+      endProperties[k] = createInterpolable(v)
+      if endProperties[k] instanceof InterpolableWithUnit && el.style?
+        # We don't have the unit, we'll get the default one
+        endProperties[k].prefix = ''
+        endProperties[k].suffix ?= unitForProperty(k, 0)
+  endProperties['transform'] = Matrix.fromTransform(Matrix.matrixForTransform(transforms.join(' '))).decompose() if transforms.length > 0
+
+  animations.push({
+    el: el,
+    properties: {
+      start: startProperties,
+      end: endProperties
+    },
+    options: options,
+    curve: options.type.call(options.type, options)
+  })
+  startRunLoop()
 
 # Timeouts
 timeouts = []
@@ -1259,22 +1288,6 @@ dynamics.css = makeArrayFn (el, properties) ->
 
 # Animation
 dynamics.animate = makeArrayFn (el, properties, options={}) ->
-  dynamics.stop(el)
-  properties = parseProperties(properties)
-  startProperties = getCurrentProperties(el, Object.keys(properties))
-  endProperties = {}
-  transforms = []
-  for k, v of properties
-    if transformProperties.contains(k)
-      transforms.push(transformValueForProperty(k, v))
-    else
-      endProperties[k] = createInterpolable(v)
-      if endProperties[k] instanceof InterpolableWithUnit && el.style?
-        # We don't have the unit, we'll get the default one
-        endProperties[k].prefix = ''
-        endProperties[k].suffix ?= unitForProperty(k, 0)
-  endProperties['transform'] = Matrix.fromTransform(Matrix.matrixForTransform(transforms.join(' '))).decompose() if transforms.length > 0
-
   applyDefaults(options, {
     type: dynamics.easeInOut,
     duration: 1000,
@@ -1282,18 +1295,23 @@ dynamics.animate = makeArrayFn (el, properties, options={}) ->
   })
   options.duration = Math.max(0, options.duration)
   options.delay = Math.max(0, options.delay)
-  animations.push({
-    el: el,
-    properties: {
-      start: startProperties,
-      end: endProperties
-    },
-    options: options,
-    curve: options.type.call(options.type, options)
-  })
-  startRunLoop()
+
+  if options.delay == 0
+    startAnimation(el, properties, options)
+  else
+    id = dynamics.setTimeout(startAnimation.bind(this, el, properties, options), options.delay)
+    animationsTimeouts.push({
+      id: id,
+      el: el
+    })
 
 dynamics.stop = makeArrayFn (el) ->
+  animationsTimeouts = animationsTimeouts.filter (timeout) ->
+    if timeout.el == el
+      dynamics.clearTimeout(timeout.id)
+      return true
+    false
+
   animations = animations.filter (animation) ->
     animation.el != el
 
