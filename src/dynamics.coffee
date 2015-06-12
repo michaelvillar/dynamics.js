@@ -948,7 +948,11 @@ interpolate = (start, end, y) ->
   null
 
 # Animations
-startAnimation = (el, properties, options) ->
+startAnimation = (el, properties, options, timeoutId) ->
+  if timeoutId?
+    animationsTimeouts = animationsTimeouts.filter (timeout) ->
+      return timeout.id != timeoutId
+
   dynamics.stop(el)
   properties = parseProperties(properties)
   startProperties = getCurrentProperties(el, Object.keys(properties))
@@ -1299,7 +1303,9 @@ dynamics.animate = makeArrayFn (el, properties, options={}) ->
   if options.delay == 0
     startAnimation(el, properties, options)
   else
-    id = dynamics.setTimeout(startAnimation.bind(this, el, properties, options), options.delay)
+    id = dynamics.setTimeout ->
+      startAnimation(el, properties, options, id)
+    , options.delay
     animationsTimeouts.push({
       id: id,
       el: el
