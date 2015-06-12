@@ -40,7 +40,10 @@ applyFrame = (el, properties) ->
 applyProperties = (el, properties, onlyCSS=false) ->
   properties = parseProperties(properties)
   transforms = []
-  isSVG = if SVGElement? then el instanceof SVGElement else dynamics.tests?.isSVG?(el) ? false
+  if SVGElement? and SVGSVGElement?
+    isSVG = el instanceof SVGElement && !(el instanceof SVGSVGElement)
+  else
+    isSVG = dynamics.tests?.isSVG?(el) ? false
   for k, v of properties
     if transformProperties.contains(k)
       transforms.push(transformValueForProperty(k, v))
@@ -79,7 +82,7 @@ toDashed = (str) ->
 pxProperties = new Set('marginTop,marginLeft,marginBottom,marginRight,paddingTop,paddingLeft,paddingBottom,paddingRight,top,left,bottom,right,translateX,translateY,translateZ,perspectiveX,perspectiveY,perspectiveZ,width,height,maxWidth,maxHeight,minWidth,minHeight,borderRadius'.split(','))
 degProperties = new Set('rotate,rotateX,rotateY,rotateZ,skew,skewX,skewY,skewZ'.split(','))
 transformProperties = new Set('translateX,translateY,translateZ,scale,scaleX,scaleY,scaleZ,rotate,rotateX,rotateY,rotateZ,skew,skewX,skewY,skewZ,perspective'.split(','))
-svgProperties = new Set('accent-height,ascent,azimuth,baseFrequency,baseline-shift,bias,cx,cy,d,diffuseConstant,divisor,dx,dy,elevation,filterRes,fx,fy,gradientTransform,height,k1,k2,k3,k4,kernelMatrix,kernelUnitLength,letter-spacing,limitingConeAngle,markerHeight,markerWidth,numOctaves,order,overline-position,overline-thickness,pathLength,points,pointsAtX,pointsAtY,pointsAtZ,r,radius,rx,ry,seed,specularConstant,specularExponent,stdDeviation,stop-color,stop-opacity,strikethrough-position,strikethrough-thickness,surfaceScale,target,targetX,targetY,underline-position,underline-thickness,viewBox,width,x,x1,x2,y,y1,y2,z'.split(','))
+svgProperties = new Set('accent-height,ascent,azimuth,baseFrequency,baseline-shift,bias,cx,cy,d,diffuseConstant,divisor,dx,dy,elevation,filterRes,fx,fy,gradientTransform,height,k1,k2,k3,k4,kernelMatrix,kernelUnitLength,letter-spacing,limitingConeAngle,markerHeight,markerWidth,numOctaves,order,overline-position,overline-thickness,pathLength,points,pointsAtX,pointsAtY,pointsAtZ,r,radius,rx,ry,seed,specularConstant,specularExponent,stdDeviation,stop-color,stop-opacity,strikethrough-position,strikethrough-thickness,surfaceScale,target,targetX,targetY,transform,underline-position,underline-thickness,viewBox,width,x,x1,x2,y,y1,y2,z'.split(','))
 
 unitForProperty = (k, v) ->
   return '' unless typeof v == 'number'
