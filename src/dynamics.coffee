@@ -15,7 +15,7 @@ observeVisibilityChange = (() ->
 # Caching
 cacheFn = (func) ->
   data = {}
-  cachedMethod = ->
+  ->
     key = ""
     for k in arguments
       key += k.toString() + ","
@@ -23,7 +23,17 @@ cacheFn = (func) ->
     unless result
       data[key] = result = func.apply(this, arguments)
     result
-  cachedMethod
+
+# Make a function accept array or single objects for the first argument
+makeArrayFn = (fn) ->
+  (el) ->
+    if el instanceof Array or el instanceof NodeList
+      res = for i in [0...el.length]
+        args = Array.prototype.slice.call(arguments, 1)
+        args.splice(0, 0, el[i])
+        fn.apply(this, args)
+      return res
+    fn.apply(this, arguments)
 
 # Properties Helpers
 applyDefaults = (options, defaults) ->
@@ -1243,11 +1253,11 @@ dynamics.easeInOut.defaults = dynamics.easeIn.defaults = dynamics.easeOut.defaul
   friction: 500
 
 # CSS
-dynamics.css = (el, properties) ->
+dynamics.css = makeArrayFn (el, properties) ->
   applyProperties(el, properties, true)
 
 # Animation
-dynamics.animate = (el, properties, options={}) ->
+dynamics.animate = makeArrayFn (el, properties, options={}) ->
   dynamics.stop(el)
   properties = parseProperties(properties)
   startProperties = getCurrentProperties(el, Object.keys(properties))
@@ -1279,7 +1289,7 @@ dynamics.animate = (el, properties, options={}) ->
   })
   startRunLoop()
 
-dynamics.stop = (el) ->
+dynamics.stop = makeArrayFn (el) ->
   animations = animations.filter (animation) ->
     animation.el != el
 

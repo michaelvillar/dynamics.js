@@ -53,7 +53,7 @@ dynamics.animate(o, {
 ## Reference
 ### dynamics.animate(el, properties, options)
 Animates an element to the properties with the animation options.
-- `el` is a DOM element or any Javascript object
+- `el` is a DOM element, a Javascript object or an Array of elements
 - `properties` is an object of the properties/values you want to animate
 - `options` is an object representing the animation
   - `type` is the [animation type](#dynamics-and-properties): `dynamics.spring`, `dynamics.easeInOut`,... (default: `dynamics.easeInOut`)
