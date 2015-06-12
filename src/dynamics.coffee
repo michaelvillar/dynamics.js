@@ -818,7 +818,7 @@ class Matrix
     str = 'matrix3d('
     for i in [0..3]
       for j in [0..3]
-        str += @els[i][j]
+        str += roundf(@els[i][j], 10)
         str += ',' unless i == 3 and j == 3
     str += ')'
     str
