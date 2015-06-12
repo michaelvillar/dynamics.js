@@ -919,7 +919,8 @@ runLoopTick = (t) ->
     rAF(runLoopTick)
 
 animationTick = (t, animation) ->
-  animation.tStart ?= t
+  animation.tStart ?= t + animation.options.delay
+  return true if t < animation.tStart
   tt = (t - animation.tStart) / animation.options.duration
   y = animation.curve(tt)
 
@@ -1276,8 +1277,11 @@ dynamics.animate = makeArrayFn (el, properties, options={}) ->
 
   applyDefaults(options, {
     type: dynamics.easeInOut,
-    duration: 1000
+    duration: 1000,
+    delay: 0
   })
+  options.duration = Math.max(0, options.duration)
+  options.delay = Math.max(0, options.delay)
   animations.push({
     el: el,
     properties: {

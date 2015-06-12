@@ -73,6 +73,27 @@ describe 'dynamics.animate', ->
       done()
     , 50
 
+  it 'animate with a delay', (done) ->
+    el = document.createElement('div')
+    el.style.left = 0
+    dynamics.animate(el, {
+      left: 100
+    }, {
+      duration: 25,
+      delay: 100,
+      type: dynamics.easeInOut
+    })
+    setTimeout ->
+      expect(el.style.left).eql("0px")
+    , 50
+    setTimeout ->
+      expect(el.style.left).not.eql("100px")
+    , 110
+    setTimeout ->
+      expect(el.style.left).eql("100px")
+      done()
+    , 150
+
   it 'works with an array of elements', (done) ->
     els = [
       document.createElement('div'),
@@ -272,6 +293,26 @@ describe 'dynamics.stop', ->
     setTimeout ->
       dynamics.stop(el)
       changeCanBeCalled = false
+    , 50
+    setTimeout ->
+      done()
+    , 150
+
+  it 'also works with a delayed animation', (done) ->
+    el = document.createElement('div')
+    dynamics.animate(el, {
+      left: 100
+    }, {
+      duration: 100,
+      delay: 100,
+      change: ->
+        assert(false, "change shouldn't be called")
+      ,
+      complete: ->
+        assert(false, "complete shouldn't be called")
+    })
+    setTimeout ->
+      dynamics.stop(el)
     , 50
     setTimeout ->
       done()

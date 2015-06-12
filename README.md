@@ -59,6 +59,7 @@ Animates an element to the properties with the animation options.
   - `type` is the [animation type](#dynamics-and-properties): `dynamics.spring`, `dynamics.easeInOut`,... (default: `dynamics.easeInOut`)
   - `frequency`, `friction`, `bounciness`,... are specific to the animation type you are using
   - `duration` is in milliseconds (default: `1000`)
+  - `delay` is in milliseconds (default: `0`)
   - `complete` (optional) is the completion callback
   - `change` (optional) is called at every change
 
