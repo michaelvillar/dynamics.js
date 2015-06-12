@@ -84,27 +84,27 @@ Clears a timeout that was defined earlier
 
 ## Dynamics and properties
 ### dynamics.spring
-- `frequency`: default is 300
-- `friction`: default is 200
+- `frequency` default is 300
+- `friction` default is 200
 - `anticipationSize` (optional)
 - `anticipationStrength` (optional)
 
 ### dynamics.bounce
-- `frequency`: default is 300
-- `friction`: default is 200
+- `frequency` default is 300
+- `friction` default is 200
 
 ### dynamics.forceWithGravity and dynamics.gravity
-- `bounciness`: default is 400
-- `elasticity`: default is 200
+- `bounciness` default is 400
+- `elasticity` default is 200
 
 ### dynamics.easeInOut, dynamics.easeIn and dynamics.easeOut
-- `friction`: default is 500
+- `friction` default is 500
 
 ### dynamics.linear
 No properties
 
 ### dynamics.bezier
-- `points`: array of points and control points
+- `points` array of points and control points
 
 The easiest way to output this kind of array is to use the [curve creator](http://dynamicsjs.com). Here is an example:
 ```
