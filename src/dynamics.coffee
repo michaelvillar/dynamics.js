@@ -937,7 +937,7 @@ animationTick = (t, animation) ->
 
   animation.options.change?()
   if tt >= 1
-    animation.options.complete?()
+    animation.options.complete?(animation.el)
 
   return tt < 1
 

@@ -43,6 +43,17 @@ describe 'dynamics.css', ->
     })
     expect(el.style.transform).eql("translateX(10px) translateY(0px) translateZ(25%) rotateZ(90deg) rotateX(45deg) skewX(10deg) scaleX(2) scaleY(2) scaleZ(2)")
 
+  it 'works with an array of DOM element', ->
+    els = [
+      document.createElement('div'),
+      document.createElement('div')
+    ]
+    dynamics.css(els, {
+      left: "10px"
+    })
+    expect(els[0].style.left).eql('10px')
+    expect(els[1].style.left).eql('10px')
+
 describe 'dynamics.animate', ->
   it 'animate position properties of a DOM element', (done) ->
     el = document.createElement('div')
@@ -59,6 +70,29 @@ describe 'dynamics.animate', ->
       expect(el.style.left).eql("100px")
       expect(el.style.top).eql("50px")
       expectEqualMatrix3d(el.style.transform, dynamics.tests.matrixForTransform("translateX(50px) rotateZ(45deg)"))
+      done()
+    , 50
+
+  it 'works with an array of elements', (done) ->
+    els = [
+      document.createElement('div'),
+      document.createElement('div')
+    ]
+    el0asserted = false
+    el1asserted = false
+    dynamics.animate(els, {
+      left: 100,
+    }, {
+      duration: 25,
+      complete: (el) ->
+        el0asserted = true if el == els[0]
+        el1asserted = true if el == els[1]
+    })
+    setTimeout ->
+      expect(els[0].style.left).eql("100px")
+      expect(els[1].style.left).eql("100px")
+      assert(el0asserted, "complete wasn't called with the right element")
+      assert(el1asserted, "complete wasn't called with the right element")
       done()
     , 50
 
