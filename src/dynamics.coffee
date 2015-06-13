@@ -884,6 +884,14 @@ propertyWithPrefix = cacheFn (property) ->
 rAF = window?.requestAnimationFrame
 animations = []
 animationsTimeouts = []
+slow = false
+slowRatio = 1
+
+window.addEventListener 'keyup', (e) ->
+  # Enable slow animations with ctrl+shift+D
+  if e.keyCode == 68 and e.shiftKey and e.ctrlKey
+    dynamics.toggleSlow()
+
 if !rAF?
   lastTime = 0
   rAF = (callback) ->
@@ -1297,7 +1305,7 @@ dynamics.animate = makeArrayFn (el, properties, options={}) ->
     duration: 1000,
     delay: 0
   })
-  options.duration = Math.max(0, options.duration)
+  options.duration = Math.max(0, options.duration * slowRatio)
   options.delay = Math.max(0, options.delay)
 
   if options.delay == 0
@@ -1322,10 +1330,18 @@ dynamics.stop = makeArrayFn (el) ->
     animation.el != el
 
 dynamics.setTimeout = (fn, delay) ->
-  addTimeout(fn, delay)
+  addTimeout(fn, delay * slowRatio)
 
 dynamics.clearTimeout = (id) ->
   cancelTimeout(id)
+
+dynamics.toggleSlow = ->
+  slow = !slow
+  if slow
+    slowRatio = 3
+  else
+    slowRatio = 1
+  console?.log?("dynamics.js: slow animations #{if slow then "enabled" else "disabled"}")
 
 # CommonJS
 if typeof module == "object" and typeof module.exports == "object"

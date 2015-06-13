@@ -82,6 +82,11 @@ Returns a unique id
 Clears a timeout that was defined earlier
 - `id` is the timeout id
 
+### dynamics.toggleSlow()
+Toggle a debug mode to slow down every animations and timeouts.
+This is useful for development mode to tweak your animation.
+This can be activated using `^⇧D` in the browser.
+
 ## Dynamics and properties
 ### dynamics.spring
 - `frequency` default is 300
