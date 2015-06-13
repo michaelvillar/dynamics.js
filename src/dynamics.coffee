@@ -382,9 +382,9 @@ class DecomposedMatrix2D
 
   applyRotateCenter: (rotateC) =>
     m = baseSVG.createSVGMatrix()
-    m = m.translate(rotateC[0] ? 0, rotateC[1] ? 0)
+    m = m.translate(rotateC[0], rotateC[1])
     m = m.rotate(@props.rotate[0])
-    m = m.translate(-(rotateC[0] ? 0), -(rotateC[1] ? 0))
+    m = m.translate(-rotateC[0], -rotateC[1])
     m2d = new Matrix2D(m)
 
     negativeTranslate = m2d.decompose().props.translate
@@ -406,7 +406,7 @@ class Matrix2D
     ky = r1.combine(r0, 1, -kz).length()
     new DecomposedMatrix2D({
       translate: [@m.e, @m.f],
-      rotate: [Math.atan2(@m.b, @m.a) * 180 / Math.PI, @rotateCX ? 0, @rotateCY ? 0],
+      rotate: [Math.atan2(@m.b, @m.a) * 180 / Math.PI, @rotateCX, @rotateCY],
       scale: [kx, ky],
       skew: kz / ky * 180 / Math.PI
     })
@@ -431,9 +431,8 @@ class Matrix2D
       else if k == "skewY"
         @m = @m.skewY(v)
 
-    @rotateCX = hash.rotateCX
-    @rotateCY = hash.rotateCY
-
+    @rotateCX = hash.rotateCX ? 0
+    @rotateCY = hash.rotateCY ? 0
 
 # Vector
 # Some code has been ported from Sylvester.js https://github.com/jcoglan/sylvester
