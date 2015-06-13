@@ -112,7 +112,7 @@ toDashed = (str) ->
 # CSS Helpers
 pxProperties = new Set('marginTop,marginLeft,marginBottom,marginRight,paddingTop,paddingLeft,paddingBottom,paddingRight,top,left,bottom,right,translateX,translateY,translateZ,perspectiveX,perspectiveY,perspectiveZ,width,height,maxWidth,maxHeight,minWidth,minHeight,borderRadius'.split(','))
 degProperties = new Set('rotate,rotateX,rotateY,rotateZ,skew,skewX,skewY,skewZ'.split(','))
-transformProperties = new Set('translate,translateX,translateY,translateZ,scale,scaleX,scaleY,scaleZ,rotate,rotateX,rotateY,rotateZ,rotateCX,rotateCY,skew,skewX,skewY,skewZ,perspective'.split(','))
+transformProperties = new Set('translate,translateX,translateY,translateZ,scale,scaleX,scaleY,scaleZ,rotate,rotateX,rotateY,rotateZ,rotateC,rotateCX,rotateCY,skew,skewX,skewY,skewZ,perspective'.split(','))
 svgProperties = new Set('accent-height,ascent,azimuth,baseFrequency,baseline-shift,bias,cx,cy,d,diffuseConstant,divisor,dx,dy,elevation,filterRes,fx,fy,gradientTransform,height,k1,k2,k3,k4,kernelMatrix,kernelUnitLength,letter-spacing,limitingConeAngle,markerHeight,markerWidth,numOctaves,order,overline-position,overline-thickness,pathLength,points,pointsAtX,pointsAtY,pointsAtZ,r,radius,rx,ry,seed,specularConstant,specularExponent,stdDeviation,stop-color,stop-opacity,strikethrough-position,strikethrough-thickness,surfaceScale,target,targetX,targetY,transform,underline-position,underline-thickness,viewBox,width,x,x1,x2,y,y1,y2,z'.split(','))
 
 unitForProperty = (k, v) ->
@@ -138,21 +138,15 @@ transformValueForProperty = (k, v) ->
 
   "#{k}(#{v}#{unit})"
 
-axisForTransformProperty = (property) ->
-  if property == 'perspective' or property == 'skew'
-    ['X', 'Y']
-  else
-    ['X', 'Y', 'Z']
-
 parseProperties = (properties) ->
   parsed = {}
   for property, value of properties
     if transformProperties.contains(property)
-      match = property.match(/(translate|rotate|skew|scale|perspective)(X|Y|Z|)/)
-      if (match and match[2].length > 0) or property == "rotateCX" or property == "rotateCY"
+      match = property.match(/(translate|rotateC|rotate|skew|scale|perspective)(X|Y|Z|)/)
+      if match and match[2].length > 0
         parsed[property] = value
       else
-        for axis in axisForTransformProperty(match[1])
+        for axis in ['X', 'Y', 'Z']
           parsed[match[1] + axis] = value
     else
       parsed[property] = value
