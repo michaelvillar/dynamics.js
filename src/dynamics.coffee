@@ -12,6 +12,15 @@ observeVisibilityChange = (() ->
     fns.push(fn)
 )()
 
+# Object helpers
+# Not deep clone and not using JSON.stringify/JSON.parse because
+# We want to keep functions
+clone = (o) ->
+  newO = {}
+  for k, v of o
+    newO[k] = v
+  newO
+
 # Caching
 cacheFn = (func) ->
   data = {}
@@ -1300,6 +1309,7 @@ dynamics.css = makeArrayFn (el, properties) ->
 
 # Animation
 dynamics.animate = makeArrayFn (el, properties, options={}) ->
+  options = clone(options)
   applyDefaults(options, {
     type: dynamics.easeInOut,
     duration: 1000,
