@@ -56,27 +56,39 @@ applyFrame = (el, properties) ->
     for k, v of properties
       el[k] = v.format()
 
-applyProperties = (el, properties, onlyCSS=false) ->
+applyProperties = (el, properties) ->
   properties = parseProperties(properties)
   transforms = []
-  if SVGElement? and SVGSVGElement?
-    isSVG = el instanceof SVGElement && !(el instanceof SVGSVGElement)
-  else
-    isSVG = dynamics.tests?.isSVG?(el) ? false
+  isSVG = isSVGElement(el)
   for k, v of properties
     if transformProperties.contains(k)
-      transforms.push(transformValueForProperty(k, v))
+      transforms.push([k, v])
     else
       if v.format?
         v = v.format()
       else
         v = "#{v}#{unitForProperty(k, v)}"
-      if !onlyCSS && isSVG && svgProperties.contains(k)
+      if isSVG && svgProperties.contains(k)
         el.setAttribute(k, v)
       else
         el.style[propertyWithPrefix(k)] = v
 
-  el.style[propertyWithPrefix("transform")] = transforms.join(' ') if transforms.length > 0
+  if transforms.length > 0
+    if isSVG
+      matrix = new Matrix2D()
+      matrix.applyProperties(transforms)
+      el.setAttribute("transform", matrix.decompose().format())
+    else
+      v = (transforms.map (transform) ->
+        transformValueForProperty(transform[0], transform[1])
+      ).join(" ")
+      el.style[propertyWithPrefix("transform")] = v
+
+isSVGElement = (el) ->
+  if SVGElement? and SVGSVGElement?
+    el instanceof SVGElement && !(el instanceof SVGSVGElement)
+  else
+    dynamics.tests?.isSVG?(el) ? false
 
 # Math
 roundf = (v, decimal) ->
@@ -100,7 +112,7 @@ toDashed = (str) ->
 # CSS Helpers
 pxProperties = new Set('marginTop,marginLeft,marginBottom,marginRight,paddingTop,paddingLeft,paddingBottom,paddingRight,top,left,bottom,right,translateX,translateY,translateZ,perspectiveX,perspectiveY,perspectiveZ,width,height,maxWidth,maxHeight,minWidth,minHeight,borderRadius'.split(','))
 degProperties = new Set('rotate,rotateX,rotateY,rotateZ,skew,skewX,skewY,skewZ'.split(','))
-transformProperties = new Set('translateX,translateY,translateZ,scale,scaleX,scaleY,scaleZ,rotate,rotateX,rotateY,rotateZ,skew,skewX,skewY,skewZ,perspective'.split(','))
+transformProperties = new Set('translateX,translateY,translateZ,scale,scaleX,scaleY,scaleZ,rotate,rotateX,rotateY,rotateZ,rotateCX,rotateCY,skew,skewX,skewY,skewZ,perspective'.split(','))
 svgProperties = new Set('accent-height,ascent,azimuth,baseFrequency,baseline-shift,bias,cx,cy,d,diffuseConstant,divisor,dx,dy,elevation,filterRes,fx,fy,gradientTransform,height,k1,k2,k3,k4,kernelMatrix,kernelUnitLength,letter-spacing,limitingConeAngle,markerHeight,markerWidth,numOctaves,order,overline-position,overline-thickness,pathLength,points,pointsAtX,pointsAtY,pointsAtZ,r,radius,rx,ry,seed,specularConstant,specularExponent,stdDeviation,stop-color,stop-opacity,strikethrough-position,strikethrough-thickness,surfaceScale,target,targetX,targetY,transform,underline-position,underline-thickness,viewBox,width,x,x1,x2,y,y1,y2,z'.split(','))
 
 unitForProperty = (k, v) ->
@@ -137,7 +149,7 @@ parseProperties = (properties) ->
   for property, value of properties
     if transformProperties.contains(property)
       match = property.match(/(translate|rotate|skew|scale|perspective)(X|Y|Z|)/)
-      if match and match[2].length > 0
+      if (match and match[2].length > 0) or property == "rotateCX" or property == "rotateCY"
         parsed[property] = value
       else
         for axis in axisForTransformProperty(match[1])
@@ -152,12 +164,17 @@ defaultValueForKey = (key) ->
 
 getCurrentProperties = (el, keys) ->
   properties = {}
+  isSVG = isSVGElement(el)
   if el.style?
     style = window.getComputedStyle(el, null)
     for key in keys
       if transformProperties.contains(key)
         unless properties['transform']?
-          properties['transform'] = Matrix.fromTransform(style[propertyWithPrefix('transform')]).decompose()
+          if isSVG
+            matrix = new Matrix2D(el.transform.baseVal.consolidate()?.matrix)
+          else
+            matrix = Matrix.fromTransform(style[propertyWithPrefix('transform')])
+          properties['transform'] = matrix.decompose()
       else
         v = style[key]
         if !v? && svgProperties.contains(key)
@@ -342,6 +359,82 @@ class InterpolableColor
       return new InterpolableColor(color)
     null
 
+# SVG Matrix2D
+class DecomposedMatrix2D
+  constructor: (@props) ->
+
+  interpolate: (endMatrix, t) =>
+    newProps = {}
+    for k in ['translate', 'scale', 'rotate']
+      newProps[k] = []
+      for i in [0...@props[k].length]
+        newProps[k][i] = (endMatrix.props[k][i] - @props[k][i]) * t + @props[k][i]
+    for i in [1..2]
+      newProps['rotate'][i] = endMatrix.props['rotate'][i]
+    for k in ['skew']
+      newProps[k] = (endMatrix.props[k] - @props[k]) * t + @props[k]
+
+    new DecomposedMatrix2D(newProps)
+
+  format: =>
+    "translate(#{@props.translate.join(',')}) rotate(#{@props.rotate.join(',')})
+     skewX(#{@props.skew}) scale(#{@props.scale.join(',')})"
+
+  applyRotateCenter: (rotateC) =>
+    m = baseSVG.createSVGMatrix()
+    m = m.translate(rotateC[0] ? 0, rotateC[1] ? 0)
+    m = m.rotate(@props.rotate[0])
+    m = m.translate(-(rotateC[0] ? 0), -(rotateC[1] ? 0))
+    m2d = new Matrix2D(m)
+
+    negativeTranslate = m2d.decompose().props.translate
+    for i in [0..1]
+      @props.translate[i] -= negativeTranslate[i]
+
+baseSVG = document?.createElementNS("http://www.w3.org/2000/svg", "svg")
+class Matrix2D
+  constructor: (@m) ->
+    if !@m
+      @m = baseSVG.createSVGMatrix()
+
+  decompose: =>
+    r0 = new Vector([@m.a, @m.b])
+    r1 = new Vector([@m.c, @m.d])
+    kx = r0.length()
+    kz = r0.dot(r1)
+    r0 = r0.normalize()
+    ky = r1.combine(r0, 1, -kz).length()
+    new DecomposedMatrix2D({
+      translate: [@m.e, @m.f],
+      rotate: [Math.atan2(@m.b, @m.a) * 180 / Math.PI, @rotateCX ? 0, @rotateCY ? 0],
+      scale: [kx, ky],
+      skew: kz / ky * 180 / Math.PI
+    })
+
+  applyProperties: (properties) =>
+    hash = {}
+    for props in properties
+      hash[props[0]] = props[1]
+    for k, v of hash
+      if k == "translateX"
+        @m = @m.translate(v, 0)
+      else if k == "translateY"
+        @m = @m.translate(0, v)
+      else if k == "scaleX"
+        @m = @m.scale(v, 1)
+      else if k == "scaleY"
+        @m = @m.scale(1, v)
+      else if k == "rotateZ"
+        @m = @m.rotate(v)
+      else if k == "skewX"
+        @m = @m.skewX(v)
+      else if k == "skewY"
+        @m = @m.skewY(v)
+
+    @rotateCX = hash.rotateCX
+    @rotateCY = hash.rotateCY
+
+
 # Vector
 # Some code has been ported from Sylvester.js https://github.com/jcoglan/sylvester
 class Vector
@@ -390,7 +483,7 @@ class Vector
 
   combine: (b, ascl, bscl) =>
     result = []
-    for i in [0..2]
+    for i in [0...@els.length]
       result[i] = (ascl * @els[i]) + (bscl * b.els[i])
     new Vector(result)
 
@@ -896,7 +989,7 @@ animationsTimeouts = []
 slow = false
 slowRatio = 1
 
-window.addEventListener 'keyup', (e) ->
+window?.addEventListener 'keyup', (e) ->
   # Enable slow animations with ctrl+shift+D
   if e.keyCode == 68 and e.shiftKey and e.ctrlKey
     dynamics.toggleSlow()
@@ -977,14 +1070,30 @@ startAnimation = (el, properties, options, timeoutId) ->
   transforms = []
   for k, v of properties
     if transformProperties.contains(k)
-      transforms.push(transformValueForProperty(k, v))
+      transforms.push([k, v])
     else
       endProperties[k] = createInterpolable(v)
       if endProperties[k] instanceof InterpolableWithUnit && el.style?
         # We don't have the unit, we'll get the default one
         endProperties[k].prefix = ''
         endProperties[k].suffix ?= unitForProperty(k, 0)
-  endProperties['transform'] = Matrix.fromTransform(Matrix.matrixForTransform(transforms.join(' '))).decompose() if transforms.length > 0
+
+  if transforms.length > 0
+    isSVG = isSVGElement(el)
+    if isSVG
+      matrix = new Matrix2D()
+      matrix.applyProperties(transforms)
+    else
+      v = (transforms.map (transform) ->
+        transformValueForProperty(transform[0], transform[1])
+      ).join(" ")
+      matrix = Matrix.fromTransform(Matrix.matrixForTransform(v))
+    endProperties['transform'] = matrix.decompose()
+
+    if isSVG
+      startProperties.transform.applyRotateCenter(
+        [endProperties.transform.props.rotate[1], endProperties.transform.props.rotate[2]]
+      )
 
   animations.push({
     el: el,
