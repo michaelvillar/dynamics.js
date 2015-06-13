@@ -85,7 +85,7 @@ Clears a timeout that was defined earlier
 ### dynamics.toggleSlow()
 Toggle a debug mode to slow down every animations and timeouts.
 This is useful for development mode to tweak your animation.
-This can be activated using **^⇧D** in the browser.
+This can be activated using `Shift-Control-D` in the browser.
 
 ## Dynamics and properties
 ### dynamics.spring
