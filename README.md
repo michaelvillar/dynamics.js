@@ -28,7 +28,11 @@ You also can animate SVG properties.
 var path = document.querySelector("path")
 dynamics.animate(path, {
   d: "M0,0 L0,100 L100,50 L0,0 Z",
-  fill: "#FF0000"
+  fill: "#FF0000",
+  rotateZ: 45,
+  // rotateCX and rotateCY are the center of the rotation
+  rotateCX: 100,
+  rotateCY: 100
 }, {
   friction: 800
 })
