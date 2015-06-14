@@ -964,7 +964,7 @@ prefixFor = cacheFn (property) ->
   propertyName = ""
   for prop in propArray
     propertyName += prop.substring(0, 1).toUpperCase() + prop.substring(1)
-  for prefix in [ "Webkit", "Moz" ]
+  for prefix in [ "Webkit", "Moz", "ms" ]
     k = prefix + propertyName
     if document.body.style[k] != undefined
       return prefix
