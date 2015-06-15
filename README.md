@@ -1,5 +1,5 @@
 # Dynamics.js
-Dynamics.js is a Javascript library to create physics-related CSS animations
+Dynamics.js is a JavaScript library to create physics-related CSS animations
 
 To see some demos, check out [dynamicsjs.com](http://dynamicsjs.com).
 
@@ -38,7 +38,7 @@ dynamics.animate(path, {
 })
 ```
 
-And any Javascript object.
+And any JavaScript object.
 ```
 var o = {
   number: 10,
@@ -57,7 +57,7 @@ dynamics.animate(o, {
 ## Reference
 ### dynamics.animate(el, properties, options)
 Animates an element to the properties with the animation options.
-- `el` is a DOM element, a Javascript object or an Array of elements
+- `el` is a DOM element, a JavaScript object or an Array of elements
 - `properties` is an object of the properties/values you want to animate
 - `options` is an object representing the animation
   - `type` is the [animation type](#dynamics-and-properties): `dynamics.spring`, `dynamics.easeInOut`,... (default: `dynamics.easeInOut`)
