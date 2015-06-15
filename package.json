@@ -2,7 +2,7 @@
   "name": "dynamics.js",
   "title": "Dynamics.js",
   "description": "Javascript library to create physics-related CSS animations",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "homepage": "http://dynamicsjs.com",
   "author": {
     "name": "Michael Villar",
