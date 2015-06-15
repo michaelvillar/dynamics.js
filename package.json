@@ -4,11 +4,7 @@
   "description": "Javascript library to create physics-related CSS animations",
   "version": "0.0.3",
   "homepage": "http://dynamicsjs.com",
-  "author": {
-    "name": "Michael Villar",
-    "email": "me@michaelvillar.com",
-    "url": "http://twitter.com/michaelvillar"
-  },
+  "author": "Michael Villar <me@michaelvillar.com> (http://twitter.com/michaelvillar)",
   "repository": {
     "type": "git",
     "url": "https://github.com/michaelvillar/dynamics.js"
@@ -25,5 +21,26 @@
     "test": "mocha --compilers coffee:coffee-script/register",
     "build": "coffee -c -o ./lib/ ./src/dynamics.coffee && ./node_modules/uglify-js/bin/uglifyjs ./lib/dynamics.js -m -c -o ./lib/dynamics.min.js",
     "build:watch": "coffee -w -c -o ./lib/ ./src/dynamics.coffee"
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/michaelvillar/dynamics.js/issues"
+  },
+  "main": "lib/dynamics.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "chai": "^3.0.0",
+    "jsdom": "^3.1.2",
+    "uglify-js": "^2.4.14",
+    "mocha-jsdom": "^0.4.0"
+  },
+  "keywords": [
+    "animation",
+    "javascript",
+    "requestAnimationFrame",
+    "spring",
+    "physic"
+  ],
+  "license": "MIT"
 }

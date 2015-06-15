@@ -5,11 +5,11 @@ To see some demos, check out [dynamicsjs.com](http://dynamicsjs.com).
 
 ## Usage
 Include `dynamics.js` into your page: [download here](https://github.com/michaelvillar/dynamics.js/releases)
-```
+```html
 <script src="dynamics.js"></script>
 ```
 You can animate CSS properties of any DOM element.
-```
+```javascript
 var el = document.getElementById("logo")
 dynamics.animate(el, {
   translateX: 350,
@@ -24,7 +24,7 @@ dynamics.animate(el, {
 ```
 
 You also can animate SVG properties.
-```
+```javascript
 var path = document.querySelector("path")
 dynamics.animate(path, {
   d: "M0,0 L0,100 L100,50 L0,0 Z",
@@ -39,7 +39,7 @@ dynamics.animate(path, {
 ```
 
 And any JavaScript object.
-```
+```javascript
 var o = {
   number: 10,
   color: "#FFFFFF",
@@ -116,7 +116,7 @@ No properties
 - `points` array of points and control points
 
 The easiest way to output this kind of array is to use the [curve creator](http://dynamicsjs.com). Here is an example:
-```
+```javascript
 [{"x":0,"y":0,"cp":[{"x":0.2,"y":0}]},
  {"x":0.5,"y":-0.4,"cp":[{"x":0.4,"y":-0.4},{"x":0.8,"y":-0.4}]},
  {"x":1,"y":1,"cp":[{"x":0.8,"y":1}]}]
