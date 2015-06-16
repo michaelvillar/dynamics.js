@@ -1056,7 +1056,7 @@ startAnimation = (el, properties, options, timeoutId) ->
     animationsTimeouts = animationsTimeouts.filter (timeout) ->
       return timeout.id != timeoutId
 
-  dynamics.stop(el)
+  dynamics.stop(el, { timeout: false })
   properties = parseProperties(properties)
   startProperties = getCurrentProperties(el, Object.keys(properties))
   endProperties = {}
@@ -1431,12 +1431,15 @@ dynamics.animate = makeArrayFn (el, properties, options={}) ->
       el: el
     })
 
-dynamics.stop = makeArrayFn (el) ->
-  animationsTimeouts = animationsTimeouts.filter (timeout) ->
-    if timeout.el == el
-      dynamics.clearTimeout(timeout.id)
-      return true
-    false
+dynamics.stop = makeArrayFn (el, options={}) ->
+  options.timeout ?= true
+  if options.timeout
+    # Clear timeouts too
+    animationsTimeouts = animationsTimeouts.filter (timeout) ->
+      if timeout.el == el and (!options.filter? or options.filter(timeout))
+        dynamics.clearTimeout(timeout.id)
+        return true
+      false
 
   animations = animations.filter (animation) ->
     animation.el != el
