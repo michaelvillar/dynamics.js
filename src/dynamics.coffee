@@ -1057,6 +1057,10 @@ startAnimation = (el, properties, options, timeoutId) ->
       return timeout.id != timeoutId
 
   dynamics.stop(el, { timeout: false })
+  if !options.animated
+    dynamics.css(el, properties)
+    options.complete?(@)
+    return
   properties = parseProperties(properties)
   startProperties = getCurrentProperties(el, Object.keys(properties))
   endProperties = {}
@@ -1415,7 +1419,8 @@ dynamics.animate = makeArrayFn (el, properties, options={}) ->
   applyDefaults(options, {
     type: dynamics.easeInOut,
     duration: 1000,
-    delay: 0
+    delay: 0,
+    animated: true
   })
   options.duration = Math.max(0, options.duration * slowRatio)
   options.delay = Math.max(0, options.delay)
