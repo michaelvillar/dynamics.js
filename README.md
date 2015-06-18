@@ -1,5 +1,5 @@
 # Dynamics.js
-Dynamics.js is a JavaScript library to create physics-based CSS animations
+Dynamics.js is a JavaScript library to create physics-based animations
 
 To see some demos, check out [dynamicsjs.com](http://dynamicsjs.com).
 
