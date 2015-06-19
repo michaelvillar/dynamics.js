@@ -27,5 +27,10 @@
     "mocha-jsdom": "0.4.0",
     "chai": "3.0.0",
     "mocha": "2.2.5"
-  }
+  },
+  "scripts": {
+    "test": "mocha --compilers coffee:coffee-script/register",
+    "build": "coffee -c -o ./lib/ ./src/dynamics.coffee && ./node_modules/uglify-js/bin/uglifyjs ./lib/dynamics.js -m -c -o ./lib/dynamics.min.js",
+    "build:watch": "coffee -w -c -o ./lib/ ./src/dynamics.coffee"
+  },
 }
