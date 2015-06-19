@@ -6,7 +6,8 @@ To see some demos, check out [dynamicsjs.com](http://dynamicsjs.com).
 ## Usage
 Download:
 - [GitHub releases](https://github.com/michaelvillar/dynamics.js/releases)
-- [npm](https://www.npmjs.com/package/dynamics.js): `npm install dynamics.js` - bower: `bower install dynamics.js`
+- [npm](https://www.npmjs.com/package/dynamics.js): `npm install dynamics.js`
+- bower: `bower install dynamics.js`
 
 Include `dynamics.js` into your page:
 ```html
