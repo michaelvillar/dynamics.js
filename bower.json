@@ -1,5 +1,5 @@
 {
-  "name": "Dynamics.js",
+  "name": "dynamics.js",
   "description": "Javascript library to create physics-related animations",
   "version": "0.0.7",
   "main": "lib/dynamics.js",
@@ -32,5 +32,5 @@
     "test": "mocha --compilers coffee:coffee-script/register",
     "build": "coffee -c -o ./lib/ ./src/dynamics.coffee && ./node_modules/uglify-js/bin/uglifyjs ./lib/dynamics.js -m -c -o ./lib/dynamics.min.js",
     "build:watch": "coffee -w -c -o ./lib/ ./src/dynamics.coffee"
-  },
+  }
 }
