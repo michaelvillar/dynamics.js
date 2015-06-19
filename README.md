@@ -4,7 +4,7 @@ Dynamics.js is a JavaScript library to create physics-based animations
 To see some demos, check out [dynamicsjs.com](http://dynamicsjs.com).
 
 ## Usage
-Download on [GitHub releases](https://github.com/michaelvillar/dynamics.js/releases) or [npm](https://www.npmjs.com/package/dynamics.js).
+Download on [GitHub releases](https://github.com/michaelvillar/dynamics.js/releases), [npm](https://www.npmjs.com/package/dynamics.js): `npm install dynamics.js` or bower: `bower install dynamics.js`
 
 Include `dynamics.js` into your page:
 ```html
