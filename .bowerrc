@@ -1,5 +1,0 @@
-{
-  "scripts": {
-    "postinstall": "coffee -c -o ./lib/ ./src/dynamics.coffee && ./node_modules/uglify-js/bin/uglifyjs ./lib/dynamics.js -m -c -o ./lib/dynamics.min.js"
-  }
-}
