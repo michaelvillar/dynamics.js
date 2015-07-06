@@ -275,6 +275,37 @@ describe 'dynamics.animate', ->
       done()
     , 150
 
+  it 'animates actual properties of an object correctly', (done) ->
+    object = {}
+    Object.defineProperty(object, "prop", {
+      set: (v) ->
+        @_prop = v
+      get: ->
+        @_prop
+    })
+    object.prop = 1
+
+    dynamics.animate(object, {
+      prop: 0
+    }, {
+      duration: 100
+    })
+
+    previousProp = object.prop
+
+    setInterval ->
+      assert(object.prop >= 0 && object.prop <= 1, "prop is between 0 and 1")
+      assert(object.prop < previousProp || object.prop == 0, "prop should be decreasing or equal 0")
+
+      previousProp = object.prop
+    , 20
+
+    setTimeout ->
+      expect(object.prop).to.be.equal(0, 'object.prop has the wrong end value')
+
+      done()
+    , 150
+
 describe 'dynamics.stop', ->
   it 'actually stops current animation', (done) ->
     el = document.createElement('div')
