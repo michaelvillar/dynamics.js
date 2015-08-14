@@ -1467,8 +1467,8 @@ dynamics.toggleSlow = ->
 if typeof module == "object" and typeof module.exports == "object"
   module.exports = dynamics
 # AMD
-else if typeof define == "function" and define.amd
-  define(dynamics)
+else if typeof define == "function"
+  define('dynamics', -> dynamics)
 # Global
 else
   window.dynamics = dynamics
