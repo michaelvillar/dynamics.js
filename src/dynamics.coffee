@@ -1066,7 +1066,7 @@ startAnimation = (el, properties, options, timeoutId) ->
   endProperties = {}
   transforms = []
   for k, v of properties
-    if transformProperties.contains(k)
+    if el.style? and transformProperties.contains(k)
       transforms.push([k, v])
     else
       endProperties[k] = createInterpolable(v)

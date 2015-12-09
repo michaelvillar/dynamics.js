@@ -206,7 +206,7 @@ describe 'dynamics.animate', ->
       done()
     , 150
 
-  it 'animates properties of a object correctly', (done) ->
+  it 'animates properties of an object correctly', (done) ->
     assertTypes = (object) ->
       expect(typeof(object.number)).to.be.equal('number', 'object.number has the wrong type')
       expect(typeof(object.negative)).to.be.equal('number', 'object.negative has the wrong type')
@@ -234,7 +234,9 @@ describe 'dynamics.animate', ->
       array: ["0deg", 0, "1.10", 10, "#FFFFFF"],
       hexColor: "#FFFFFF",
       rgbColor: "rgb(255, 255, 255)",
-      rgbaColor: "rgba(255, 255, 255, 0)"
+      rgbaColor: "rgba(255, 255, 255, 0)",
+      translateX: 0,
+      rotateZ: 0
     }
     previous = JSON.parse(JSON.stringify(object))
     dynamics.animate(object, {
@@ -245,7 +247,9 @@ describe 'dynamics.animate', ->
       array: ["100deg", 40, "2.20", 20, "#123456"],
       hexColor: "#123456",
       rgbColor: "rgb(18, 52, 86)",
-      rgbaColor: "rgba(18, 52, 86, 1)"
+      rgbaColor: "rgba(18, 52, 86, 1)",
+      translateX: 10,
+      rotateZ: 1
     }, {
       duration: 100
     })
