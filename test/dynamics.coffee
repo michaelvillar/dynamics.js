@@ -349,6 +349,30 @@ describe 'dynamics.stop', ->
       done()
     , 150
 
+  it 'also works with multiple delayed animations', (done) ->
+    els = [document.createElement('div'), document.createElement('div'), document.createElement('div')]
+    delay = 100
+    for el in els
+      dynamics.animate(el, {
+        left: 100
+      }, {
+        duration: 100,
+        delay: delay,
+        change: ->
+          assert(false, "change shouldn't be called")
+        ,
+        complete: ->
+          assert(false, "complete shouldn't be called")
+      })
+      delay += 50
+    setTimeout ->
+      for el in els
+        dynamics.stop(el)
+    , 50
+    setTimeout ->
+      done()
+    , 450
+
 describe 'curves', ->
   describe 'dynamics.linear', ->
     it 'works', ->
