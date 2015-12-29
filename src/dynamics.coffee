@@ -1029,7 +1029,7 @@ animationTick = (t, animation) ->
 
   properties = {}
   if tt >= 1
-    if animation.curve.initialForce
+    if animation.curve.returnsToSelf
       properties = animation.properties.start
     else
       properties = animation.properties.end
@@ -1237,7 +1237,7 @@ dynamics.bounce = (options={}) ->
 
     angle = frequency * t * a + b
     (At * Math.cos(angle))
-  fn.initialForce = true
+  fn.returnsToSelf = true
   fn
 
 dynamics.gravity = (options={}) ->
@@ -1251,7 +1251,7 @@ dynamics.gravity = (options={}) ->
   L = do ->
     b = Math.sqrt(2 / gravity)
     curve = { a: -b, b: b, H: 1 }
-    if options.initialForce
+    if options.returnsToSelf
       curve.a = 0
       curve.b = curve.b * 2
     while curve.H > 0.001
@@ -1263,14 +1263,14 @@ dynamics.gravity = (options={}) ->
     L = b - a
     t2 = (2 / L) * (t) - 1 - (a * 2 / L)
     c = t2 * t2 * H - H + 1
-    c = 1 - c if options.initialForce
+    c = 1 - c if options.returnsToSelf
     c
 
   # Create curves
   do ->
     b = Math.sqrt(2 / (gravity * L * L))
     curve = { a: -b, b: b, H: 1 }
-    if options.initialForce
+    if options.returnsToSelf
       curve.a = 0
       curve.b = curve.b * 2
     curves.push curve
@@ -1289,16 +1289,16 @@ dynamics.gravity = (options={}) ->
       break unless curve
 
     if !curve
-      v = if options.initialForce then 0 else 1
+      v = if options.returnsToSelf then 0 else 1
     else
       v = getPointInCurve(curve.a, curve.b, curve.H, t)
     v
-  fn.initialForce = options.initialForce
+  fn.returnsToSelf = options.returnsToSelf
   fn
 
 dynamics.forceWithGravity = (options={}) ->
   applyDefaults(options, arguments.callee.defaults)
-  options.initialForce = true
+  options.returnsToSelf = true
   dynamics.gravity(options)
 
 dynamics.bezier = do ->
@@ -1350,7 +1350,6 @@ dynamics.bezier = do ->
   # Actual bezier function
   (options={}) ->
     points = options.points
-    returnsToSelf = false
 
     # Init different curves
     Bs = do ->
@@ -1365,13 +1364,15 @@ dynamics.bezier = do ->
         )(points[k], points[k + 1])
       Bs
 
-    (t) ->
+    fn = (t) ->
       if t == 0
         return 0
       else if t == 1
         return 1
       else
-        yForX(t, Bs, returnsToSelf)
+        yForX(t, Bs, @returnsToSelf)
+    fn.returnsToSelf = points[points.length - 1].y == 0
+    fn
 
 dynamics.easeInOut = (options={}) ->
   friction = options.friction ? arguments.callee.defaults.friction

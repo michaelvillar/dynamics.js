@@ -310,6 +310,22 @@ describe 'dynamics.animate', ->
       done()
     , 150
 
+  it 'finishes the animation with the correct end state while using a specific bezier curve', (done) ->
+    el = document.createElement('div')
+    dynamics.animate(el, {
+      left: 100,
+    }, {
+      duration: 25,
+      type: dynamics.bezier,
+      points: [
+        {"x":0,"y":0,"cp":[{"x":0,"y":1}]},
+        {"x":1,"y":0,"cp":[{"x":0.5,"y":0}]}
+      ],
+      complete: ->
+        expect(el.style.left).eql('0px')
+        done()
+    })
+
 describe 'dynamics.stop', ->
   it 'actually stops current animation', (done) ->
     el = document.createElement('div')
