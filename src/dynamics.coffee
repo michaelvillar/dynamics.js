@@ -1177,7 +1177,7 @@ dynamics.linear = ->
     t
 
 dynamics.spring = (options={}) ->
-  applyDefaults(options, arguments.callee.defaults)
+  applyDefaults(options, dynamics.spring.defaults)
 
   frequency = Math.max(1, options.frequency / 20)
   friction = Math.pow(20, options.friction / 100)
@@ -1221,7 +1221,7 @@ dynamics.spring = (options={}) ->
     1 - (At * Math.cos(angle))
 
 dynamics.bounce = (options={}) ->
-  applyDefaults(options, arguments.callee.defaults)
+  applyDefaults(options, dynamics.bounce.defaults)
 
   frequency = Math.max(1, options.frequency / 20)
   friction = Math.pow(20, options.friction / 100)
@@ -1241,7 +1241,7 @@ dynamics.bounce = (options={}) ->
   fn
 
 dynamics.gravity = (options={}) ->
-  applyDefaults(options, arguments.callee.defaults)
+  applyDefaults(options, dynamics.gravity.defaults)
 
   bounciness = Math.min((options.bounciness / 1250), 0.8)
   elasticity = options.elasticity / 1000
@@ -1297,7 +1297,7 @@ dynamics.gravity = (options={}) ->
   fn
 
 dynamics.forceWithGravity = (options={}) ->
-  applyDefaults(options, arguments.callee.defaults)
+  applyDefaults(options, dynamics.forceWithGravity.defaults)
   options.returnsToSelf = true
   dynamics.gravity(options)
 
@@ -1375,21 +1375,21 @@ dynamics.bezier = do ->
     fn
 
 dynamics.easeInOut = (options={}) ->
-  friction = options.friction ? arguments.callee.defaults.friction
+  friction = options.friction ? dynamics.easeInOut.defaults.friction
   dynamics.bezier(points: [
     { x:0, y:0, cp:[{ x:0.92 - (friction / 1000), y:0 }] },
     { x:1, y:1, cp:[{ x:0.08 + (friction / 1000), y:1 }] }
   ])
 
 dynamics.easeIn = (options={}) ->
-  friction = options.friction ? arguments.callee.defaults.friction
+  friction = options.friction ? dynamics.easeIn.defaults.friction
   dynamics.bezier(points: [
     { x:0, y:0, cp:[{ x:0.92 - (friction / 1000), y:0 }] },
     { x:1, y:1, cp:[{ x:1, y:1 }] }
   ])
 
 dynamics.easeOut = (options={}) ->
-  friction = options.friction ? arguments.callee.defaults.friction
+  friction = options.friction ? dynamics.easeOut.defaults.friction
   dynamics.bezier(points: [
     { x:0, y:0, cp:[{ x:0, y:0 }] },
     { x:1, y:1, cp:[{ x:0.08 + (friction / 1000), y:1 }] }
