@@ -216,6 +216,7 @@ describe 'dynamics.animate', ->
       expect(typeof(object.hexColor)).to.be.equal('string', 'object.hexColor has the wrong type')
       expect(typeof(object.rgbColor)).to.be.equal('string', 'object.rgbColor has the wrong type')
       expect(typeof(object.rgbaColor)).to.be.equal('string', 'object.rgbaColor has the wrong type')
+      expect(typeof(object.background)).to.be.equal('string', 'object.background has the wrong type')
 
     assertFormats = (object) ->
       assert(object.stringArray.match(/^([.\d]*) ([.\d]*), d([.\d]*):([.\d]*)$/)?, 'object.stringArray has the wrong format')
@@ -225,6 +226,7 @@ describe 'dynamics.animate', ->
       assert(object.hexColor.match(/^#([a-zA-Z\d]{6})$/)?, 'object.hexColor has the wrong format')
       assert(object.rgbColor.match(/^rgb\(([.\d]*), ([.\d]*), ([.\d]*)\)$/)?, 'object.rgbColor has the wrong format')
       assert(object.rgbaColor.match(/^rgba\(([.\d]*), ([.\d]*), ([.\d]*), ([.\d]*)\)$/)?, 'object.rgbaColor has the wrong format')
+      assert(object.background.match(/^linear-gradient\(#([a-zA-Z\d]{6}), #([a-zA-Z\d]{6})\)$/)?, 'object.background has the wrong format')
 
     object = {
       number: 0,
@@ -236,7 +238,8 @@ describe 'dynamics.animate', ->
       rgbColor: "rgb(255, 255, 255)",
       rgbaColor: "rgba(255, 255, 255, 0)",
       translateX: 0,
-      rotateZ: 0
+      rotateZ: 0,
+      background: "linear-gradient(#FFFFFF, #000000)",
     }
     previous = JSON.parse(JSON.stringify(object))
     dynamics.animate(object, {
@@ -249,11 +252,12 @@ describe 'dynamics.animate', ->
       rgbColor: "rgb(18, 52, 86)",
       rgbaColor: "rgba(18, 52, 86, 1)",
       translateX: 10,
-      rotateZ: 1
+      rotateZ: 1,
+      background: "linear-gradient(#FF0000, #F0F0F0)",
     }, {
       duration: 100
     })
-    setInterval ->
+    interval = setInterval ->
       current = JSON.parse(JSON.stringify(object))
 
       assertTypes(current)
@@ -273,6 +277,7 @@ describe 'dynamics.animate', ->
       previous = current
     , 20
     setTimeout ->
+      clearInterval(interval)
       assertTypes(object)
       assertFormats(object)
 
