@@ -244,7 +244,10 @@ class InterpolableString
         })
 
     matches = matches.sort((a, b) ->
-      a.index > b.index
+      if a.index > b.index
+        1
+      else
+        -1
     )
 
     parts = []
