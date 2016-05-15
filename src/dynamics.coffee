@@ -473,9 +473,9 @@ class Matrix2D
       else if k == "translateY"
         @m = @m.translate(0, v)
       else if k == "scaleX"
-        @m = @m.scale(v, 1)
+        @m = @m.scaleNonUniform(v, 1)
       else if k == "scaleY"
-        @m = @m.scale(1, v)
+        @m = @m.scaleNonUniform(1, v)
       else if k == "rotateZ"
         @m = @m.rotate(v)
       else if k == "skewX"
