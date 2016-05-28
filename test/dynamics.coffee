@@ -134,6 +134,40 @@ describe 'dynamics.animate', ->
       done()
     , 150
 
+  it 'calls change with element being animated', (done) ->
+    el = document.createElement('div')
+    dynamics.animate(el, {
+      left: 100,
+      top: "50px"
+    }, {
+      duration: 100,
+      type: dynamics.easeInOut,
+      change: (element) ->
+        assert(el == element, "Element should be the same")
+    })
+    setTimeout ->
+      done()
+    , 150
+
+  it 'calls change with progress incrementing', (done) ->
+    el = document.createElement('div')
+    savedProgress = -1
+    dynamics.animate(el, {
+      left: 100,
+      top: "50px"
+    }, {
+      duration: 100,
+      type: dynamics.easeInOut,
+      change: (el, progress) ->
+        assert(progress > savedProgress, "Progress should increment")
+        assert(progress >= 0 && progress <= 1, "Progress should be in [0, 1] range")
+        savedProgress = progress
+    })
+    setTimeout ->
+      assert(savedProgress == 1, "Progress should end with 1")
+      done()
+    , 150
+
   it 'actually animates properties while the animation is running', (done) ->
     el = document.createElement('div')
     previous = { left: 0, top: 0, translateX: 0, rotateZ: 0, transform: 'none' }

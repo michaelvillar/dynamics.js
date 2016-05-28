@@ -1097,7 +1097,7 @@ animationTick = (t, animation) ->
 
   applyFrame(animation.el, properties)
 
-  animation.options.change?(animation.el)
+  animation.options.change?(animation.el, Math.min(1, tt))
   if tt >= 1
     animation.options.complete?(animation.el)
 

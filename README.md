@@ -70,7 +70,9 @@ Animates an element to the properties with the animation options.
   - `duration` is in milliseconds (default: `1000`)
   - `delay` is in milliseconds (default: `0`)
   - `complete` (optional) is the completion callback
-  - `change` (optional) is called at every change
+  - `change` (optional) is called at every change. Two arguments are passed to the function. `function(el, progress)`
+    - `el` is the element it's animating
+    - `progress` is the progress of the animation between 0 and 1
 
 ### dynamics.stop(el)
 Stops the animation applied on the element
