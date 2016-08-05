@@ -70,6 +70,8 @@ applyProperties = (el, properties) ->
         v = "#{v}#{unitForProperty(k, v)}"
       if isSVG && svgProperties.contains(k)
         el.setAttribute(k, v)
+      else if k of el # support animating scrollTop, etc
+        el[k] = v
       else
         el.style[propertyWithPrefix(k)] = v
 

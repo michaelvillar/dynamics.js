@@ -73,6 +73,19 @@ describe 'dynamics.animate', ->
       done()
     , 50
 
+  it 'animate scrollTop of a DOM element', (done) ->
+    el = document.createElement('div')
+    dynamics.animate(el, {
+      scrollTop: 100,
+    }, {
+      duration: 25,
+      type: dynamics.easeInOut
+    })
+    setTimeout ->
+      expect(el.scrollTop).eql('100')
+      done()
+    , 50
+
   it 'animate with a delay', (done) ->
     el = document.createElement('div')
     el.style.left = 0
