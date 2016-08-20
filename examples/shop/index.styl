@@ -1,0 +1,514 @@
+// Mixins
+appearance()
+  -webkit-appearance: arguments
+  -moz-appearance: arguments
+  appearance: arguments
+
+user-select()
+  -webkit-user-select: arguments
+  -moz-user-select: arguments
+  user-select: arguments
+
+transition()
+  -webkit-transition: arguments
+  -moz-transition: arguments
+  transition: arguments
+
+transform()
+  -webkit-transform: arguments
+  -moz-transform: arguments
+  transform: arguments
+
+transform-origin()
+  -webkit-transform-origin: arguments
+  -moz-transform-origin: arguments
+  transform-origin: arguments
+
+background-image2x(url)
+  @media only screen and (-webkit-min-device-pixel-ratio: 1.5),
+       only screen and (min--moz-device-pixel-ratio: 1.5),
+       only screen and (min-device-pixel-ratio: 1.5) {
+    background-image: url(url)
+  }
+
+// CSS
+* {
+  padding: 0
+  margin: 0
+  border: none
+}
+
+a {
+  cursor: pointer
+}
+
+header {
+  position: fixed
+  top: 0
+  left: 0
+  right: 0
+  z-index: 10
+
+  a#logo {
+    position: absolute
+    top: 15px
+    left: 16px
+    font: 20px "Myriad Pro", "MyriadPro", Helvetica, Arial
+    color: #959BA1
+    user-select: none
+
+    &.hidden {
+      pointer-events: none
+    }
+
+    &:active {
+      color: #53A9E9
+      > span {
+        color: #53A9E9
+      }
+    }
+
+    > span {
+      font-weight: 600
+      color: #616467
+    }
+  }
+
+  a#closeCart {
+    position: absolute
+    top: 11px
+    right: 10px
+    display: block
+    background: #8D9096
+    border-radius: 5px
+    width: 31px
+    height: 31px
+    &:active {
+      background: black
+    }
+    > span {
+      position: absolute
+      top: 11px
+      left: 11px
+      display: block
+      width: 10px
+      height: 10px
+      background: url(img/iconClose.png) no-repeat
+      background-image2x: 'img/iconClose@2x.png'
+      background-size: 100% 100%
+      pointer-events: none
+    }
+  }
+
+  a#cart {
+    position: absolute
+    top: 11px
+    right: 10px
+    display: block
+    height: 31px
+    width: 54px
+    box-sizing: border-box
+    border: 2px solid rgba(255,255,255,0)
+    transition: border-color .25s ease-in-out
+    user-select: none
+    border-radius: 5px
+    transform-origin: 38px 50%
+
+    &.filled {
+      border: 2px solid #EDEEF2
+      &:hover {
+        border-color: #53A9E9
+        transition: border-color .25s ease-in-out
+      }
+      &:active {
+        border-color: #000
+        transition: none
+      }
+      > .icon {
+        right: 22px
+        &.blue {
+          opacity: 1
+        }
+      }
+    }
+
+    &:active {
+      .icon.black {
+        opacity: 1
+        transition: none
+      }
+      > .label {
+        color: #000
+        transition: none
+      }
+    }
+
+    > span {
+      pointer-events: none
+    }
+    > .icon {
+      position: absolute
+      top: 6px
+      right: 2px
+      display: block
+      width: 21px
+      height: 16px
+      &.gray {
+        background: url(img/cart.png) no-repeat
+        background-image2x: 'img/cart@2x.png'
+        background-size: 100% 100%
+      }
+      &.blue {
+        background: url(img/cartBlue.png)
+        background-image2x: 'img/cartBlue@2x.png'
+        background-size: 100% 100%
+        opacity: 0
+      }
+      &.black {
+        background: url(img/cartBlack.png)
+        background-image2x: 'img/cartBlack@2x.png'
+        background-size: 100% 100%
+        opacity: 0
+        transition: opacity .25s ease-in-out
+      }
+      transition: all .2s ease-in-out
+    }
+    > .label {
+      position: absolute
+      top: 4px
+      right: 3px
+      width: 18px
+      text-align: center
+      font-family: "HelveticaNeueMedium", "HelveticaNeue-Medium", "Helvetica Neue Medium", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial
+      font-size: 15px
+      color: #53A9E9
+      transition: color .25s ease-in-out
+    }
+  }
+
+  .loading {
+    position: absolute
+    left: 50%
+    width: 30px
+    margin-left: -15px
+    top: 14px
+  }
+}
+
+a.item {
+  display: block
+  width: 80px
+  height: 120px
+  padding: 0
+  line-height: 0
+  background: #eaebed
+
+  &.hidden {
+    background: transparent
+    &::after, img {
+      visibility: hidden
+    }
+  }
+
+  img {
+    width: 100%
+    height: 100%
+    opacity: 0
+    transition: opacity .25s ease-in-out
+
+    &.loaded {
+      opacity: 1
+    }
+  }
+}
+
+#grid {
+  line-height: 0
+  text-align: center
+  padding: 50px 30px
+  user-select: none
+  overflow-x: hidden
+
+  a.item {
+    position: relative
+    display: inline-block
+    margin: 10px
+
+    &::after {
+      position: absolute
+      content: ''
+      left: 0
+      right: 0
+      bottom: 0
+      top: 0
+      z-index: 2
+      background: rgba(97,100,103,.2)
+      opacity: 0
+      transition: opacity .2s ease-in-out
+    }
+    &:active::after {
+      opacity: 1
+      transition: opacity .05s ease-in-out
+    }
+  }
+}
+
+.loading {
+  transition: opacity .25s ease-in-out
+
+  &.hidden {
+    opacity: 0
+  }
+
+  > span {
+    display: inline-block
+    width: 4px
+    height: 4px
+    margin: 0 2px
+
+    > span {
+      display: inline-block
+      width: 100%
+      height: 100%
+      border-radius: 2px
+      background: #616467
+    }
+  }
+}
+
+#fade {
+  position: fixed
+  top: 0
+  left: 0
+  right: 0
+  bottom: 0
+  z-index: 5
+  background: rgba(255,255,255,.95)
+  opacity: .000001
+  pointer-events: none
+  transition: opacity .4s ease-in-out
+
+  &.visible {
+    opacity: 1
+    pointer-events: auto
+  }
+}
+
+#product {
+  position: fixed
+  top: 47%
+  left: 50%
+  margin-left: -250px
+  margin-top: -120px
+  width: 500px
+  z-index: 20
+  pointer-events: none
+
+  h2, p {
+    position: relative
+    top: 23px
+    left: 186px
+    overflow: hidden
+    span {
+      display: inline-block
+    }
+  }
+
+  h2 {
+    font: 20px "Myriad Pro", "MyriadPro", Helvetica, Arial
+    color: #616467
+  }
+
+  p {
+    font: 12px "Helvetica Neue", "HelveticaNeue", Helvetica, Arial
+    color: #8D9096
+    &.author {
+      margin-bottom: 22px
+    }
+    &.footer {
+      position absolute
+      top: 190px
+      padding-top: 10px
+      > span {
+        font-family: "HelveticaNeueMedium", "HelveticaNeue-Medium", "Helvetica Neue Medium", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial
+        font-size: 15px
+        color: #7B7E84
+        padding-right: 14px
+        padding-left: 13px
+        &.price {
+          padding-left: 0
+          border-right: 1px solid #CED2DA
+        }
+      }
+    }
+  }
+
+  button {
+    height: 31px
+    background: #53A9E9
+    border-radius: 5px
+    appearance: none
+    font-family: "HelveticaNeueMedium", "HelveticaNeue-Medium", "Helvetica Neue Medium", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial
+    font-size: 15px
+    color: white
+    padding: 0 9px
+    cursor: pointer
+    span.icon {
+      display: inline-block
+      width: 13px
+      height: 13px
+      background: url(img/iconAdd.png) no-repeat
+      background-image2x: 'img/iconAdd@2x.png'
+      background-size: 100% 100%
+    }
+    span.label {
+      position: relative
+      top: -1px
+      margin-left: 6px
+      margin-right: 2px
+    }
+    &:focus, &:active {
+      outline: none
+    }
+    &:active {
+      background-color: #2C7BB5
+    }
+  }
+
+  a.close {
+    position: absolute
+    top: 0
+    left: 0
+    width: 160px
+    height: 240px
+    display: block
+    overflow: hidden
+    z-index: 200
+    span {
+      position: absolute
+      top: 10px
+      left: 10px
+      display: block
+      background: url(img/closeButton.png) no-repeat
+      background-image2x: 'img/closeButton@2x.png'
+      background-size: 100% 100%
+      width: 38px
+      height: 38px
+      pointer-events: none
+    }
+  }
+}
+
+#cartSection {
+  position: fixed
+  top: 0
+  left: 0
+  right: 0
+  bottom: 0
+  font: 13px "Helvetica Neue", "HelveticaNeue", Helvetica, Arial
+  color: #7B7E84
+  z-index: 7
+
+  .items {
+    position: absolute
+    left: 50%
+    margin-left: -167px
+    width: 334px
+    bottom: 240px
+    margin-bottom: 9px
+
+    .item {
+      position: relative
+      width: 100%
+      height: 60px
+      margin-bottom: 9px
+
+      img {
+        width: 40px
+      }
+
+      p {
+        position: absolute
+        top: 16px
+        left: 52px
+      }
+
+      .amount {
+        position: absolute
+        top: 21px
+        right: 0
+        font-size: 15px
+
+        .price {
+          font-family: "HelveticaNeueMedium", "HelveticaNeue-Medium", "Helvetica Neue Medium", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial
+        }
+      }
+    }
+  }
+
+  .footer {
+    position: absolute
+    left: 0
+    right: 0
+    bottom: -100px
+    height: 340px
+    background: #f0f2f4
+    text-shadow: #fff
+    z-index: 5
+
+    dl, .buttons {
+      width: 334px
+      margin: 0 auto
+    }
+
+    dl {
+      margin-top: 13px
+      font-size: 15px
+
+      dt, dd {
+        display: inline-block
+        width: 50%
+        line-height: 1.3em
+      }
+
+      dd {
+        text-align: right
+        font-family: "HelveticaNeueMedium", "HelveticaNeue-Medium", "Helvetica Neue Medium", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial
+      }
+    }
+
+    dl.total {
+      border-top: 1px solid #d3d5d9
+      padding-top: 8px
+      margin-top: 14px
+      font-size: 17px
+      color: #5B5E65
+    }
+
+    .buttons {
+      margin-top: 10px
+      text-align: right
+
+      button.checkout {
+        display: inline-block
+        width: 106px
+        height: 36px
+        background: #53A9E9
+        border-radius: 5px
+        font-size: 18px
+        font-family: "HelveticaNeueMedium", "HelveticaNeue-Medium", "Helvetica Neue Medium", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial
+        color: #fff
+        padding: 0 3px
+        appearance: none
+        cursor: pointer
+
+        &:focus, &:active {
+          outline: none
+        }
+        &:active {
+          background-color: #2C7BB5
+        }
+      }
+    }
+  }
+}

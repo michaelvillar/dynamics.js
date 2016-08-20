@@ -1,0 +1,59 @@
+<!doctype html>
+<title>basics</title>
+<link rel="stylesheet" href="common.css">
+<style>
+#triangle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-left: -50px;
+  margin-top: -35px;
+  width: 0;
+  height: 0;
+  border-left: 50px solid transparent;
+  border-right: 50px solid transparent;
+  border-bottom: 70px solid #CA2F6F;
+}
+</style>
+<script src="../lib/dynamics.js"></script>
+<section id="example">
+  <div id="triangle"></div>
+</section>
+<script id="script">
+var el = document.querySelector('#triangle')
+
+// From purple to green
+function animate1() {
+  dynamics.animate(el, {
+    rotateZ: 180,
+    scale: 1.5,
+    borderBottomColor: '#43F086'
+  }, {
+    type: dynamics.spring,
+    friction: 400,
+    duration: 1300,
+    complete: animate2
+  })
+}
+
+// From green to purple
+function animate2() {
+  dynamics.animate(el, {
+    rotateZ: 360,
+    scale: 1,
+    borderBottomColor: '#CA2F6F'
+  }, {
+    type: dynamics.spring,
+    frequency: 600,
+    friction: 400,
+    duration: 1800,
+    anticipationSize: 350,
+    anticipationStrength: 400,
+    complete: animate1
+  })
+}
+
+// Start first animation
+animate1()
+</script>
+<script src="example.js"></script>

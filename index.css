@@ -1,0 +1,234 @@
+@import url(http://fonts.googleapis.com/css?family=Source+Sans+Pro|Source+Code+Pro:400,600);
+
+* {
+  margin: 0;
+  padding: 0;
+  font-family: "Source Sans Pro", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial;
+  cursor: default;
+  -webkit-user-select: none;
+}
+
+a {
+  cursor: pointer;
+}
+
+body {
+  background: white;
+  min-width: 620px;
+}
+
+.navContainer {
+  border-bottom: 1px solid #EBEFF4;
+}
+nav {
+  width: 580px;
+  margin: 0 auto;
+  font-size: 16px;
+  color: #496281;
+  padding: 14px 0;
+  height: 21px;
+}
+nav.foot {
+  padding-top: 30px;
+  padding-bottom: 34px;
+}
+nav a {
+  color: #0070FF;
+  text-decoration: none;
+}
+nav a:not(.right) {
+  margin-right: 30px;
+}
+nav a.stripe {
+  color: #394E6E;
+}
+nav .right {
+  float: right;
+}
+nav .right a {
+  margin-right: 0px;
+}
+
+header {
+  width: 580px;
+  height: 188px;
+  text-align: center;
+  margin: 0 auto;
+}
+h1 {
+  font-weight: normal;
+  font-size: 41px;
+  color: #0070FF;
+  padding-top: 38px;
+}
+h2 {
+  font-weight: normal;
+  font-size: 20px;
+  color: #394E6E;
+  width: 380px;
+  margin: 0 auto;
+}
+h3 {
+  font-weight: normal;
+  font-size: 18px;
+  color: #394E6E;
+  text-align: center;
+  margin: 0 auto;
+}
+h4 {
+  font-weight: normal;
+  text-align: center;
+  margin: 0 auto;
+}
+
+section {
+  position: relative;
+  width: 580px;
+  margin: 0 auto;
+}
+
+section.editor #editor, section.editor #editor * {
+  font-family: "Source Sans Pro", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial;
+  font-size: 15px;
+}
+
+section.editor #editor > div.settings select {
+  padding-top: 0px;
+  padding-bottom: 0px;
+}
+
+section.demo {
+  height: 114px;
+}
+div.track {
+  position: absolute;
+  top: 50%;
+  left: 125px;
+  width: 350px;
+  height: 1px;
+  background: #e0effe;
+  -webkit-transition: width .25s ease-in-out;
+}
+div.track.tiny {
+  width: 50px;
+}
+div.track > span.circle {
+  position: absolute;
+  display: block;
+  width: 9px;
+  height: 9px;
+  background: white;
+  border: 1px solid #e0effe;
+  border-radius: 5px;
+  top: -5px;
+}
+div.track > span.circle0 { left: -5px; }
+div.track > span.circle1 { right: -5px; }
+div.track > span.index {
+  top: 24px;
+  left: -3px;
+  font-size: 10px;
+  color: #8096B1;
+  position: absolute;
+  user-select: none;
+  -webkit-user-select: none;
+}
+div.track > span.index1 {
+  left: auto;
+  right: -3px;
+}
+div.circle {
+  position: absolute;
+  top: 40px;
+  left: 108px;
+  width: 34px;
+  height: 34px;
+  background: #0070FF;
+  border-radius: 17px;
+}
+
+section.code {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  background: #F4F9FF;
+  padding: 17px;
+  overflow: hidden;
+  white-space: pre-wrap;
+  font-family: "Source Code Pro", Menlo, Courier, Arial;
+  font-size: 14px;
+  color: #496281;
+  line-height: 18px;
+  -webkit-user-select: auto;
+  cursor: text;
+}
+section.code strong {
+  font-family: "Source Code Pro", Menlo, Courier, Arial;
+  font-weight: 600;
+  -webkit-user-select: auto;
+  color: #214373;
+}
+
+.examplesContainer {
+  background: #1474d5;
+  background: -webkit-linear-gradient(top, #0063C8, #1474d5);
+  background: -moz-linear-gradient(top, #0063C8, #1474d5);
+  background: linear-gradient(top, #0063C8, #1474d5);
+  border-top: 1px solid #0048cd;
+  border-bottom: 1px solid #0357d7;
+  width: 100%;
+  margin-top: 40px;
+}
+section.examples {
+  overflow: hidden;
+  width: 600px;
+  padding-bottom: 40px;
+}
+section.examples > h3 {
+  padding: 30px 0 0;
+  color: #F6F9FF;
+  font-size: 38px;
+}
+section.examples > h4 {
+  padding: 0 0 30px;
+  color: #CAD6E9;
+  font-size: 20px;
+}
+.example {
+  width: calc(100% / 2 - 20px);
+  float: left;
+  margin: 10px;
+  overflow: hidden;
+}
+.example p {
+  float: left;
+  font-size: 20px;
+  color: #F6F9FF;
+  padding-bottom: 8px;
+}
+.example a.link {
+  float: right;
+  font-size: 15px;
+  color: #CAD6E9;
+  text-decoration: none;
+  padding-top: 5px;
+  padding-right: 12px;
+  background: url(img/iconArrow@1x.png) no-repeat right 13px;
+}
+.example iframe, .example .over {
+  display: block;
+  clear: both;
+  border: none;
+  width: 100%;
+  height: 280px;
+}
+.example .over {
+  position: relative;
+  margin-top: -280px;
+}
+@media (-webkit-min-device-pixel-ratio: 2) {
+  .example a.link {
+    background-image: url(img/iconArrow@2x.png);
+    background-size: 8px 8px;
+  }
+}

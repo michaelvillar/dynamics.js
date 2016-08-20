@@ -1,0 +1,31 @@
+.hljs {
+  color: #000000;
+}
+
+.hljs-comment {
+  color: #0066FF;
+}
+
+.hljs-built_in {
+  color: #6c76e1;
+  font-weight: 600;
+}
+
+.hljs-function .hljs-keyword,
+.hljs-keyword {
+  color: #0000FF;
+  font-weight: 600;
+}
+
+.hljs-title {
+  color: #0000A2;
+  font-weight: 600;
+}
+
+.hljs-number {
+  color: #2129d6;
+}
+
+.hljs-string {
+  color: #006b00;
+}

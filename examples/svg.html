@@ -1,0 +1,93 @@
+<!doctype html>
+<title>svg animation</title>
+<link rel="stylesheet" href="common.css">
+<style>
+@import url(http://fonts.googleapis.com/css?family=Source+Sans+Pro);
+
+button {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-left: -74px;
+  margin-top: -21px;
+  background: transparent;
+  border: none;
+  width: 148px;
+  height: 43px;
+  padding: 0;
+  overflow: visible;
+}
+button svg {
+  position: absolute;
+  left: 0;
+  top: -55px;
+}
+button span {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  font: 22px 'Source Sans Pro', 'HelveticaNeue', Arial;
+  line-height: 41px;
+  color: #fff;
+  text-align: center;
+}
+</style>
+<script src="../lib/dynamics.js"></script>
+<section id="example">
+  <button>
+    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="148" height="142">
+      <path d="M4.94536417,5 C6.53051758,4.67822266 37,5 74,5 C111,5 141.352051,4.67993164 143.054636,5 C145.785885,5.66926188 148,8.23345454 148,11.0068935 L148,41.9931065 C148,44.7583374 145.792998,47.3731866 143.065211,48 C141.023682,48.3474121 111,48 74,48 C43.4761603,48 6.64355469,48.274559 4.92422485,48 C2.20465056,47.3606837 0,44.7665455 0,41.9931065 L0,11.0068935 C0,8.24166255 2.20700163,5.66022277 4.94536417,5 Z" data-over-path="M4.94536417,5 C6.53051758,4.67822266 37,0 74,0 C111,0 141.352051,4.67993164 143.054636,5 C145.785885,5.66926188 148,8.23345454 148,11.0068935 L148,41.9931065 C148,44.7583374 145.792998,47.3731866 143.065211,48 C141.023682,48.3474121 111,53.6231884 74,53 C43.4761603,53.5141109 6.64355469,48.274559 4.92422485,48 C2.20465056,47.3606837 0,44.7665455 0,41.9931065 L0,11.0068935 C0,8.24166255 2.20700163,5.66022277 4.94536417,5 Z" fill="#0bf" transform="translate(0 50)" />
+    </svg>
+    <span>Button</span>
+  </button>
+</section>
+<script id="script">
+var el = document.querySelector('path')
+var textEl = document.querySelector('span')
+var pathOver = el.getAttribute('data-over-path')
+var pathOut = el.getAttribute('d')
+
+// Over animation
+function animateOver() {
+  dynamics.animate(el, {
+    d: pathOver,
+    fill: "#007EFF"
+  }, {
+    type: dynamics.spring,
+    complete: animateOut
+  })
+
+  dynamics.animate(textEl, {
+    scale: 1.06
+  }, {
+    type: dynamics.spring
+  })
+}
+
+// Out animation
+function animateOut() {
+  dynamics.animate(el, {
+    d: pathOut,
+    fill: "#0bf"
+  }, {
+    type: dynamics.easeInOut,
+    friction: 100
+  })
+
+  dynamics.animate(textEl, {
+    scale: 1
+  }, {
+    type: dynamics.easeInOut,
+    friction: 100,
+    complete: function() {
+      dynamics.setTimeout(animateOver, 500)
+    }
+  })
+}
+
+// Start
+animateOver()
+</script>
+<script src="example.js"></script>

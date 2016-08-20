@@ -1,0 +1,37 @@
+<!doctype html>
+<title>basics</title>
+<link rel="stylesheet" href="common.css">
+<style>
+#triangle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-left: -50px;
+  margin-top: -35px;
+  width: 0;
+  height: 0;
+  border-left: 50px solid transparent;
+  border-right: 50px solid transparent;
+  border-bottom: 70px solid #CA2F6F;
+}
+</style>
+<script src="../lib/dynamics.js"></script>
+<section id="example">
+  <div id="triangle"></div>
+</section>
+<script id="script">
+var el = document.querySelector('#triangle')
+
+dynamics.runloop(el, {
+  rotateZ: function(rotateZ, t, dt) {
+    return rotateZ + dt * 100
+  },
+  scale: dynamics.sinusoidal(function(scale, t, dt) {
+    return 1 + t * 0.25
+  }),
+  borderBottomColor: function(color, t, dt) {
+    return "hsl(" + (t * 100) + ", 100%, 50%)"
+  }
+})
+</script>
+<script src="example.js"></script>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dynamics.js</title>
+  <link rel="icon" type="image/png" href="./img/favicon.png">
+  <link rel="stylesheet" href="index.css">
+  <link rel="stylesheet" href="editor.css">
+  <script src="lib/dynamics.js"></script>
+  <script src="editor.js"></script>
+</head>
+<body>
+  <div class="navContainer">
+    <nav>
+      <a href="https://github.com/michaelvillar/dynamics.js">GitHub</a>
+      <a href="https://github.com/michaelvillar/dynamics.js/releases">Download</a>
+      <span class="right">by <a href="https://twitter.com/michaelvillar">@michaelvillar</a></span>
+    </nav>
+  </div>
+  <header>
+    <h1>Dynamics.js</h1>
+    <h2>JavaScript library to create physics-based animations</h2>
+  </header>
+  <section class="editor"></section>
+  <section class="demo">
+    <div class="track">
+      <span class="circle circle0"></span>
+      <span class="circle circle1"></span>
+      <span class="index index0">0</span>
+      <span class="index index1">1</span>
+    </div>
+  </section>
+  <section class="code"></section>
+  <div class="examplesContainer">
+    <section class="examples">
+      <h3>Examples</h3>
+      <h4>A few animations made with Dynamics.js</h4>
+      <div class="example">
+        <p>Basics</p>
+        <a class="link" href="examples/basics.html">View source</a>
+        <iframe src="examples/basics.html"></iframe>
+        <a class="over" href="examples/basics.html"></a>
+      </div>
+      <div class="example">
+        <p>SVG</p>
+        <a class="link" href="examples/svg.html">View source</a>
+        <iframe src="examples/svg.html"></iframe>
+        <a class="over" href="examples/svg.html"></a>
+      </div>
+      <div class="example">
+        <p>Loader</p>
+        <a class="link" href="examples/loader.html">View source</a>
+        <iframe src="examples/loader.html"></iframe>
+        <a class="over" href="examples/loader.html"></a>
+      </div>
+      <div class="example">
+        <p>Syncing spinner</p>
+        <a class="link" href="examples/syncing.html">View source</a>
+        <iframe src="examples/syncing.html"></iframe>
+        <a class="over" href="examples/syncing.html"></a>
+      </div>
+      <div class="example">
+        <p>Pin</p>
+        <a class="link" href="examples/pin.html">View source</a>
+        <iframe src="examples/pin.html"></iframe>
+        <a class="over" href="examples/pin.html"></a>
+      </div>
+      <div class="example">
+        <p>Menu</p>
+        <a class="link" href="examples/menu.html">View source</a>
+        <iframe src="examples/menu.html"></iframe>
+        <a class="over" href="examples/menu.html"></a>
+      </div>
+    </section>
+  </div>
+  <nav class="foot">
+    <a href="https://github.com/michaelvillar/dynamics.js">GitHub</a>
+    <a href="https://github.com/michaelvillar/dynamics.js/releases">Download</a>
+    <span class="right">by <a href="https://twitter.com/michaelvillar">@michaelvillar</a></span>
+  </nav>
+  <span style="display:none;"></span>
+  <script>
+  var codeEl = document.querySelector('.code');
+  var editor = new dynamics.Editor({
+    onChange: function() {
+      codeEl.innerHTML = this.code(true);
+    }
+  });
+  document.querySelector(".editor").appendChild(editor.el);
+
+  // Toggle slow on every iframe
+  window.addEventListener('keyup', function(e) {
+    var iframes = document.querySelectorAll("iframe");
+    for(var i=0;i<iframes.length;i++) {
+      var iframe = iframes[i];
+      iframe.contentWindow.dynamics.toggleSlow();
+    }
+  });
+  </script>
+</body>
+</html>

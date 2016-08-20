@@ -1,0 +1,53 @@
+<!doctype html>
+<title>loader</title>
+<link rel="stylesheet" href="common.css">
+<style>
+.loader {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin-left: -60px;
+  margin-top: -12px;
+}
+.dot {
+  float: left;
+  margin: 0 8px;
+  width: 24px;
+  height: 24px;
+  border-radius: 12px;
+  background: black;
+}
+</style>
+<script src="../lib/dynamics.js"></script>
+<section id="example">
+  <div class="loader">
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+  </div>
+</section>
+<script id="script">
+var dots = document.querySelectorAll('.dot')
+var colors = ['#007EFF', '#FF3700', '#92FF00']
+
+// Start the 3 dot animations with different delays
+function animateDots() {
+  for(var i=0; i<dots.length; i++) {
+    dynamics.animate(dots[i], {
+      translateY: -70,
+      backgroundColor: colors[i]
+    }, {
+      type: dynamics.forceWithGravity,
+      bounciness: 800,
+      elasticity: 200,
+      duration: 2000,
+      delay: i * 450
+    })
+  }
+
+  dynamics.setTimeout(animateDots, 2500)
+}
+
+animateDots()
+</script>
+<script src="example.js"></script>

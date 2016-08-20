@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+<head>
+  <title>dynamics.animate</title>
+  <style>
+    #square {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 50px;
+      height: 50px;
+      background: red;
+      -webkit-transform: rotateZ(45deg);
+      transform: rotateZ(45deg);
+    }
+  </style>
+  <script src="../lib/dynamics.js"></script>
+</head>
+<body>
+  <div id="square"></div>
+  <script>
+  dynamics.animate(document.querySelector('#square'), {
+    left: 100,
+    top: "100px",
+    rotateZ: 80,
+    backgroundColor: 'rgba(0, 255, 0, 0.5)'
+  })
+  </script>
+</body>
+</html>

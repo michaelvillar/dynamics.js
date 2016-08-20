@@ -1,0 +1,77 @@
+<!doctype html>
+<title>location pin</title>
+<link rel="stylesheet" href="common.css">
+<style>
+.pin {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin-left: -38px;
+  margin-top: -53px;
+}
+.pin, svg {
+  -webkit-transform-origin: 50% 100%;
+  -moz-transform-origin: 50% 100%;
+  transform-origin: 50% 100%;
+}
+</style>
+<script src="../lib/dynamics.js"></script>
+<section id="example">
+  <div class="pin">
+    <svg width="76" height="107" viewBox="0 0 76 107" xmlns="http://www.w3.org/2000/svg">
+      <path d="M38 106.7c2.4 0 37.7-43 37.8-68.8 0-21-17-38-38-38C17 0 0 17 0 38c.4 27 35.4 68.7 38 68.7z" fill="#EC1A0A"/>
+      <ellipse fill="#FFF" cx="38.1" cy="38.1" rx="23.1" ry="23.1"/>
+    </svg>
+  </div>
+</section>
+<script id="script">
+var pin = document.querySelector('.pin')
+var svg = document.querySelector('.pin svg')
+
+function horizontalBounce() {
+  // The bounce animation will return to the original state
+  // In this case, it will go from 0deg to -45deg to 0deg
+  dynamics.animate(pin, {
+    rotateZ: -45
+  }, {
+    type: dynamics.bounce,
+    duration: 1800,
+    complete: verticalBounce
+  })
+}
+
+function verticalBounce() {
+  // We animate the two elements (svg, pin) independently
+  dynamics.animate(svg, {
+    scaleY: 0.8
+  }, {
+    type: dynamics.bounce,
+    duration: 800,
+    bounciness: 0
+  })
+
+  // Use the delay option to delay your animations
+  dynamics.animate(pin, {
+    translateY: -60
+  }, {
+    type: dynamics.forceWithGravity,
+    bounciness: 0,
+    duration: 500,
+    delay: 150
+  })
+
+  dynamics.animate(svg, {
+    scaleY: 0.8
+  }, {
+    type: dynamics.bounce,
+    duration: 800,
+    bounciness: 600,
+    delay: 650,
+    complete: horizontalBounce
+  })
+}
+
+// Start the horizontal bounce first!
+horizontalBounce()
+</script>
+<script src="example.js"></script>

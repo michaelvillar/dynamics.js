@@ -1,0 +1,118 @@
+<!doctype html>
+<title>menu</title>
+<link rel="stylesheet" href="common.css">
+<style>
+@import url(http://fonts.googleapis.com/css?family=Source+Sans+Pro);
+
+nav {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-left: -114px;
+  margin-top: -118px;
+  width: 228px;
+  height: 239px;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  padding: 21px 26px 0 26px;
+  -webkit-transform-origin: 50% 10px;
+  -moz-transform-origin: 50% 10px;
+  transform-origin: 50% 10px;
+  -webkit-transform: scale(.1);
+  transform: scale(.1);
+  opacity: 0;
+  background: url(../img/menu@1x.png);
+}
+ul {
+  font: 16px 'Source Sans Pro', 'HelveticaNeue', Arial;
+  color: #496281;
+  list-style: none;
+  overflow: hidden;
+  padding-top: 13px;
+  padding-bottom: 13px;
+}
+li {
+  height: 25px;
+}
+@media only screen and (-webkit-min-device-pixel-ratio: 2),
+only screen and ( min-resolution: 192dpi),
+only screen and ( min-resolution: 2dppx) {
+  nav {
+    background: url(../img/menu@2x.png);
+    background-size: 100% 100%;
+  }
+}
+</style>
+<script src="../lib/dynamics.js"></script>
+<section id="example">
+  <nav>
+    <ul>
+      <li>Checkout</li>
+      <li>Subscriptions</li>
+      <li>Connect</li>
+      <li>Apple Pay</li>
+      <li>Android Pay</li>
+      <li>Bitcoin</li>
+      <li>Gallery</li>
+    </ul>
+  </nav>
+</section>
+<script id="script">
+var nav = document.querySelector('nav')
+var items = document.querySelectorAll('li')
+
+function show() {
+  // Animate the popover
+  dynamics.animate(nav, {
+    opacity: 1,
+    scale: 1
+  }, {
+    type: dynamics.spring,
+    frequency: 200,
+    friction: 270,
+    duration: 800
+  })
+
+  // Animate each line individually
+  for(var i=0; i<items.length; i++) {
+    var item = items[i]
+    // Define initial properties
+    dynamics.css(item, {
+      opacity: 0,
+      translateY: 20
+    })
+
+    // Animate to final properties
+    dynamics.animate(item, {
+      opacity: 1,
+      translateY: 0
+    }, {
+      type: dynamics.spring,
+      frequency: 300,
+      friction: 435,
+      duration: 1000,
+      delay: 100 + i * 40
+    })
+  }
+
+  dynamics.setTimeout(hide, 2000)
+}
+
+function hide() {
+  // Animate the popover
+  dynamics.animate(nav, {
+    opacity: 0,
+    scale: .1
+  }, {
+    type: dynamics.easeInOut,
+    duration: 300,
+    friction: 100
+  })
+
+  dynamics.setTimeout(show, 1000)
+}
+
+show()
+</script>
+<script src="example.js"></script>

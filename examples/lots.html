@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+<head>
+  <title>dynamics.animate - lots of elements</title>
+  <style>
+    .square {
+      width: 5px;
+      height: 5px;
+      background: red;
+      margin-bottom: 1px;
+    }
+  </style>
+  <script src="../lib/dynamics.js"></script>
+</head>
+<body>
+  <script>
+  var n = parseInt(document.location.hash.substring(1));
+  for(var i=0;i<n;i++) {
+    document.body.innerHTML += '<div class="square"></div>';
+  }
+  var squares = document.querySelectorAll('.square');
+  for(var i=0;i<n;i++) {
+    dynamics.animate(squares[i], {
+      translateX: 100
+    })
+  }
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+<head>
+  <title>dynamics.animate - transform</title>
+  <style>
+    #square {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 50px;
+      height: 50px;
+      background: red;
+      -webkit-transform: translateX(100px) translateY(100px) rotateZ(145deg);
+      transform: translateX(100px) translateY(100px) rotateZ(145deg);
+    }
+  </style>
+  <script src="../lib/dynamics.js"></script>
+</head>
+<body>
+  <div id="square"></div>
+  <script>
+  dynamics.animate(document.querySelector('#square'), {
+    left: 100,
+    top: 100,
+    translateX: 200,
+    translateY: 100,
+    rotateZ: 0
+  })
+  </script>
+</body>
+</html>

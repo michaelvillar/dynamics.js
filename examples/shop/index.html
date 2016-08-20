@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ExampleShop (Dynamics.js demo)</title>
+  <meta charset="utf-8">
+  <script src="../../lib/dynamics.js"></script>
+  <link rel="stylesheet" href="index.css">
+</head>
+<body>
+  <header>
+    <a id="logo">Example<span>Shop</span></a>
+    <div class="loading"><span class="dot"><span></span></span><span class="dot"><span></span></span><span class="dot"><span></span></span></div>
+    <a id="cart">
+      <span class="icon gray"></span>
+      <span class="icon blue"></span>
+      <span class="icon black"></span>
+      <span class="label"></span>
+    </a>
+    <a id="closeCart">
+      <span></span>
+    </a>
+  </header>
+  <section id="grid"></section>
+  <section id="product" style="display:none;">
+    <a class="close"><span></span></a>
+    <h2><span>Bauhaus Socks</span></h2>
+    <p class="author"><span>from HENRIK VIBSKOV</span></p>
+
+    <p><span>Size: One size fits most</span></p>
+    <p><span>Fabric: 82% cotton, 18% polyamide</span></p>
+
+    <p class="footer">
+      <span class="price">$9.99</span>
+      <span class="size">One size</span>
+      <button><span class="icon"></span><span class="label">Add to cart</span></button>
+    </p>
+  </section>
+  <div id="fade"></div>
+  <section id="cartSection" style="display:none;">
+    <div class="items">
+      <div class="item">
+        <img src="img/socks/socks-1.jpg">
+        <p>Baha Socks<br>One Size</p>
+        <div class="amount">1 x <span class="price">$9.99</span></div>
+      </div>
+      <div class="item">
+        <img src="img/socks/socks-1.jpg">
+        <p>Baha Socks<br>One Size</p>
+        <div class="amount">1 x <span class="price">$9.99</span></div>
+      </div>
+    </div>
+    <div class="footer">
+      <dl class="pre">
+        <dt>Taxes:</dt><!--
+     --><dd>$1.19</dd><!--
+     --><dt>Shipping:</dt><!--
+     --><dd>$0</dd>
+      </dl>
+      <dl class="total">
+        <dt>Total:</dt><!--
+     --><dd>$11.18</dd>
+      </dl>
+      <div class="buttons">
+        <button class="checkout">Checkout</button>
+      </div>
+    </div>
+  </section>
+  <script src="index.js"></script>
+</body>
+</html>

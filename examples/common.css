@@ -1,0 +1,64 @@
+@import url(http://fonts.googleapis.com/css?family=Source+Code+Pro:400,600);
+
+* {
+  margin: 0;
+  padding: 0;
+  cursor: default;
+  -webkit-user-select: none;
+}
+html, body {
+  height: 100%;
+}
+#example {
+  background: url(../img/exampleBackground@1x.png);
+  width: 100%;
+  height: 100%;
+}
+.back {
+  position: fixed;
+  display: block;
+  top: 11px;
+  left: 11px;
+  width: 35px;
+  height: 35px;
+  background: url(../img/iconBack@1x.png);
+  z-index: 3;
+  cursor: pointer;
+}
+@media only screen and (-webkit-min-device-pixel-ratio: 2),
+only screen and ( min-resolution: 192dpi),
+only screen and ( min-resolution: 2dppx) {
+  #example {
+    background: url(../img/exampleBackground@2x.png);
+    background-size: 56px 56px;
+  }
+  .back {
+    background: url(../img/iconBack@2x.png);
+    background-size: 100% 100%;
+  }
+}
+
+.debug #example {
+  position: fixed;
+  width: 419px;
+  height: 100%;
+  border-right: 1px solid rgba(37, 108, 250, .1);
+  z-index: 2;
+}
+code {
+  position: absolute;
+  top: 0;
+  left: 419px;
+  right: 0;
+  background: white;
+  padding: 20px 0 20px 20px;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  font-family: "Source Code Pro", Menlo, Courier, Arial;
+  font-size: 13px;
+}
+code, code * {
+  cursor: text;
+  -webkit-user-select: auto;
+}

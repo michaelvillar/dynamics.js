@@ -1,0 +1,43 @@
+<!doctype html>
+<html>
+<head>
+  <title>dynamics.animate - object</title>
+  <script src="../lib/dynamics.js"></script>
+  <style>
+    div {
+      font: 12px Monaco;
+      border-bottom: 1px solid rgba(0,0,0,.05);
+    }
+  </style>
+</head>
+<body>
+  <script>
+  var object = {
+    number: 0,
+    negative: "-10",
+    string: "10",
+    stringArray: "10 50, d10:50",
+    array: ["0deg",0,"1.10",10, "#FFFFFF"],
+    hexColor: "#FFFFFF",
+    rgbColor: "rgb(255, 255, 255)",
+    rgbaColor: "rgba(255, 255, 255, 0)"
+  }
+  dynamics.animate(object, {
+    number: 10,
+    negative: "+50",
+    string: "50",
+    stringArray: "100 1, d0:100",
+    array: ["100deg", 40, "2.20", 20, "#123456"],
+    hexColor: "#123456",
+    rgbColor: "rgb(18, 52, 86)",
+    rgbaColor: "rgba(18, 52, 86, 1)"
+  }, {
+    change: function() {
+      var el = document.createElement("div");
+      el.innerHTML = JSON.stringify(object);
+      document.body.appendChild(el);
+    }
+  })
+  </script>
+</body>
+</html>
