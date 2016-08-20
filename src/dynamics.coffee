@@ -172,7 +172,11 @@ getCurrentProperties = (el, keys) ->
             matrix = Matrix.fromTransform(style[propertyWithPrefix('transform')])
           properties['transform'] = matrix.decompose()
       else
-        v = style[key]
+        if key of el # support animating scrollTop, etc
+          v = el[key]
+        else
+          v = style[key]
+
         if (!v? or key is 'd') && svgProperties.contains(key)
           v = el.getAttribute(key)
         if v == "" or !v?
@@ -1130,7 +1134,7 @@ startAnimation = (el, properties, options, timeoutId) ->
       transforms.push([k, v])
     else
       interpolable = createInterpolable(v)
-      if interpolable instanceof InterpolableNumber && el.style?
+      if interpolable instanceof InterpolableNumber && k not of el && el.style?
         interpolable = new InterpolableString([
           interpolable,
           unitForProperty(k, 0),
