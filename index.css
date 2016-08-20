@@ -190,9 +190,21 @@ section.examples > h3 {
   font-size: 38px;
 }
 section.examples > h4 {
-  padding: 0 0 30px;
+  padding: 0 0 6px;
   color: #CAD6E9;
   font-size: 20px;
+}
+section.examples > p {
+  padding: 0 0 30px;
+  color: #CAD6E9;
+  font-size: 16px;
+  text-align: center;
+}
+section.examples > p > span {
+  background: rgb(8, 65, 156);
+  border-radius: 1px;
+  display: inline-block;
+  padding: 2px 3px;
 }
 .example {
   width: calc(100% / 2 - 20px);
