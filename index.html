@@ -91,10 +91,13 @@
 
   // Toggle slow on every iframe
   window.addEventListener('keyup', function(e) {
-    var iframes = document.querySelectorAll("iframe");
-    for(var i=0;i<iframes.length;i++) {
-      var iframe = iframes[i];
-      iframe.contentWindow.dynamics.toggleSlow();
+    // Enable slow animations with ctrl+shift+D
+    if (e.keyCode == 68 && e.shiftKey && e.ctrlKey) {
+      var iframes = document.querySelectorAll("iframe");
+      for(var i=0;i<iframes.length;i++) {
+        var iframe = iframes[i];
+        iframe.contentWindow.dynamics.toggleSlow();
+      }
     }
   });
   </script>
