@@ -1176,10 +1176,15 @@ timeoutLastId = 0
 
 setRealTimeout = (timeout) ->
   return unless isDocumentVisible()
-  timeout.realTimeoutId = setTimeout(->
-    timeout.fn()
-    cancelTimeout(timeout.id)
-  , timeout.delay)
+  # Because in iframe, rAF might not run directly even if tab is visible
+  rAF(->
+    # Timeout might have been cancelled already
+    return if timeouts.indexOf(timeout) == -1
+    timeout.realTimeoutId = setTimeout(->
+      timeout.fn()
+      cancelTimeout(timeout.id)
+    , timeout.delay)
+  )
 
 addTimeout = (fn, delay) ->
   timeoutLastId += 1
@@ -1196,7 +1201,7 @@ addTimeout = (fn, delay) ->
 
 cancelTimeout = (id) ->
   timeouts = timeouts.filter (timeout) ->
-    if timeout.id == id
+    if timeout.id == id && timeout.realTimeoutId
       clearTimeout(timeout.realTimeoutId)
     timeout.id != id
 
