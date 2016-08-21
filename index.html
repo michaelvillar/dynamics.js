@@ -11,7 +11,7 @@
 <body>
   <div class="navContainer">
     <nav>
-      <a href="https://github.com/michaelvillar/dynamics.js#dynamicsjs">Documentation</a>
+      <a href="https://github.com/michaelvillar/dynamics.js#usage">Documentation</a>
       <a href="https://github.com/michaelvillar/dynamics.js/releases">Download</a>
       <a href="https://www.npmjs.com/package/dynamics.js">npm</a>
       <span class="right">by <a href="https://twitter.com/michaelvillar">@michaelvillar</a></span>
@@ -30,12 +30,14 @@
       <span class="index index1">1</span>
     </div>
   </section>
-  <section class="code"></section>
+  <section class="code">
+    <pre></pre>
+    <a href="https://github.com/michaelvillar/dynamics.js#usage">Read the documentation</a>
+  </section>
   <div class="examplesContainer">
     <section class="examples">
       <h3>Examples</h3>
-      <h4>A few animations made with Dynamics.js</h4>
-      <p><span>ctrl+shift+D</span> to enable slow animations!</p>
+      <h4>Toggle slow animations with <span>ctrl+shift+D</span></h4>
       <div class="example">
         <p>Basics</p>
         <a class="link" href="examples/basics.html">View source</a>
@@ -75,14 +77,14 @@
     </section>
   </div>
   <nav class="foot">
-    <a href="https://github.com/michaelvillar/dynamics.js#dynamicsjs">Documentation</a>
+    <a href="https://github.com/michaelvillar/dynamics.js#usage">Documentation</a>
     <a href="https://github.com/michaelvillar/dynamics.js/releases">Download</a>
     <a href="https://www.npmjs.com/package/dynamics.js">npm</a>
     <span class="right">by <a href="https://twitter.com/michaelvillar">@michaelvillar</a></span>
   </nav>
   <span style="display:none;"></span>
   <script>
-  var codeEl = document.querySelector('.code');
+  var codeEl = document.querySelector('.code pre');
   var editor = new dynamics.Editor({
     onChange: function() {
       codeEl.innerHTML = this.code(true);

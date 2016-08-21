@@ -148,11 +148,21 @@ div.circle {
 }
 
 section.code {
+  background: #F4F9FF;
+  padding: 17px 17px 14px;
+}
+section.code a {
+  color: #0070FF;
+  font-size: 15px;
+  display: block;
+  border-top: 1px solid rgba(1, 100, 200, .1);
+  margin-top: 17px;
+  padding-top: 10px;
+}
+section.code pre {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
-  background: #F4F9FF;
-  padding: 17px;
   overflow: hidden;
   white-space: pre-wrap;
   font-family: "Source Code Pro", Menlo, Courier, Arial;
@@ -194,13 +204,7 @@ section.examples > h4 {
   color: #CAD6E9;
   font-size: 20px;
 }
-section.examples > p {
-  padding: 0 0 30px;
-  color: #CAD6E9;
-  font-size: 16px;
-  text-align: center;
-}
-section.examples > p > span {
+section.examples > h4 > span {
   background: rgb(8, 65, 156);
   border-radius: 1px;
   display: inline-block;
