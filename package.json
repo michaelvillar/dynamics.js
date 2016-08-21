@@ -20,7 +20,8 @@
   "scripts": {
     "test": "mocha --compilers coffee:coffee-script/register",
     "build": "coffee -c -o ./lib/ ./src/dynamics.coffee && ./node_modules/uglify-js/bin/uglifyjs ./lib/dynamics.js -m -c -o ./lib/dynamics.min.js",
-    "build:watch": "coffee -w -c -o ./lib/ ./src/dynamics.coffee"
+    "build:watch": "coffee -w -c -o ./lib/ ./src/dynamics.coffee",
+    "prepublish": "npm run build"
   },
   "bugs": {
     "url": "https://github.com/michaelvillar/dynamics.js/issues"
