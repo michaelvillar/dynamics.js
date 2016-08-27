@@ -68,7 +68,7 @@ applyProperties = (el, properties) ->
         v = v.format()
       if typeof(v) == 'number'
         v = "#{v}#{unitForProperty(k, v)}"
-      if isSVG && svgProperties.contains(k)
+      if el.hasAttribute? && el.hasAttribute(k)
         el.setAttribute(k, v)
       else if el.style?
         el.style[propertyWithPrefix(k)] = v
@@ -172,7 +172,9 @@ getCurrentProperties = (el, keys) ->
             matrix = Matrix.fromTransform(style[propertyWithPrefix('transform')])
           properties['transform'] = matrix.decompose()
       else
-        if key of el # support animating scrollTop, etc
+        if el.hasAttribute? && el.hasAttribute(key)
+          v = el.getAttribute(key)
+        else if key of el
           v = el[key]
         else
           v = style[key]
