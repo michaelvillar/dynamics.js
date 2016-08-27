@@ -193,7 +193,7 @@ describe 'dynamics.animate', ->
       duration: 100,
       type: dynamics.easeInOut
     })
-    setInterval ->
+    interval = setInterval ->
       current = { left: parseFloat(el.style.left), top: parseFloat(el.style.top), transform: el.style.transform }
       assert(current.left >= previous.left, "Left should increment")
       assert(current.top >= previous.top, "Top should increment")
@@ -201,6 +201,7 @@ describe 'dynamics.animate', ->
       previous = current
     , 20
     setTimeout ->
+      clearInterval(interval)
       done()
     , 150
 
@@ -239,7 +240,7 @@ describe 'dynamics.animate', ->
     }, {
       duration: 100
     })
-    setInterval ->
+    interval = setInterval ->
       current = el.getAttribute("points").match(regex)
       assert(current?)
       expect(parseFloat(current[1])).to.at.most(parseFloat(previous[1]))
@@ -249,6 +250,7 @@ describe 'dynamics.animate', ->
       previous = current
     , 20
     setTimeout ->
+      clearInterval(interval)
       expect(el.getAttribute("points")).to.be.equal("M50,10 C88.11,20.45")
       done()
     , 150
@@ -373,7 +375,7 @@ describe 'dynamics.animate', ->
 
     previousProp = object.prop
 
-    setInterval ->
+    interval = setInterval ->
       assert(object.prop >= 0 && object.prop <= 1, "prop is between 0 and 1")
       assert(object.prop < previousProp || object.prop == 0, "prop should be decreasing or equal 0")
 
@@ -381,6 +383,7 @@ describe 'dynamics.animate', ->
     , 20
 
     setTimeout ->
+      clearInterval(interval)
       expect(object.prop).to.be.equal(0, 'object.prop has the wrong end value')
 
       done()
