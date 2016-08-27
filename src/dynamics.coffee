@@ -188,6 +188,18 @@ getCurrentProperties = (el, keys) ->
     for key in keys
       properties[key] = createInterpolable(el[key])
 
+  addUnitsToNumberInterpolables(el, properties)
+
+  properties
+
+addUnitsToNumberInterpolables = (el, properties) ->
+  for k, interpolable of properties
+    if interpolable instanceof InterpolableNumber && el.style? && k of el.style
+      interpolable = new InterpolableString([
+        interpolable,
+        unitForProperty(k, 0),
+      ])
+    properties[k] = interpolable
   properties
 
 # Interpolable
@@ -1127,22 +1139,17 @@ startAnimation = (el, properties, options, timeoutId) ->
     dynamics.css(el, properties)
     options.complete?(@)
     return
-  properties = parseProperties(properties)
   startProperties = getCurrentProperties(el, Object.keys(properties))
+
+  properties = parseProperties(properties)
+
   endProperties = {}
   transforms = []
   for k, v of properties
     if el.style? and transformProperties.contains(k)
       transforms.push([k, v])
     else
-      interpolable = createInterpolable(v)
-      if interpolable instanceof InterpolableNumber && k not of el && el.style?
-        interpolable = new InterpolableString([
-          interpolable,
-          unitForProperty(k, 0),
-        ])
-
-      endProperties[k] = interpolable
+      endProperties[k] = createInterpolable(v)
 
   if transforms.length > 0
     isSVG = isSVGElement(el)
@@ -1160,6 +1167,8 @@ startAnimation = (el, properties, options, timeoutId) ->
       startProperties.transform.applyRotateCenter(
         [endProperties.transform.props.rotate[1], endProperties.transform.props.rotate[2]]
       )
+
+  addUnitsToNumberInterpolables(el, endProperties)
 
   animations.push({
     el: el,
