@@ -36,7 +36,7 @@ cacheFn = (func) ->
 # Make a function accept array or single objects for the first argument
 makeArrayFn = (fn) ->
   (el) ->
-    if el instanceof Array or el instanceof NodeList or el instanceof HTMLCollection
+    if el.hasOwnProperty("length")
       res = for i in [0...el.length]
         args = Array.prototype.slice.call(arguments, 1)
         args.splice(0, 0, el[i])
@@ -1091,7 +1091,7 @@ runLoopTick = (t) ->
   # Animations
   toRemoveAnimations = []
   for animation in animations
-    toRemoveAnimations.push(animation) unless animationTick(t, animation)
+    toRemoveAnimations.push(animation) unless animation && animationTick(t, animation)
   animations = animations.filter (animation) ->
     toRemoveAnimations.indexOf(animation) == -1
 

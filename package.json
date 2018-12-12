@@ -10,15 +10,15 @@
     "url": "https://github.com/michaelvillar/dynamics.js"
   },
   "devDependencies": {
-    "coffee-script": "1.7.1",
-    "uglify-js": "2.4.14",
-    "jsdom": "3.x.x",
-    "mocha-jsdom": "0.4.0",
-    "chai": "3.0.0",
-    "mocha": "2.2.5"
+    "coffeescript": "1.12.7",
+    "uglify-js": "2.8.29",
+    "jsdom": "13.x.x",
+    "mocha-jsdom": "2.0.0",
+    "chai": "4.2.0",
+    "mocha": "5.2.0"
   },
   "scripts": {
-    "test": "mocha --compilers coffee:coffee-script/register",
+    "test": "mocha --compilers coffee:coffeescript/register",
     "build": "coffee -c -o ./lib/ ./src/dynamics.coffee && ./node_modules/uglify-js/bin/uglifyjs ./lib/dynamics.js -m -c -o ./lib/dynamics.min.js",
     "build:watch": "coffee -w -c -o ./lib/ ./src/dynamics.coffee",
     "prepublish": "npm run build"
