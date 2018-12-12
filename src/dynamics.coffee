@@ -1091,7 +1091,7 @@ runLoopTick = (t) ->
   # Animations
   toRemoveAnimations = []
   for animation in animations
-    toRemoveAnimations.push(animation) unless animationTick(t, animation)
+    toRemoveAnimations.push(animation) unless animation && animationTick(t, animation)
   animations = animations.filter (animation) ->
     toRemoveAnimations.indexOf(animation) == -1
 
