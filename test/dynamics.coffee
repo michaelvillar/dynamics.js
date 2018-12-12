@@ -216,6 +216,25 @@ describe 'dynamics.animate', ->
         done()
     })
 
+  it 'does not crash if dynamics.stop is called in complete and two animations are active', (done) ->
+    el = document.createElement('div')
+    el2 = document.createElement('div')
+
+    dynamics.animate(el, {
+      left: 100
+    }, {
+       duration: 25,
+       complete: ->
+         dynamics.stop(el)
+    })
+    dynamics.animate(el2, {
+      left: 100
+    }, {
+       duration: 100,
+       complete: ->
+         done()
+    })
+
   it 'comes back to the original value with dynamics.bounce', (done) ->
     el = document.createElement('div')
     dynamics.animate(el, {
