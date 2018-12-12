@@ -4,7 +4,7 @@ expect = require('chai').expect
 assert = require('chai').assert
 dynamics = require('../src/dynamics')
 
-jsdom()
+jsdom({url: 'http://localhost'})
 
 dynamics.tests =
   matrixForTransform: (transform) ->
@@ -82,7 +82,7 @@ describe 'dynamics.animate', ->
       type: dynamics.easeInOut
     })
     setTimeout ->
-      expect(el.scrollTop).eql('100')
+      expect(el.scrollTop).eql(100)
       done()
     , 50
 
