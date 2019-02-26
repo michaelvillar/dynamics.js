@@ -17,11 +17,11 @@ namespace dynamics {
     change?(target: P, progress: number): void;
   }
 
-  function animate<P, T extends Type = typeof easeInOut>(
-    target: P,
-    properties: P,
-    options?: Options<P, T> & Parameters<T>[0]
-  ): number;
+  function animate<
+    P,
+    T extends Type = typeof easeInOut,
+    C = Parameters<T>[0] extends undefined ? {} : Parameters<T>[0]
+  >(target: P, properties: P, options?: Options<P, T> & C): number;
 
   function spring(config?: {
     frequency?: number;
@@ -37,7 +37,10 @@ namespace dynamics {
     elasticity?: number;
   }): void;
 
-  function gravity(config?: { bounciness?: number; elasticity?: number }): void;
+  function gravity(config?: {
+    bounciness?: number;
+    elasticity?: number;
+  }): void;
 
   function easeOut(config?: { friction?: number }): void;
 
@@ -61,4 +64,3 @@ namespace dynamics {
 }
 
 export = dynamics;
-export as namespace dynamics;
