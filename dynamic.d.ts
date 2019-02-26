@@ -28,22 +28,38 @@ function spring(config?: {
   anticipationSize?: number;
   anticipationStrength?: number;
 }): void;
+                 
 function bounce(config?: { frequency?: number; friction?: number }): void;
+                 
 function forceWithGravity(config?: {
   bounciness?: number;
   elasticity?: number;
 }): void;
+                 
 function gravity(config?: { bounciness?: number; elasticity?: number }): void;
+                 
 function easeOut(config?: { friction?: number }): void;
+                 
 function easeIn(config?: { friction?: number }): void;
+                 
 function easeInOut(config?: { friction?: number }): void;
+                 
 function linear(): void;
+                 
 function bezier(config?: { points: any[] }): void;
 
 function setTimeout(fn: (...args: any[]) => void, delay: number): number;
+                 
 function clearTimeout(id: number): void;
+                 
 function stop<P>(target: P): void;
+                 
 function toggleSlow(): void;
+
+function css<T extends HTMLElement>(
+  el: T,
+  properties: T["style"]
+): number;
 
 const Dynamics = {
   animate,
@@ -56,6 +72,7 @@ const Dynamics = {
   easeInOut,
   linear,
   bezier,
+  css,
   setTimeout,
   clearTimeout,
   stop,
