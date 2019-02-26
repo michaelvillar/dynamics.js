@@ -9,6 +9,7 @@
     "type": "git",
     "url": "https://github.com/michaelvillar/dynamics.js"
   },
+  "types": "./dynamic.d.ts",
   "devDependencies": {
     "coffee-script": "1.7.1",
     "uglify-js": "2.4.14",
