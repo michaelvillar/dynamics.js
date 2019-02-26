@@ -60,4 +60,5 @@ namespace dynamics {
   function css<T extends HTMLElement>(el: T, properties: T["style"]): number;
 }
 
-export default dynamics;
+export = dynamics;
+export as namespace dynamics;
